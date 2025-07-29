@@ -4,7 +4,7 @@
   <img alt="OpenBench Logo" src="assets/openbench-light.png">
 </picture>
 
-[![Paper](https://img.shields.io/badge/Paper-📄-blue)](https://www.arxiv.org/abs/2507.16136)
+[![arXiv](https://img.shields.io/badge/arXiv-2507.16136-b31b1b.svg)](https://arxiv.org/abs/2507.16136)
 [![Discord](https://img.shields.io/discord/1171912382512115722?style=flat&logo=discord&logoColor=969da4&label=Discord&labelColor=353a41&color=32d058&link=https%3A%2F%2Fdiscord.gg%2FG5F5GZGecC)](https://discord.gg/G5F5GZGecC)
 
 > [!NOTE]
@@ -43,23 +43,23 @@ Key features include:
 
 These are the results reported in the `SDBench` paper. For more details please refer to the [paper](https://arxiv.org/abs/2507.16136).
 
-> **Note:** Each cell in the table below shows `DER / Speed Factor`, where **DER** is the Diarization Error Rate (lower is better) and **Speed Factor** indicates how many times faster than real time the system processes the audio (higher is better). Cells with `-` indicate that the system/dataset combination was not evaluated.
+> **Note:** Each cell in the table below shows `DER`, where **DER** is the Diarization Error Rate (lower is better). Cells with `-` indicate that the system/dataset combination was not evaluated.
 
-| Dataset               | AWS Transcribe   | Deepgram     | Picovoice   | Pyannote    | Pyannote-AI   | SpeakerKit   |
-|-----------------------|------------------|--------------|-------------|-------------|---------------|--------------|
-| AISHELL-4             | 22.5% / 10x      | 71.7% / 130x | -           | 12.2% / 55x | 11.2% / 62x   | 12.7% / 476x |
-| AMI-IHM               | 28.7% / 11x      | 35.4% / 216x | 35.4% / 59x | 18.9% / 53x | 15.8% / 45x   | 20.6% / 463x |
-| AMI-SDM               | 37.0% / 10x      | 42.5% / 241x | -           | 22.9% / 54x | 18.3% / 62x   | 23.7% / 458x |
-| AVA-AVD               | 61.5% / 3x       | 68.2% / 187x | -           | 48.5% / 28x | 46.5% / 35x   | 51.9% / 426x |
-| AliMeeting            | 42.3% / 9x       | 80.7% / 157x | -           | 25.1% / 29x | 19.2% / 45x   | 26.5% / 442x |
-| American-Life-Podcast | 23.5% / 10x      | 28.9% / 231x | -           | 28.8% / 54x | 29.3% / 58x   | 36.9% / 481x |
-| CallHome              | 36.8% / 2x       | 63.9% / 63x  | 54.2% / 61x | 28.8% / 53x | 19.8% / 20x   | 31.0% / 263x |
-| DIHARD-III            | 35.5% / 8x       | 36.8% / 154x | -           | 23.6% / 28x | 17.1% / 39x   | 23.6% / 433x |
-| EGO4D                 | 60.9% / 6x       | 70.7% / 127x | -           | 51.7% / 54x | 45.8% / 34x   | 54.0% / 436x |
-| Earnings-21           | 17.8% / 9x       | -            | -           | 9.5% / 54x  | 9.3% / 47x    | 9.5% / 496x  |
-| ICSI                  | 46.0% / 11x      | -            | -           | 34.4% / 52x | 31.4% / 62x   | 35.1% / 447x |
-| MSDWILD               | 40.2% / 1x       | 64.5% / 43x  | -           | 31.7% / 53x | 26.2% / 15x   | 35.2% / 216x |
-| VoxConverse           | 13.0% / 6x       | 36.4% / 210x | -           | 11.0% / 53x | 9.8% / 50x    | 12.1% / 462x |
+| Dataset               | AWS Transcribe   | Deepgram   | Picovoice   | Pyannote   | Pyannote-AI   | SpeakerKit   |
+|-----------------------|------------------|------------|-------------|------------|---------------|--------------|
+| AISHELL-4             | 22.5%            | 71.7%      | -           | 12.2%      | 11.2%         | 12.7%        |
+| AMI-IHM               | 28.7%            | 35.4%      | 35.4%       | 18.9%      | 15.8%         | 20.6%        |
+| AMI-SDM               | 37.0%            | 42.5%      | -           | 22.9%      | 18.3%         | 23.7%        |
+| AVA-AVD               | 61.5%            | 68.2%      | -           | 48.5%      | 46.5%         | 51.9%        |
+| AliMeeting            | 42.3%            | 80.7%      | -           | 25.1%      | 19.2%         | 26.5%        |
+| American-Life-Podcast | 23.5%            | 28.9%      | -           | 28.8%      | 29.3%         | 36.9%        |
+| CallHome              | 36.8%            | 63.9%      | 54.2%       | 28.8%      | 19.8%         | 31.0%        |
+| DIHARD-III            | 35.5%            | 36.8%      | -           | 23.6%      | 17.1%         | 23.6%        |
+| EGO4D                 | 60.9%            | 70.7%      | -           | 51.7%      | 45.8%         | 54.0%        |
+| Earnings-21           | 17.8%            | -          | -           | 9.5%       | 9.3%          | 9.5%         |
+| ICSI                  | 46.0%            | -          | -           | 34.4%      | 31.4%         | 35.1%        |
+| MSDWILD               | 40.2%            | 64.5%      | -           | 31.7%      | 26.2%         | 35.2%        |
+| VoxConverse           | 13.0%            | 36.4%      | -           | 11.0%      | 9.8%          | 12.1%        |
 
 
 ## 🚀 Roadmap
