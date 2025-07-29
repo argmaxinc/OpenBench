@@ -13,7 +13,7 @@
 > - The datasets used in this benchmark have their own licenses and usage restrictions (see [Diarization Datasets](#diarization-datasets) section for details)
 
 > [!IMPORTANT]
-> **OpenBench** is the evolution of **SDBench**, originally introduced in the paper *"SDBench: A Comprehensive Benchmark Suite for Speaker Diarization"*. While SDBench focused specifically on speaker diarization, OpenBench has expanded to encompass a broader range of speech processing tasks and is designed to accommodate future modalities beyond speech.
+> **OpenBench** is the evolution of **SDBench**, originally introduced in the paper *["SDBench: A Comprehensive Benchmark Suite for Speaker Diarization"](https://arxiv.org/abs/2507.16136)*. While SDBench focused specifically on speaker diarization, OpenBench has expanded to encompass a broader range of speech processing tasks and is designed to accommodate future modalities beyond speech.
 
 `OpenBench` is an open-source benchmarking framework for speech processing systems. Originally focused on speaker diarization (as SDBench), the framework has evolved to support comprehensive evaluation of:
 
@@ -34,10 +34,163 @@ Key features include:
 - Availability of 13+ commonly used datasets (Original dataset license restrictions apply)
 
 > [!TIP]
-> Want to add your own diarization, ASR, or combined pipeline? Check out our [Adding a New Diarization Pipeline](#adding-a-new-diarization-pipeline) section for a step-by-step guide!
+> Want to add your own diarization, ASR, or orchestration pipeline? Check out our [Adding a New Diarization Pipeline](#adding-a-new-diarization-pipeline) section for a step-by-step guide!
 
 > [!IMPORTANT]
 > Before getting started, please note that some datasets in our [Datasets](#datasets) section require special access or have license restrictions. While we provide dataset preparation utilities in `common/download_dataset`, you'll need to procure the raw data independently for these datasets. See the dataset table for details on access requirements.
+
+## Results
+
+These are the results reported in the `SDBench` paper. For more details please refer to the [paper](https://arxiv.org/abs/2507.16136).
+
+> **Note:** Each cell in the table below shows `DER / Speed Factor`, where **DER** is the Diarization Error Rate (lower is better) and **Speed Factor** indicates how many times faster than real time the system processes the audio (higher is better).
+
+<div align="center">
+  <table>
+    <tr>
+      <td width="50%" align="center">
+        <strong>Performance Results Table</strong><br><br>
+        <table>
+          <thead>
+            <tr>
+              <th>Dataset</th>
+              <th>AWS Transcribe</th>
+              <th>Deepgram</th>
+              <th>Picovoice</th>
+              <th>Pyannote</th>
+              <th>Pyannote-AI</th>
+              <th>SpeakerKit</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>AISHELL-4</strong></td>
+              <td>22.47% / 10x</td>
+              <td>71.69% / 130x</td>
+              <td>-</td>
+              <td>12.19% / 55x</td>
+              <td>11.19% / 62x</td>
+              <td>12.67% / 476x</td>
+            </tr>
+            <tr>
+              <td><strong>AMI-IHM</strong></td>
+              <td>28.65% / 11x</td>
+              <td>35.38% / 216x</td>
+              <td>35.38% / 59x</td>
+              <td>18.91% / 53x</td>
+              <td>15.78% / 45x</td>
+              <td>20.64% / 463x</td>
+            </tr>
+            <tr>
+              <td><strong>AMI-SDM</strong></td>
+              <td>36.97% / 10x</td>
+              <td>42.47% / 241x</td>
+              <td>-</td>
+              <td>22.95% / 54x</td>
+              <td>18.30% / 62x</td>
+              <td>23.70% / 458x</td>
+            </tr>
+            <tr>
+              <td><strong>AVA-AVD</strong></td>
+              <td>61.48% / 3x</td>
+              <td>68.16% / 187x</td>
+              <td>-</td>
+              <td>48.45% / 28x</td>
+              <td>46.54% / 35x</td>
+              <td>51.88% / 426x</td>
+            </tr>
+            <tr>
+              <td><strong>AliMeeting</strong></td>
+              <td>42.32% / 9x</td>
+              <td>80.68% / 157x</td>
+              <td>-</td>
+              <td>25.14% / 29x</td>
+              <td>19.18% / 45x</td>
+              <td>26.48% / 442x</td>
+            </tr>
+            <tr>
+              <td><strong>American-Life-Podcast</strong></td>
+              <td>23.47% / 10x</td>
+              <td>28.88% / 231x</td>
+              <td>-</td>
+              <td>28.80% / 54x</td>
+              <td>29.28% / 58x</td>
+              <td>36.86% / 481x</td>
+            </tr>
+            <tr>
+              <td><strong>CallHome</strong></td>
+              <td>36.77% / 2x</td>
+              <td>63.85% / 63x</td>
+              <td>54.21% / 61x</td>
+              <td>28.77% / 53x</td>
+              <td>19.76% / 20x</td>
+              <td>31.00% / 263x</td>
+            </tr>
+            <tr>
+              <td><strong>DIHARD-III</strong></td>
+              <td>35.50% / 8x</td>
+              <td>36.85% / 154x</td>
+              <td>-</td>
+              <td>23.63% / 28x</td>
+              <td>17.06% / 39x</td>
+              <td>23.62% / 433x</td>
+            </tr>
+            <tr>
+              <td><strong>EGO4D</strong></td>
+              <td>60.88% / 6x</td>
+              <td>70.72% / 127x</td>
+              <td>-</td>
+              <td>51.71% / 54x</td>
+              <td>45.79% / 34x</td>
+              <td>54.01% / 436x</td>
+            </tr>
+            <tr>
+              <td><strong>Earnings-21</strong></td>
+              <td>17.76% / 9x</td>
+              <td>-</td>
+              <td>-</td>
+              <td>9.54% / 54x</td>
+              <td>9.28% / 47x</td>
+              <td>9.48% / 496x</td>
+            </tr>
+            <tr>
+              <td><strong>ICSI</strong></td>
+              <td>45.98% / 11x</td>
+              <td>-</td>
+              <td>-</td>
+              <td>34.43% / 52x</td>
+              <td>31.35% / 62x</td>
+              <td>35.06% / 447x</td>
+            </tr>
+            <tr>
+              <td><strong>MSDWILD</strong></td>
+              <td>40.15% / 1x</td>
+              <td>64.49% / 43x</td>
+              <td>-</td>
+              <td>31.71% / 53x</td>
+              <td>26.17% / 15x</td>
+              <td>35.19% / 216x</td>
+            </tr>
+            <tr>
+              <td><strong>VoxConverse</strong></td>
+              <td>13.01% / 6x</td>
+              <td>36.42% / 210x</td>
+              <td>-</td>
+              <td>11.04% / 53x</td>
+              <td>9.82% / 50x</td>
+              <td>12.05% / 462x</td>
+            </tr>
+          </tbody>
+        </table>
+      </td>
+      <td width="50%" align="center">
+        <strong>Visual Analysis</strong><br><br>
+        <img src="interspeech_analysis/figures/Figure-1.png" alt="Speed Factor vs DER comparison for speaker diarization systems" width="100%">
+        <br><em>Figure 1: Speed Factor vs DER comparison showing the trade-off between processing speed and accuracy across different speaker diarization systems.</em>
+      </td>
+    </tr>
+  </table>
+</div>
 
 ## 🚀 Roadmap
 
