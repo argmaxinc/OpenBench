@@ -45,21 +45,21 @@ These are the results reported in the `SDBench` paper. For more details please r
 
 > **Note:** Each cell in the table below shows `DER / Speed Factor`, where **DER** is the Diarization Error Rate (lower is better) and **Speed Factor** indicates how many times faster than real time the system processes the audio (higher is better). Cells with `-` indicate that the system/dataset combination was not evaluated.
 
-| Dataset               | AWS Transcribe   | Deepgram      | Picovoice    | Pyannote     | Pyannote-AI   | SpeakerKit    |
-|-----------------------|------------------|---------------|--------------|--------------|---------------|---------------|
-| AISHELL-4             | 22.47% / 10x     | 71.69% / 130x | -            | 12.19% / 55x | 11.19% / 62x  | 12.67% / 476x |
-| AMI-IHM               | 28.65% / 11x     | 35.38% / 216x | 35.38% / 59x | 18.91% / 53x | 15.78% / 45x  | 20.64% / 463x |
-| AMI-SDM               | 36.97% / 10x     | 42.47% / 241x | -            | 22.95% / 54x | 18.30% / 62x  | 23.70% / 458x |
-| AVA-AVD               | 61.48% / 3x      | 68.16% / 187x | -            | 48.45% / 28x | 46.54% / 35x  | 51.88% / 426x |
-| AliMeeting            | 42.32% / 9x      | 80.68% / 157x | -            | 25.14% / 29x | 19.18% / 45x  | 26.48% / 442x |
-| American-Life-Podcast | 23.47% / 10x     | 28.88% / 231x | -            | 28.80% / 54x | 29.28% / 58x  | 36.86% / 481x |
-| CallHome              | 36.77% / 2x      | 63.85% / 63x  | 54.21% / 61x | 28.77% / 53x | 19.76% / 20x  | 31.00% / 263x |
-| DIHARD-III            | 35.50% / 8x      | 36.85% / 154x | -            | 23.63% / 28x | 17.06% / 39x  | 23.62% / 433x |
-| EGO4D                 | 60.88% / 6x      | 70.72% / 127x | -            | 51.71% / 54x | 45.79% / 34x  | 54.01% / 436x |
-| Earnings-21           | 17.76% / 9x      | -             | -            | 9.54% / 54x  | 9.28% / 47x   | 9.48% / 496x  |
-| ICSI                  | 45.98% / 11x     | -             | -            | 34.43% / 52x | 31.35% / 62x  | 35.06% / 447x |
-| MSDWILD               | 40.15% / 1x      | 64.49% / 43x  | -            | 31.71% / 53x | 26.17% / 15x  | 35.19% / 216x |
-| VoxConverse           | 13.01% / 6x      | 36.42% / 210x | -            | 11.04% / 53x | 9.82% / 50x   | 12.05% / 462x |
+| Dataset               | AWS Transcribe   | Deepgram     | Picovoice   | Pyannote    | Pyannote-AI   | SpeakerKit   |
+|-----------------------|------------------|--------------|-------------|-------------|---------------|--------------|
+| AISHELL-4             | 22.5% / 10x      | 71.7% / 130x | -           | 12.2% / 55x | 11.2% / 62x   | 12.7% / 476x |
+| AMI-IHM               | 28.7% / 11x      | 35.4% / 216x | 35.4% / 59x | 18.9% / 53x | 15.8% / 45x   | 20.6% / 463x |
+| AMI-SDM               | 37.0% / 10x      | 42.5% / 241x | -           | 22.9% / 54x | 18.3% / 62x   | 23.7% / 458x |
+| AVA-AVD               | 61.5% / 3x       | 68.2% / 187x | -           | 48.5% / 28x | 46.5% / 35x   | 51.9% / 426x |
+| AliMeeting            | 42.3% / 9x       | 80.7% / 157x | -           | 25.1% / 29x | 19.2% / 45x   | 26.5% / 442x |
+| American-Life-Podcast | 23.5% / 10x      | 28.9% / 231x | -           | 28.8% / 54x | 29.3% / 58x   | 36.9% / 481x |
+| CallHome              | 36.8% / 2x       | 63.9% / 63x  | 54.2% / 61x | 28.8% / 53x | 19.8% / 20x   | 31.0% / 263x |
+| DIHARD-III            | 35.5% / 8x       | 36.8% / 154x | -           | 23.6% / 28x | 17.1% / 39x   | 23.6% / 433x |
+| EGO4D                 | 60.9% / 6x       | 70.7% / 127x | -           | 51.7% / 54x | 45.8% / 34x   | 54.0% / 436x |
+| Earnings-21           | 17.8% / 9x       | -            | -           | 9.5% / 54x  | 9.3% / 47x    | 9.5% / 496x  |
+| ICSI                  | 46.0% / 11x      | -            | -           | 34.4% / 52x | 31.4% / 62x   | 35.1% / 447x |
+| MSDWILD               | 40.2% / 1x       | 64.5% / 43x  | -           | 31.7% / 53x | 26.2% / 15x   | 35.2% / 216x |
+| VoxConverse           | 13.0% / 6x       | 36.4% / 210x | -           | 11.0% / 53x | 9.8% / 50x    | 12.1% / 462x |
 
 
 ## 🚀 Roadmap
