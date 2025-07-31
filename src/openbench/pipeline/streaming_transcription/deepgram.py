@@ -68,7 +68,7 @@ class DeepgramApi:
         # Connect to the real-time streaming endpoint, attaching our API key.
         async with websockets.connect(
             f"{self.host_url}/v1/listen?model={self.model_version}&channels={channels}&sample_rate={sample_rate}&encoding=linear16&interim_results=true",
-            extra_headers={
+            additional_headers={
                 "Authorization": "Token {}".format(key),
             },
         ) as ws:
