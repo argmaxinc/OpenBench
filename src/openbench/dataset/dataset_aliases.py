@@ -3,6 +3,8 @@
 
 """Dataset alias registrations for the CLI."""
 
+import os
+
 from ..types import PipelineType
 from .dataset_base import DatasetConfig
 from .dataset_registry import DatasetRegistry
@@ -43,9 +45,9 @@ def register_dataset_aliases() -> None:
         "earnings21",
         DatasetConfig(dataset_id="argmaxinc/earnings21", split="test"),
         supported_pipeline_types={
+            PipelineType.DIARIZATION,
             PipelineType.TRANSCRIPTION,
             PipelineType.ORCHESTRATION,
-            PipelineType.DIARIZATION,
         },
         description="Earnings call dataset with transcription ground truth",
     )
@@ -70,11 +72,18 @@ def register_dataset_aliases() -> None:
 
     DatasetRegistry.register_alias(
         "american-life-podcast",
-        DatasetConfig(dataset_id="argmaxinc/american-life", split="test"),
+        DatasetConfig(
+            dataset_id=os.getenv("AMERICAN_LIFE_PODCAST_DATASET_REPO_ID", "argmaxinc/american-life"), split="test"
+        ),
         supported_pipeline_types={
             PipelineType.DIARIZATION,
         },
-        description="This American Life podcast dataset",
+        description=(
+            "This American Life podcast dataset. "
+            "To use this dataset recreate it using the `download_dataset.py` script in the common/ directory in OpenBench repository. "
+            "We are not allowe to distribute it since the audios from https://www.thisamericanlife.org/ don't mention any license. "
+            "Once you do that you can set the `AMERICAN_LIFE_PODCAST_DATASET_REPO_ID` environment variable to the repo id of the dataset you created, otherwise it will default to the private Argmax Inc. repo."
+        ),
     )
 
     DatasetRegistry.register_alias(
@@ -113,7 +122,64 @@ def register_dataset_aliases() -> None:
         description="AliMeetings dataset for speaker diarization",
     )
 
+    DatasetRegistry.register_alias(
+        "callhome",
+        DatasetConfig(dataset_id=os.getenv("CALLHOME_DATASET_REPO_ID", "argmaxinc/callhome"), split="part2"),
+        supported_pipeline_types={
+            PipelineType.DIARIZATION,
+        },
+        description=(
+            "CALLHOME dataset distributed by LDC also known as NIST SRE 2000. "
+            "To use this dataset you need to buy the license at https://catalog.ldc.upenn.edu/LDC2001S97 and use the `download_dataset.py` script in the common/ directory in OpenBench repository to download create the dataset."
+            "Once you do that you can set the `CALLHOME_DATASET_REPO_ID` environment variable to the repo id of the dataset you created, otherwise it will default to the private Argmax Inc. repo."
+        ),
+    )
+
+    DatasetRegistry.register_alias(
+        "ego4d",
+        DatasetConfig(dataset_id=os.getenv("EGO4D_DATASET_REPO_ID", "argmaxinc/ego4d"), split="validation"),
+        supported_pipeline_types={
+            PipelineType.DIARIZATION,
+        },
+        description=(
+            "Ego4D dataset for speaker diarization. "
+            "To use this dataset you need to request access to the dataset at https://ego4d-data.org/docs/start-here/ and use the `download_dataset.py` script in the common/ directory in OpenBench repository to download create the dataset."
+            "Once you do that you can set the `EGO4D_DATASET_REPO_ID` environment variable to the repo id of the dataset you created, otherwise it will default to the private Argmax Inc. repo. "
+            "NOTE: We use the validation split for evaluation because the test split reference values are not available."
+        ),
+    )
+
+    DatasetRegistry.register_alias(
+        "dihard-3",
+        DatasetConfig(dataset_id=os.getenv("DIHARD_3_DATASET_REPO_ID", "argmaxinc/dihard-3"), split="full"),
+        supported_pipeline_types={
+            PipelineType.DIARIZATION,
+        },
+        description=(
+            "DIHARD-3 dataset for speaker diarization. "
+            "To use this dataset you need to buy the license at https://catalog.ldc.upenn.edu/LDC2022S14 and use the `download_dataset.py` script in the common/ directory in OpenBench repository to download create the dataset."
+            "Once you do that you can set the `DIHARD_3_DATASET_REPO_ID` environment variable to the repo id of the dataset you created, otherwise it will default to the private Argmax Inc. repo."
+        ),
+    )
+
     ########## TRANSCRIPTION ##########
+
+    DatasetRegistry.register_alias(
+        "callhome-english",
+        DatasetConfig(
+            dataset_id=os.getenv("CALLHOME_ENGLISH_DATASET_REPO_ID", "argmaxinc/callhome-english"), split="test"
+        ),
+        supported_pipeline_types={
+            PipelineType.TRANSCRIPTION,
+            PipelineType.ORCHESTRATION,
+        },
+        description=(
+            "Callhome English dataset for transcription and orchestration evaluation. "
+            "To use this dataset you need to buy the license for the audio files at https://catalog.ldc.upenn.edu/LDC97S42 and the license for the transcript files at https://catalog.ldc.upenn.edu/LDC97T14"
+            "and use the `download_dataset.py` script in the common/ directory in OpenBench repository to download create the dataset."
+            "Once you do that you can set the `CALLHOME_ENGLISH_DATASET_REPO_ID` environment variable to the repo id of the dataset you created, otherwise it will default to the private Argmax Inc. repo."
+        ),
+    )
 
     DatasetRegistry.register_alias(
         "librispeech",
