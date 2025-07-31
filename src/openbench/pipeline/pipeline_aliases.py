@@ -7,12 +7,14 @@ import os
 
 from .diarization import (
     AWSTranscribePipeline,
+    DeepgramDiarizationPipeline,
     PicovoicePipeline,
     PyannoteApiPipeline,
     PyAnnotePipeline,
     SpeakerKitPipeline,
 )
 from .orchestration import (
+    DeepgramOrchestrationPipeline,
     WhisperXPipeline,
 )
 from .pipeline_registry import PipelineRegistry
@@ -91,6 +93,16 @@ def register_pipeline_aliases() -> None:
         description="Picovoice diarization pipeline. Requires API key from https://www.picovoice.ai/. Set `PICOVOICE_API_KEY` env var.",
     )
 
+    PipelineRegistry.register_alias(
+        "deepgram-diarization",
+        DeepgramDiarizationPipeline,
+        default_config={
+            "out_dir": "./deepgram_diarization_results",
+            "model_version": "nova-3",
+        },
+        description="Deepgram diarization pipeline. Requires API key from https://www.deepgram.com/. Set `DEEPGRAM_API_KEY` env var.",
+    )
+
     ################# ORCHESTRATION PIPELINES #################
 
     PipelineRegistry.register_alias(
@@ -105,6 +117,16 @@ def register_pipeline_aliases() -> None:
             "threads": 8,
         },
         description="WhisperX diarized transcription pipeline from https://github.com/m-bain/whisperX",
+    )
+
+    PipelineRegistry.register_alias(
+        "deepgram-orchestration",
+        DeepgramOrchestrationPipeline,
+        default_config={
+            "out_dir": "./deepgram_orchestration_results",
+            "model_version": "nova-3",
+        },
+        description="Deepgram orchestration pipeline. Requires API key from https://www.deepgram.com/. Set `DEEPGRAM_API_KEY` env var.",
     )
 
     ################# TRANSCRIPTION PIPELINES #################
