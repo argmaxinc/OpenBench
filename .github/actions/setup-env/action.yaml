@@ -22,5 +22,6 @@ runs:
       shell: bash -el {0}
       run: |
         uv sync --locked
-        uv run huggingface-cli login --token ${{ inputs.HF_TOKEN }}
-        uv run wandb login ${{ inputs.WANDB_TOKEN }}
+        # Log into HuggingFace and Weights & Biases without stdout and stderr
+        uv run huggingface-cli login --token ${{ inputs.HF_TOKEN }} > /dev/null 2>&1
+        uv run wandb login ${{ inputs.WANDB_TOKEN }} > /dev/null 2>&1

@@ -27,37 +27,10 @@ jobs:
           - pyannote-api
           - aws-diarization
           - deepgram-diarization
-          # TODO: Support speakerkit
-          # - speakerkit 
         
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Environment
-        uses: ./.github/actions/setup-env
-        with:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          WANDB_TOKEN: ${{ secrets.WANDB_TOKEN }}
-      
-      - name: Setup AWS CLI
-        if: matrix.pipeline == 'aws-diarization'
-        uses: ./.github/actions/setup-aws-cli
-        with:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-
-      - name: Run Evaluation
-        shell: bash -el {0}
-        run: |
-          uv run openbench-cli evaluate \
-            --pipeline ${{ matrix.pipeline }} \
-            --dataset ${{ matrix.dataset }} \
-            --metrics der \
-            --metrics jer \
-            --metrics sca \
-            --use-wandb \
-            --wandb-project diarization-benchmark \
-            --wandb-run-name ${{ matrix.pipeline }}-${{ matrix.dataset }}-${{ github.event.date }} \
-            --wandb-tags ${{ matrix.dataset }}
+    uses: ./.github/workflows/run_evaluate.yaml
+    with:
+      dataset: ${{ matrix.dataset }}
+      pipeline: ${{ matrix.pipeline }}
+      metrics: der jer sca
+      wandb_project: diarization-benchmark
