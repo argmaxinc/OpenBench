@@ -1,0 +1,58 @@
+name: Diarization Benchmark
+run_name: Diarization Benchmark ${{ github.event.date }} - ${{ github.sha }}
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 5 5 * *'  # Every month on the 5th day of the month at 5:00 AM UTC
+  
+
+jobs:
+  diarization-benchmark:
+    runs-on: M3-Ultra
+    strategy:
+      fail-fast: false
+      matrix:
+        dataset:
+          - callhome
+          - dihard-3
+          - ami-ihm
+          - ami-sdm
+          - earnings21
+          - msdwild
+          - voxconverse
+
+        pipeline:
+          - pyannote
+          - pyannote-api
+          - aws-diarization
+          # TODO: Support speakerkit
+          # - speakerkit 
+        
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup-env
+        with:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          WANDB_TOKEN: ${{ secrets.WANDB_TOKEN }}
+      
+      - name: Setup AWS CLI
+        if: matrix.pipeline == 'aws-diarization'
+        uses: ./.github/actions/setup-aws-cli
+        with:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+
+      - name: Run Evaluation
+        shell: bash -el {0}
+        run: |
+          uv run openbench-cli evaluate \
+            -p ${{ matrix.pipeline }} \
+            -d ${{ matrix.dataset }} \
+            -m der \
+            -m jer \
+            -m sca

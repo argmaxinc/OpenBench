@@ -37,7 +37,7 @@ def register_pipeline_aliases() -> None:
         AWSTranscribePipeline,
         default_config={
             "out_dir": "./aws_diarization_results",
-            "bucket_name": "openbench",
+            "bucket_name": "diarization-benchmarks",
             "region_name": "us-east-2",
             "max_speakers": 30,
             "num_worker_processes": 8,

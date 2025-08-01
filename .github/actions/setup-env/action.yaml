@@ -1,0 +1,26 @@
+name: Setup Environment
+description: 'installs uv and install dependencies, and logs into HuggingFace and Weights & Biases'
+
+inputs:
+  HF_TOKEN:
+    description: 'HuggingFace token'
+    required: true
+  WANDB_TOKEN:
+    description: 'Weights & Biases token'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:   
+    - name: Setup uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        version: "0.8.3"
+        enable-cache: false
+
+    - name: Install dependencies
+      shell: bash -el {0}
+      run: |
+        uv sync --locked
+        uv run huggingface-cli login --token ${{ inputs.HF_TOKEN }}
+        uv run wandb login ${{ inputs.WANDB_TOKEN }}
