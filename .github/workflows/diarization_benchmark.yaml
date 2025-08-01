@@ -26,6 +26,7 @@ jobs:
           - pyannote
           - pyannote-api
           - aws-diarization
+          - deepgram-diarization
           # TODO: Support speakerkit
           # - speakerkit 
         
@@ -51,8 +52,12 @@ jobs:
         shell: bash -el {0}
         run: |
           uv run openbench-cli evaluate \
-            -p ${{ matrix.pipeline }} \
-            -d ${{ matrix.dataset }} \
-            -m der \
-            -m jer \
-            -m sca
+            --pipeline ${{ matrix.pipeline }} \
+            --dataset ${{ matrix.dataset }} \
+            --metrics der \
+            --metrics jer \
+            --metrics sca \
+            --use-wandb \
+            --wandb-project diarization-benchmark \
+            --wandb-run-name ${{ matrix.pipeline }}-${{ matrix.dataset }}-${{ github.event.date }} \
+            --wandb-tags ${{ matrix.dataset }}

@@ -41,26 +41,7 @@ Key features include:
 
 ## Results
 
-These are the results reported in the `SDBench` paper. For more details please refer to the [paper](https://arxiv.org/abs/2507.16136).
-
-> **Note:** Each cell in the table below shows `DER`, where **DER** is the Diarization Error Rate (lower is better). Cells with `-` indicate that the system/dataset combination was not evaluated.
-
-| Dataset               | AWS Transcribe   | Deepgram   | Picovoice   | Pyannote   | Pyannote-AI   | SpeakerKit   |
-|-----------------------|------------------|------------|-------------|------------|---------------|--------------|
-| AISHELL-4             | 22.5%            | 71.7%      | -           | 12.2%      | 11.2%         | 12.7%        |
-| AMI-IHM               | 28.7%            | 35.4%      | 35.4%       | 18.9%      | 15.8%         | 20.6%        |
-| AMI-SDM               | 37.0%            | 42.5%      | -           | 22.9%      | 18.3%         | 23.7%        |
-| AVA-AVD               | 61.5%            | 68.2%      | -           | 48.5%      | 46.5%         | 51.9%        |
-| AliMeeting            | 42.3%            | 80.7%      | -           | 25.1%      | 19.2%         | 26.5%        |
-| American-Life-Podcast | 23.5%            | 28.9%      | -           | 28.8%      | 29.3%         | 36.9%        |
-| CallHome              | 36.8%            | 63.9%      | 54.2%       | 28.8%      | 19.8%         | 31.0%        |
-| DIHARD-III            | 35.5%            | 36.8%      | -           | 23.6%      | 17.1%         | 23.6%        |
-| EGO4D                 | 60.9%            | 70.7%      | -           | 51.7%      | 45.8%         | 54.0%        |
-| Earnings-21           | 17.8%            | -          | -           | 9.5%       | 9.3%          | 9.5%         |
-| ICSI                  | 46.0%            | -          | -           | 34.4%      | 31.4%         | 35.1%        |
-| MSDWILD               | 40.2%            | 64.5%      | -           | 31.7%      | 26.2%         | 35.2%        |
-| VoxConverse           | 13.0%            | 36.4%      | -           | 11.0%      | 9.8%          | 12.1%        |
-
+For comprehensive benchmark results across all supported tasks, please see [BENCHMARKS.md](BENCHMARKS.md).
 
 ## 🚀 Roadmap
 
