@@ -1,0 +1,36 @@
+name: Diarization Benchmark
+run_name: Diarization Benchmark ${{ github.event.date }} - ${{ github.sha }}
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 5 5 * *'  # Every month on the 5th day of the month at 5:00 AM UTC
+  
+
+jobs:
+  diarization-benchmark:
+    runs-on: M3-Ultra
+    strategy:
+      fail-fast: false
+      matrix:
+        dataset:
+          - callhome
+          - dihard-3
+          - ami-ihm
+          - ami-sdm
+          - earnings21
+          - msdwild
+          - voxconverse
+
+        pipeline:
+          - pyannote
+          - pyannote-api
+          - aws-diarization
+          - deepgram-diarization
+        
+    uses: ./.github/workflows/run_evaluate.yaml
+    with:
+      dataset: ${{ matrix.dataset }}
+      pipeline: ${{ matrix.pipeline }}
+      metrics: der jer sca
+      wandb_project: diarization-benchmark

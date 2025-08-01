@@ -1,0 +1,85 @@
+name: Run Evaluation
+
+on:
+  workflow_call:
+    inputs:
+      dataset:
+        type: string
+        description: The dataset to evaluate.
+        required: true
+      pipeline:
+        type: string
+        description: The pipeline to evaluate.
+        required: true
+      metrics:
+        type: string
+        description: The metrics to evaluate if passing multiple metrics separate them by space.
+        required: true
+      wandb_project:
+        type: string
+        default: openbench-benchmark
+        description: The wandb project to use.
+        required: false
+      wandb_run_name:
+        type: string
+        default: null
+        description: The wandb run name to use, if not provided the pipeline, dataset and date will be used as run name in the format <pipeline>-<dataset>-<date>.
+        required: false
+      wandb_tags:
+        type: string
+        default: null
+        description: The wandb tags to add to the run, note that dataset and pipeline are automatically added as tags. If passing multiple tags separate them by space.
+        required: false
+  
+
+jobs:
+  run-evaluation:
+    runs-on: M3-Ultra
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup-env
+        with:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          WANDB_TOKEN: ${{ secrets.WANDB_TOKEN }}
+      
+      - name: Setup AWS CLI
+        if: ${{ inputs.pipeline }} == 'aws-diarization'
+        uses: ./.github/actions/setup-aws-cli
+        with:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+
+      - name: Run Evaluation
+        shell: bash -el {0}
+        run: |
+          # Convert space-separated metrics to multiple -m arguments
+          METRICS_ARGS=$(echo "${{ inputs.metrics }}" | sed 's/ / -m /g' | sed 's/^/-m /')
+          
+          # Build base command
+          CMD="uv run openbench-cli evaluate -p ${{ inputs.pipeline }} -d ${{ inputs.dataset }} $METRICS_ARGS -w -wp ${{ inputs.wandb_project }}"
+          
+          # Add wandb run name if provided
+          if [ "${{ inputs.wandb_run_name }}" != "null" ]; then
+            CMD="$CMD -wr ${{ inputs.wandb_run_name }}"
+          else
+            # If no run name provided, use the pipeline, dataset and date as run name in the format <pipeline>-<dataset>-<date>
+            CMD="$CMD -wr ${{ inputs.pipeline }}-${{ inputs.dataset }}-${{ github.event.date }}"
+          fi
+          
+          # Add wandb tags if provided
+          if [ "${{ inputs.wandb_tags }}" != "null" ]; then
+            # Convert space-separated tags to multiple -wt arguments
+            tags_args=$(echo "${{ inputs.wandb_tags }}" | sed 's/ / -wt /g' | sed 's/^/-wt /')
+            CMD="$CMD $tags_args"
+          else
+            # If no tags provided, add the dataset as a tag
+            CMD="$CMD -wt ${{ inputs.dataset }}"
+          fi
+          
+          # Execute the command
+          echo "Executing: $CMD"
+          eval $CMD
