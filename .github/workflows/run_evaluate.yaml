@@ -18,7 +18,7 @@ on:
       wandb_project:
         type: string
         default: openbench-benchmark
-        description: The wandb project to use.
+        description: The wandb project to use. If not provided the project will be called `openbench-benchmark`.
         required: false
       wandb_run_name:
         type: string
@@ -45,6 +45,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           WANDB_TOKEN: ${{ secrets.WANDB_TOKEN }}
       
+      # Setup AWS only if the pipeline being evaluated is AWS
       - name: Setup AWS CLI
         if: ${{ inputs.pipeline }} == 'aws-diarization'
         uses: ./.github/actions/setup-aws-cli

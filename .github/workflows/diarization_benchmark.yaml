@@ -34,3 +34,14 @@ jobs:
       pipeline: ${{ matrix.pipeline }}
       metrics: der jer sca
       wandb_project: diarization-benchmark
+      wandb_run_name: ${{ matrix.pipeline }}-${{ matrix.dataset }}-${{ github.event.date }}
+
+  diarization-benchmark-sync-data:
+    runs-on: M3-Ultra
+    needs: diarization-benchmark
+    uses: ./.github/workflows/sync_data.yaml
+    with:
+      project: diarization-benchmark
+      entity: ${{ secrets.WANDB_ENTITY }}
+      run_name: ${{ matrix.pipeline }}-${{ matrix.dataset }}-${{ github.event.date }}
+      repo_id: openbench-data

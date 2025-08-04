@@ -1,5 +1,6 @@
 # For licensing see accompanying LICENSE.md file.
 # Copyright (C) 2025 Argmax, Inc. All Rights Reserved.
+"""Syncs data from W&B to Hugging Face Repo - Useful to get the data from a run that was evaluated with OpenBench and store it in a Hugging Face Repo"""
 
 import argparse
 import json
