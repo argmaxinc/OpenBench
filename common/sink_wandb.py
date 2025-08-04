@@ -3,246 +3,285 @@
 
 import argparse
 import json
-from collections import defaultdict
+import os
+import shutil
+from datetime import datetime
 from pathlib import Path
+from typing import TypedDict
 
 import pandas as pd
 import wandb
 from argmaxtools.utils import get_logger
-from huggingface_hub import snapshot_download, upload_folder
+from huggingface_hub import HfApi
 from tqdm import tqdm
 
 
 logger = get_logger(__name__)
 
 
-def get_wandb_table_as_df(files: list[wandb.apis.public.files.File], filename: str, run_name: str) -> pd.DataFrame:
-    # Get the file matching the filename
-    f = [f for f in files if filename in f.name]
-    if len(f) == 0:
-        raise ValueError(f"File {filename} not found in run {run_name}")
-    if len(f) > 1:
-        raise ValueError(f"Multiple files found with name {filename} in run {run_name} - {f}")
-
-    f = f[0]
-
-    if not f.name.endswith("table.json"):
-        raise ValueError(f"File {filename} is not a table file in run {run_name} - {f.name}")
-
-    # Downloads a wandb table file
-    path = f.download(replace=True)
-    path.seek(0)
-    content = path.read()
-    json_content = json.loads(content)
-    columns = json_content["columns"]
-    data = json_content["data"]
-    return pd.DataFrame(data, columns=columns)
+MAIN_WORKING_DIR = Path("wandb_data")
+DATA_DIR = Path("data")
+RUNS_DIR = DATA_DIR / "runs"
 
 
-def preprocess_task_results_table(df: pd.DataFrame) -> dict[str, pd.DataFrame]:
-    # Preprocess the task results table and returns a dictionary with a dataframe for each metric
-    unique_metrics = df["metric_name"].unique()
-    dataframes = dict()
-    logger.info(f"Processing {len(unique_metrics)} unique metrics")
-
-    for metric in tqdm(unique_metrics, desc="Processing metrics"):
-        df_subset = df.query("metric_name == @metric").dropna(how="all", axis=1).reset_index(drop=True)
-        df_subset.columns = [
-            col if "detailed" not in col else col.replace("detailed_", "") for col in df_subset.columns
-        ]
-        # Support legacy runs that have task_type column
-        cols_to_drop = ["metric_name", "result"]
-        if "task_type" in df_subset.columns:
-            cols_to_drop = ["metric_name", "result", "task_type"]
-        df_subset = df_subset.assign(**{metric: df_subset["result"]}).drop(columns=cols_to_drop)
-        dataframes[metric] = df_subset
-    return dataframes
+class RunDownloadResult(TypedDict):
+    metadata_path: Path
+    config_path: Path
+    system_metrics_path: Path
+    sample_results_table_path: Path
+    task_results_tables_path: Path
+    predictions_dir: Path
 
 
-def preprocess_diarization_prediction_table(df: pd.DataFrame) -> pd.DataFrame:
-    logger.info("Preprocessing diarization prediction table")
-    # This is to support legacy runs that have the embeddings_projection and prediction columns
-    columns_to_drop = ["prediction", "embeddings_projection"]
-    if all(col in df.columns for col in columns_to_drop):
-        df = df.drop(columns=columns_to_drop)
-    return df
+# Check if the destination path exists and if it does return else move the file
+def check_if_exists_then_move(src: Path, dst: Path) -> None:
+    is_file = src.is_file()
 
-
-def add_run_info(df: pd.DataFrame, run: wandb.apis.public.runs.Run) -> pd.DataFrame:
-    logger.info(f"Adding run info for run {run.name}")
-    pipeline_name = run.config["pipeline_name"]
-
-    dataset_name = list(run.config["datasets"].keys())
-    if len(dataset_name) > 1:
-        raise ValueError(f"More than one dataset found in run {run.name} - {dataset_name}")
-    dataset_name = dataset_name[0]
-
-    tags = run.tags
-    experiment_tag = [tag for tag in tags if tag not in [dataset_name, pipeline_name]]
-    # Add run info to the dataframe
-    df["run_name"] = run.name
-    df["run_id"] = run.id
-    df["experiment_tag"] = experiment_tag[0]
-    df["created_at"] = pd.Timestamp(run.created_at).tz_convert("UTC")
-    return df
-
-
-def save_or_append_to_parquet(df: pd.DataFrame, path: Path) -> None:
-    logger.info(f"Saving/appending data to {path}")
-    # If it doesn't exist, save it
-    if not path.exists():
-        df.to_parquet(path)
-        logger.info(f"Created new parquet file at {path}")
-    # If it does exist, load it, append it and save it
-    else:
-        df_existing = pd.read_parquet(path)
-        df = pd.concat([df_existing, df], ignore_index=True)
-        df.to_parquet(path)
-        logger.info(f"Appended data to existing parquet file at {path}")
-
-
-def save_processed_data(
-    task_tables_merged: dict[str, pd.DataFrame],
-    prediction_table_merged: pd.DataFrame,
-    output_dir: str,
-) -> None:
-    logger.info("Saving processed data")
-    diarization_prediction_table_path = output_dir / "diarization_prediction_table.parquet"
-    save_or_append_to_parquet(prediction_table_merged, diarization_prediction_table_path)
-
-    for metric, df in tqdm(task_tables_merged.items(), desc="Saving metric tables"):
-        save_or_append_to_parquet(df, output_dir / f"per_sample_{metric}.parquet")
-
-
-def download_preprocessed_data(repo_id: str, dir_to_download: str, output_dir: str) -> str:
-    # Downloads the previously processed data from a HF repo stored at `dir_to_download`
-    # and saves it in the output directory
-    logger.info(f"Downloading preprocessed data from {repo_id} to {output_dir}")
-    path = snapshot_download(repo_id, local_dir=output_dir, allow_patterns=f"{dir_to_download}/*")
-    return path
-
-
-def push_preprocessed_data(repo_id: str, dir_to_push: str, path_in_repo: str) -> None:
-    # Pushes preprocessed data
-    logger.info(f"Pushing preprocessed data to {repo_id} from {dir_to_push}")
-    upload_folder(repo_id=repo_id, folder_path=dir_to_push, path_in_repo=path_in_repo)
-    logger.info(f"Pushed preprocessed data to {repo_id} from {dir_to_push}")
-
-
-def wandb_data_processor(project: str, entity: str = "speakerkit", output_dir: str = "wandb_data") -> None:
-    logger.info(f"Starting data processing for project {project}")
-    # Create the output directory if it doesn't exist
-    output_dir = Path(output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
-    logger.info(f"Created output directory at {output_dir}")
-
-    # this .csv is just a single csv with the run-id records that have been processed
-    # The name of the column is `run_id`
-    processed_runs_path = output_dir / "processed_runs.csv"
-    processed_runs = []
-    if processed_runs_path.exists():
-        processed_runs = pd.read_csv(processed_runs_path)["run_id"].tolist()
-        logger.info(f"Found {len(processed_runs)} previously processed runs")
-
-    api = wandb.Api()
-    runs = api.runs(
-        f"{entity}/{project}",
-        filters={
-            "state": "finished",
-        },
-    )
-    runs = [run for run in runs if run.id not in processed_runs]
-    if len(runs) == 0:
-        logger.info("No new runs to process")
+    # If it is a file then we need to check if the destination file exists
+    if is_file and dst.exists():
         return
 
-    logger.info(f"Found {len(runs)} new runs to process")
+    # If it is a directory then we need to append the source dir name to the destination
+    # when moving a directory the dst is just the parent-directory where the src directory is being moved to
+    if not is_file and (dst / src.name).exists():
+        return
 
-    tasks_tables: dict[str, list[pd.DataFrame]] = defaultdict(list)
-    prediction_table: list[pd.DataFrame] = []
-    newly_processed_runs = []
+    shutil.move(src, dst)
 
-    for run in tqdm(runs, desc="Processing runs"):
-        try:
-            logger.info(f"Processing run {run.name}")
-            files = list(run.files())
-            file_names = [f.name for f in files]
 
-            task_results_table = get_wandb_table_as_df(files, "task_results_table", run.name)
+# A class that downloads the data from runs that were created with openbench and logged in W&B
+# It will download the metadata, the system metrics, the sample results table, the task results tables, and the predictions
+# And store the raw data (i.e. without post-processing) in a local directory with the following structure:
+# data/
+#   runs/
+#     <run_name>/
+#       metadata.json
+#       config.json
+#       system_metrics.csv
+#       sample_results_table.parquet
+#       task_results_table.parquet
+#       predictions/
+#         <file-name>.{rttm,csv,...}
+class WandbDownloader:
+    def __init__(self, project: str, entity: str) -> None:
+        self.project = project
+        self.entity = entity
+        self.api = wandb.Api()
 
-            # This is to support legacy runs that have specific `diarization_prediction_table` before the more general `sample_results_table`
-            if any("diarization_prediction_table" in file_name for file_name in file_names):
-                prediction_table_name = "diarization_prediction_table"
-            elif any("sample_results_table" in file_name for file_name in file_names):
-                prediction_table_name = "sample_results_table"
-            else:
-                raise ValueError(f"No prediction table found in run {run.name} - {file_names}")
-            diarization_prediction_table = get_wandb_table_as_df(files, prediction_table_name, run.name)
+    def get_run(self, run_name: str) -> wandb.apis.public.runs.Run:
+        logger.info(f"Getting run {run_name}")
+        runs = self.api.runs(
+            f"{self.entity}/{self.project}",
+            filters={"displayName": run_name},
+        )
+        if len(runs) == 0:
+            raise ValueError(f"No run found with name {run_name}")
+        if len(runs) > 1:
+            raise ValueError(f"Multiple runs found with name {run_name} - {runs}")
+        return runs[0]
 
-            task_results_tables = preprocess_task_results_table(task_results_table)
-            diarization_prediction_table = preprocess_diarization_prediction_table(diarization_prediction_table)
+    # Download predictions that are stored in wandb prediction artifacts
+    def download_predictions(self, artifacts: list[wandb.sdk.artifacts.artifact.Artifact]) -> Path:
+        artifact = [a for a in artifacts if a.type == "predictions"][0]
+        artifact_dir = artifact.download()
+        return Path(artifact_dir)
 
-            task_results_tables = {k: add_run_info(v, run) for k, v in task_results_tables.items()}
-            diarization_prediction_table = add_run_info(diarization_prediction_table, run)
+    def download_table(self, run_files: list[wandb.apis.public.files.File], table_name: str, run_name: str) -> Path:
+        # Get the file matching the filename
+        f = [f for f in run_files if table_name in f.name]
+        if len(f) == 0:
+            raise ValueError(f"File {table_name} not found in run {run_name}")
+        if len(f) > 1:
+            raise ValueError(f"Multiple files found with name {table_name} in run {run_name} - {f}")
+        f = f[0]
+        # Downloads a wandb table file
+        path = f.download(replace=True)
+        path.seek(0)
+        content = path.read()
+        json_content = json.loads(content)
+        columns = json_content["columns"]
+        data = json_content["data"]
+        df = pd.DataFrame(data, columns=columns)
+        parquet_path = Path(f"{table_name}.parquet")
+        df.to_parquet(parquet_path, index=False)
+        return parquet_path
 
-            prediction_table.append(diarization_prediction_table)
+    def download_run(self, run_name: str) -> RunDownloadResult:
+        run = self.get_run(run_name)
 
-            for metric, df in task_results_tables.items():
-                tasks_tables[metric].append(df)
+        logger.info(f"Downloading run {run.name} - {run.id}")
+        # Get metadata
+        keys_to_keep = ["apple", "git", "codePath", "host", "os", "python", "startedAt"]
+        metadata = {k: v for k, v in run.metadata.items() if k in keys_to_keep}
+        metadata["run_name"] = run.name
+        metadata["run_id"] = run.id
+        # Save metadata to a json file
+        logger.info(f"Saving metadata for {run.name} - {run.id}")
+        metadata_path = Path("metadata.json")
+        with metadata_path.open("w") as f:
+            json.dump(metadata, f)
 
-            newly_processed_runs.append(run.id)
-        except Exception as e:
-            logger.error(f"Error processing run {run.name} - {run.id}: {e}")
-            continue
+        # Save run config to a json file
+        logger.info(f"Saving config for {run.name} - {run.id}")
+        config_path = Path("config.json")
+        with config_path.open("w") as f:
+            json.dump(run.config, f)
 
-    logger.info("Merging processed data")
-    task_tables_merged: dict[str, pd.DataFrame] = {k: pd.concat(v, ignore_index=True) for k, v in tasks_tables.items()}
-    prediction_table_merged = pd.concat(prediction_table, ignore_index=True)
+        # Get system metrics
+        system_metrics = run.history(stream="system")
+        logger.info(f"Saving system metrics for {run.name} - {run.id}")
+        system_metrics_path = Path("system_metrics.csv")
+        system_metrics.to_csv(system_metrics_path, index=False)
 
-    save_processed_data(task_tables_merged, prediction_table_merged, output_dir)
+        # Get run files
+        run_files = run.files()
+        # Get Sample Result Table
+        logger.info(f"Downloading sample results table for {run.name} - {run.id}")
+        sample_results_table_path = self.download_table(run_files, "sample_results_table", run.name)
+        # Get Task Results Tables
+        logger.info(f"Downloading task results tables for {run.name} - {run.id}")
+        task_results_tables_path = self.download_table(run_files, "task_results_table", run.name)
 
-    # Update the processed runs file
-    logger.info("Updating processed runs file")
-    processed_runs.extend(newly_processed_runs)
-    logger.info(
-        f"Newly processed runs: {len(newly_processed_runs)}. Total number of processed runs: {len(processed_runs)}"
+        # Get Predictions Annotation Files
+        artifacts = run.logged_artifacts()
+        logger.info(f"Downloading predictions for {run.name} - {run.id}")
+        predictions_dir = self.download_predictions(artifacts)
+
+        return RunDownloadResult(
+            metadata_path=metadata_path,
+            config_path=config_path,
+            system_metrics_path=system_metrics_path,
+            sample_results_table_path=sample_results_table_path,
+            task_results_tables_path=task_results_tables_path,
+            predictions_dir=predictions_dir,
+        )
+
+    def structure_run_data(self, run_download_result: RunDownloadResult) -> None:
+        # Read metadata.json to get the run_name and run_id
+        with run_download_result["metadata_path"].open("r") as f:
+            metadata = json.load(f)
+        run_name = metadata["run_name"]
+
+        logger.info(f"Structuring run data for {run_name}")
+        run_dir = RUNS_DIR / f"{run_name}"
+        run_dir.mkdir(parents=True, exist_ok=True)
+
+        # Moving files to the appropriate directory
+        logger.info(f"Moving metadata for {run_name}")
+        check_if_exists_then_move(run_download_result["metadata_path"], run_dir / "metadata.json")
+
+        logger.info(f"Moving config for {run_name}")
+        check_if_exists_then_move(run_download_result["config_path"], run_dir / "config.json")
+
+        logger.info(f"Moving system metrics for {run_name}")
+        check_if_exists_then_move(run_download_result["system_metrics_path"], run_dir / "system_metrics.csv")
+
+        logger.info(f"Moving sample results table for {run_name}")
+        check_if_exists_then_move(
+            run_download_result["sample_results_table_path"], run_dir / "sample_results_table.parquet"
+        )
+
+        logger.info(f"Moving task results tables for {run_name}")
+        check_if_exists_then_move(
+            run_download_result["task_results_tables_path"], run_dir / "task_results_table.parquet"
+        )
+
+        logger.info(f"Moving predictions for {run_name}")
+        check_if_exists_then_move(run_download_result["predictions_dir"].rename("predictions"), run_dir)
+
+        logger.info(f"Structured run data for {run_name}")
+
+    def download(self, run_name: str) -> None:
+        # Create the runs directory if it doesn't exist
+        # it will also create the data directory if it doesn't exist
+        RUNS_DIR.mkdir(parents=True, exist_ok=True)
+        run_download_result = self.download_run(run_name)
+        self.structure_run_data(run_download_result)
+
+
+class DataProcessor:
+    def __init__(self) -> None:
+        pass
+
+    # this function will split the raw metrics table into a table for each metric
+    def split_metrics_table(
+        self, metrics_table: pd.DataFrame, columns_to_drop: list[str] | None = None
+    ) -> dict[str, pd.DataFrame]:
+        metrics_table = metrics_table.copy()  # Copying just for good measure
+        columns_to_drop = columns_to_drop or ["metric_name", "result"]
+        # Preprocess the task results table and returns a dictionary with a dataframe for each metric
+        unique_metrics = metrics_table["metric_name"].unique()
+        dataframes = {}
+        logger.info(f"Processing {len(unique_metrics)} unique metrics")
+
+        for metric in tqdm(unique_metrics, desc="Processing metrics"):
+            # Get only the rows for the current metric
+            df_subset = (
+                metrics_table.query(f"metric_name == '{metric}'")  # get current metric rows
+                .dropna(how="all", axis=1)  # drop columns that are unrelated to the current metric
+                .reset_index(drop=True)  # reset index to new index based on the current metric rows
+                .pipe(
+                    lambda df: df.rename(columns={k: k.replace("detailed_", "") for k in df.columns})
+                )  # rename columns named `detailed_<component>` to just `<component>`
+                .pipe(lambda df: df.assign(**{metric: df["result"]}))  # add the metric as a column
+                .drop(columns=columns_to_drop)  # drop the result column
+            )
+            dataframes[metric] = df_subset
+
+        return dataframes
+
+    def process(self, run_name: str, runs_dir: Path = RUNS_DIR) -> None:
+        run_dir = runs_dir / f"{run_name}"
+        metrics_dir = run_dir / "metrics"
+        metrics_dir.mkdir(parents=True, exist_ok=True)
+        if not run_dir.exists():
+            raise ValueError(f"Run directory {run_dir} does not exist")
+
+        # Load task_results_table.parquet
+        task_results_table = pd.read_parquet(run_dir / "task_results_table.parquet")
+
+        # Split the task_results_table into a table for each metric
+        metrics_tables = self.split_metrics_table(task_results_table)
+
+        # Save the metrics tables
+        for metric, df in metrics_tables.items():
+            df.to_parquet(metrics_dir / f"per_sample_{metric}.parquet", index=False)
+
+
+def main(args: argparse.Namespace) -> None:
+    # Create the main working directory if it doesn't exist
+    MAIN_WORKING_DIR.mkdir(parents=True, exist_ok=True)
+    # Set the curret working directory to `wandb_data`
+    os.chdir(MAIN_WORKING_DIR)
+
+    # Download the run data
+    wandb_downloader = WandbDownloader(project=args.project, entity=args.entity)
+    wandb_downloader.download(args.run_name)
+
+    # Process the run data
+    data_processor = DataProcessor()
+    data_processor.process(args.run_name)
+
+    hf_api = HfApi()
+
+    # Make sure the repo exists
+    hf_api.create_repo(args.repo_id, repo_type="dataset", exist_ok=True, private=True)
+
+    # Upload the processed data to the repo
+    hf_api.upload_folder(
+        repo_id=args.repo_id,
+        repo_type="dataset",
+        folder_path=RUNS_DIR / args.run_name,
+        path_in_repo=str(RUNS_DIR / args.run_name),
+        commit_message=f"Adding run {args.run_name} data to the repo at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
     )
-    pd.DataFrame({"run_id": processed_runs}).to_csv(processed_runs_path, index=False)
-    logger.info("Data processing complete")
-
-
-def wandb_dag(
-    project: str = "diarization-benchmarks",
-    entity: str = "speakerkit",
-    output_dir: str = "wandb_data",
-    repo_id: str = "argmaxinc/interspeech-artifacts",
-) -> None:
-    # This function does the following:
-    # 1. Downloads previously preprocessed data from the HF repo
-    # 2. Preprocesses more data
-    # 3. Pushes the preprocessed data to the repo
-    logger.info(f"Starting data processing for project {project}")
-    # Make sure output_dir exists
-    Path(output_dir).mkdir(parents=True, exist_ok=True)
-
-    # Download the preprocessed data from the repo
-    download_preprocessed_data(repo_id=repo_id, dir_to_download=output_dir, output_dir=".")
-    # Preprocess more data
-    wandb_data_processor(project=project, entity=entity, output_dir=output_dir)
-    # Push the preprocessed data to the repo
-    push_preprocessed_data(repo_id=repo_id, dir_to_push=output_dir, path_in_repo=output_dir)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--project", type=str, default="diarization-benchmark")
-    parser.add_argument("--entity", type=str, default="speakerkit")
-    parser.add_argument("--output-dir", type=str, default="wandb_data")
-    parser.add_argument("--repo-id", type=str, default="argmaxinc/interspeech-artifacts")
+    parser.add_argument("--project", type=str, required=True)
+    parser.add_argument("--entity", type=str, required=True)
+    parser.add_argument("--run-name", type=str, required=True)
+    parser.add_argument("--repo-id", type=str, default="openbench-data")
     args = parser.parse_args()
-    wandb_dag(
-        project=args.project,
-        entity=args.entity,
-        output_dir=args.output_dir,
-        repo_id=args.repo_id,
-    )
+    main(args)
