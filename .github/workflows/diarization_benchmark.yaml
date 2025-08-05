@@ -22,7 +22,6 @@ jobs:
           - voxconverse
 
         pipeline:
-          - pyannote
           - pyannote-api
           - aws-diarization
           - deepgram-diarization
@@ -46,4 +45,4 @@ jobs:
       project: diarization-benchmark
       entity: ${{ secrets.WANDB_ENTITY }}
       run_name: ${{ matrix.pipeline }}-${{ matrix.dataset }}-${{ github.event.date }}
-      repo_id: openbench-data
+      repo_id: openbench-diarization-benchmark # main repo to sync diarization benchmark results.
