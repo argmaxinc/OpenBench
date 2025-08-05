@@ -89,7 +89,7 @@ class BaseStreamingLatency(BaseMetric):
             out = jiwer.process_words(normalizer(transcript_gt), normalizer(interim_results[l]))
             alignments_l = [out.alignments[0][i].type for i in range(len(out.alignments[0]))]
 
-            indices = [i for i, val in enumerate(alignments_l) if val == "equal" or val == "substitute"]
+            indices = [i for i, val in enumerate(alignments_l) if val == "equal"]
 
             if indices:
                 first_index = indices[0]
