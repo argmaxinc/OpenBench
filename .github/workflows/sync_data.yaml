@@ -19,11 +19,21 @@ on:
         type: string
         description: The Hugging Face repo id to sync data to.
         required: true
+      runner:
+        type: string
+        default: M3-Ultra
+        description: The runner to use.
+        required: false
+    secrets:
+      HF_TOKEN:
+        required: true
+      WANDB_TOKEN:
+        required: true
   
 
 jobs:
   sync-data:
-    runs-on: M3-Ultra
+    runs-on: ${{ inputs.runner }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
