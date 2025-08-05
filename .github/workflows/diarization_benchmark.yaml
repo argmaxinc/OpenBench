@@ -5,7 +5,6 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '0 5 5 * *'  # Every month on the 5th day of the month at 5:00 AM UTC
-  
 
 jobs:
   diarization-benchmark:
@@ -29,6 +28,9 @@ jobs:
           - deepgram-diarization
         
     uses: ./.github/workflows/run_evaluate.yaml
+    env:
+      DEEPGRAM_API_KEY: ${{ secrets.DEEPGRAM_API_KEY }}
+      PYANNOTE_TOKEN: ${{ secrets.PYANNOTE_API_TOKEN }}
     with:
       dataset: ${{ matrix.dataset }}
       pipeline: ${{ matrix.pipeline }}
