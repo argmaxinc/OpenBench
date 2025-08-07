@@ -27,7 +27,6 @@ dependencies = [
     "torch==2.6.0",
     "scikit-learn==1.5.1",
     "speechbrain==1.0.2",
-    "python-dotenv>=1.0.0,<2",
     "websocket-client>=1.8.0,<2",
     "typer>=0.16.0",
     "pydub>=0.25.1,<0.26",

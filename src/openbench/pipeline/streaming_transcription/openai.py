@@ -12,7 +12,6 @@ import torch
 import torchaudio
 import websockets
 from argmaxtools.utils import get_logger
-from dotenv import load_dotenv
 
 from openbench.dataset import StreamingSample
 
@@ -21,8 +20,6 @@ from ...pipeline_prediction import StreamingTranscript
 from ...types import PipelineType
 from .common import StreamingTranscriptionConfig, StreamingTranscriptionOutput
 
-
-load_dotenv()
 
 logger = get_logger(__name__)
 

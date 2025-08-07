@@ -8,7 +8,6 @@ import os
 import numpy as np
 import websockets
 from argmaxtools.utils import get_logger
-from dotenv import load_dotenv
 from pydantic import Field
 
 from openbench.dataset import StreamingSample
@@ -18,8 +17,6 @@ from ...pipeline_prediction import StreamingTranscript
 from ...types import PipelineType
 from .common import StreamingTranscriptionConfig, StreamingTranscriptionOutput
 
-
-load_dotenv()
 
 logger = get_logger(__name__)
 
