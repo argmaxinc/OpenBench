@@ -166,7 +166,7 @@ class OpenAIApi:
                     "Authorization": f"Bearer {ephemeral_token}",
                     "OpenAI-Beta": "realtime=v1",
                 }
-                async with websockets.connect(websocket_url, extra_headers=connection_headers) as ws:
+                async with websockets.connect(websocket_url, additional_headers=connection_headers) as ws:
                     logger.debug("Connected to realtime endpoint.")
 
                     # Step 3: Send transcription session update event with adjusted VAD settings.
