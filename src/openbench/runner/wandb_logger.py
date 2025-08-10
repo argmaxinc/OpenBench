@@ -114,8 +114,7 @@ class WandbLogger(ABC, Generic[SampleResult]):
 
         for sample_result in sample_results:
             prediction = sample_result.prediction
-            sample_id = sample_result.sample_id
-            filename = f"_sample_{sample_id}.rttm"
+            filename = sample_result.audio_name
             prediction.to_annotation_file(save_dir, filename)
 
         artifact = wandb.Artifact(
