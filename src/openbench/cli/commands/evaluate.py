@@ -326,6 +326,10 @@ def evaluate(
     # Store original working directory
     original_cwd = os.getcwd()
 
+    # Get absolute path for evaluation config before changing working directory
+    if evaluation_config_path is not None:
+        evaluation_config_path = evaluation_config_path.absolute()
+
     try:
         # Set output_dir as working dir
         os.chdir(output_dir)
