@@ -124,7 +124,9 @@ def register_dataset_aliases() -> None:
 
     DatasetRegistry.register_alias(
         "callhome",
-        DatasetConfig(dataset_id=os.getenv("CALLHOME_DATASET_REPO_ID", "argmaxinc/callhome"), split="part2"),
+        DatasetConfig(
+            dataset_id=os.getenv("CALLHOME_DATASET_REPO_ID", "argmaxinc/callhome"), split="part2", num_samples=5
+        ),
         supported_pipeline_types={
             PipelineType.DIARIZATION,
         },

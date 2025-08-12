@@ -378,6 +378,7 @@ def evaluate(
                 verbose=verbose,
             )
         display_result(result)
+
     finally:
         # Restore original working directory
         os.chdir(original_cwd)
