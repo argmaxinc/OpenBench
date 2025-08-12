@@ -99,6 +99,7 @@ class BenchmarkRunner:
         sample_results_attributes = dict(
             dataset_name=dataset_name,
             sample_id=sample_id,
+            audio_name=sample.audio_name,
             pipeline_name=pipeline.__class__.__name__,
             audio_duration=audio_duration,
             **output.model_dump(),

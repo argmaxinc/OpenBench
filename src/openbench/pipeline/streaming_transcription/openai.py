@@ -12,7 +12,6 @@ import torch
 import torchaudio
 import websockets
 from argmaxtools.utils import get_logger
-from dotenv import load_dotenv
 
 from openbench.dataset import StreamingSample
 
@@ -21,8 +20,6 @@ from ...pipeline_prediction import StreamingTranscript
 from ...types import PipelineType
 from .common import StreamingTranscriptionConfig, StreamingTranscriptionOutput
 
-
-load_dotenv()
 
 logger = get_logger(__name__)
 
@@ -169,7 +166,7 @@ class OpenAIApi:
                     "Authorization": f"Bearer {ephemeral_token}",
                     "OpenAI-Beta": "realtime=v1",
                 }
-                async with websockets.connect(websocket_url, extra_headers=connection_headers) as ws:
+                async with websockets.connect(websocket_url, additional_headers=connection_headers) as ws:
                     logger.debug("Connected to realtime endpoint.")
 
                     # Step 3: Send transcription session update event with adjusted VAD settings.

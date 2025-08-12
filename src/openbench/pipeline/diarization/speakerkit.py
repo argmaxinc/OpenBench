@@ -40,31 +40,36 @@ class SpeakerKitCli:
         self.model_path = model_path
 
     def __call__(self, speakerkit_input: SpeakerKitInput) -> tuple[Path, float]:
-        try:
-            cmd = [
-                self.cli_path,
-                "diarize",
-                "--api-key",
-                os.environ["SPEAKERKIT_API_KEY"],
-                "--audio-path",
-                str(speakerkit_input["audio_path"]),
-                "--rttm-path",
-                str(speakerkit_input["output_path"]),
-                "--verbose",
-            ]
-            if self.model_path:
-                cmd.extend(["--model-path", self.model_path])
-        except KeyError as e:
-            raise ValueError("`SPEAKERKIT_API_KEY` environment variable is not set") from e
+        cmd = [
+            self.cli_path,
+            "diarize",
+            "--audio-path",
+            str(speakerkit_input["audio_path"]),
+            "--rttm-path",
+            str(speakerkit_input["output_path"]),
+            "--verbose",
+        ]
+
+        if self.model_path:
+            cmd.extend(["--model-path", self.model_path])
 
         if speakerkit_input["num_speakers"] is not None:
             cmd.extend(["--num-speakers", str(speakerkit_input["num_speakers"])])
+
+        if "SPEAKERKIT_API_KEY" in os.environ:
+            cmd.extend(["--api-key", os.environ["SPEAKERKIT_API_KEY"]])
 
         try:
             result = subprocess.run(cmd, check=True, capture_output=True, text=True)
             logger.info(f"Diarization CLI stdout:\n{result.stdout}")
         except subprocess.CalledProcessError as e:
-            raise RuntimeError(f"Diarization CLI failed with error: {e.stderr}") from e
+            # Strip api-key from stderr if ``SPEAKERKIT_API_KEY`` is set
+            if "SPEAKERKIT_API_KEY" in os.environ:
+                stderr = e.stderr.replace(os.environ["SPEAKERKIT_API_KEY"], "***")
+            else:
+                stderr = e.stderr
+
+            raise RuntimeError(f"Diarization CLI failed with error: {stderr}") from e
 
         # Delete the audio file
         speakerkit_input["audio_path"].unlink()

@@ -18,6 +18,7 @@ class BaseSampleResult(BaseModel, Generic[Prediction]):
 
     dataset_name: str = Field(..., description="The name of the dataset")
     sample_id: int = Field(..., description="The id of the sample")
+    audio_name: str = Field(..., description="The name of the audio file")
     pipeline_name: str = Field(..., description="The name of the pipeline")
     prediction: Prediction = Field(..., description="The predicted diarization result")
     prediction_time: float = Field(
