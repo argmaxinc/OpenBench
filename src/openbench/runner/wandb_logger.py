@@ -1,9 +1,11 @@
 # For licensing see accompanying LICENSE.md file.
 # Copyright (C) 2025 Argmax, Inc. All Rights Reserved.
 
+import json
 import os
 import warnings
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import Any, Generic, TypeVar
 
 import numpy as np
@@ -39,6 +41,8 @@ class WandbLogger(ABC, Generic[SampleResult]):
             output_dir: Directory to save artifacts
         """
         self.output_dir = "." if output_dir is None else output_dir
+        self.results_dir = Path(self.output_dir) / "results"
+
         self.logger = get_logger(f"{__name__}.{self.__class__.__name__}")
 
     @abstractmethod
@@ -70,6 +74,14 @@ class WandbLogger(ABC, Generic[SampleResult]):
             Dictionary mapping metric names to their values
         """
         self.logger.info("Getting global metrics")
+
+        # Store a json file with all global results
+        global_results_dict = {
+            global_result.metric_name: global_result.global_result for global_result in global_results
+        }
+        with open(self.results_dir / "global_results.json", "w") as f:
+            json.dump(global_results_dict, f)
+
         return {
             f"{global_result.dataset_name}/{global_result.metric_name}": global_result.global_result
             for global_result in global_results
@@ -95,6 +107,9 @@ class WandbLogger(ABC, Generic[SampleResult]):
         for key in all_keys:
             df[f"detailed_{key}"] = df["detailed_result"].apply(lambda x: x.get(key, None))
         df = df.drop(columns=["detailed_result"])
+
+        # Store a version of the table locally
+        df.to_csv(self.results_dir / "task_results_table.csv", index=False)
 
         return {f"{dataset_name}/task_results_table": wandb.Table(dataframe=df)}
 
@@ -141,6 +156,10 @@ class WandbLogger(ABC, Generic[SampleResult]):
         # Remove row keys that are np.ndarray
         rows = [{k: v for k, v in row.items() if not isinstance(v, (np.ndarray, PredictionProtocol))} for row in rows]
         dataset_name = rows[0]["dataset_name"]
+
+        # Store a version of the table locally
+        df = pd.DataFrame(rows)
+        df.to_csv(self.results_dir / "sample_results_table.csv", index=False)
 
         # Create results table
         return {
@@ -190,6 +209,12 @@ class WandbLogger(ABC, Generic[SampleResult]):
         Returns:
             Dictionary of metrics and artifacts to log
         """
+        # Check if results and output dir exists otherwise create them
+        if not self.results_dir.exists():
+            self.results_dir.mkdir(parents=True, exist_ok=True)
+        if not Path(self.output_dir).exists():
+            Path(self.output_dir).mkdir(parents=True, exist_ok=True)
+
         log_dict = {}
 
         # Get global metrics

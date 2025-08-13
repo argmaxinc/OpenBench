@@ -1,10 +1,11 @@
+.PHONY: setup test install-pre-commit format display-config download-datasets help
+
 setup:
-	uv sync
-	make install-pre-commit
-	pre-commit install
+	@uv sync
+	@make install-pre-commit
 
 test:
-	uv run pytest tests/ -v
+	@uv run pytest tests/ -v
 
 install-pre-commit:
 	@echo "Installing pre-commit..."
@@ -19,6 +20,7 @@ install-pre-commit:
 		exit 1; \
 	fi
 	@echo "pre-commit is installed."
+	@pre-commit install
 
 format:
 	@pre-commit run --all-files
@@ -27,7 +29,7 @@ format:
 	@uvx ruff format .
 
 display-config:
-	uv run python evaluation.py -h
+	@uv run python evaluation.py -h
 
 download-datasets:
 	@echo "Downloading all available datasets..."
@@ -48,3 +50,13 @@ download-datasets:
 	@echo "Downloading callhome dataset..."
 	@uv run python common/download_dataset.py --dataset-name callhome --generate-only
 	@echo "All datasets have been downloaded successfully."
+
+help:
+	@echo "Usage: make <target>"
+	@echo "Targets:"
+	@echo "  setup: Install dependencies and pre-commit hooks"
+	@echo "  test: Run tests"
+	@echo "  install-pre-commit: Install pre-commit hooks"
+	@echo "  format: Run formatting and linting"
+	@echo "  display-config: Display configuration"
+	@echo "  download-datasets: Download all available datasets"

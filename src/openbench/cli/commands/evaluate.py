@@ -12,11 +12,13 @@ from typing import Any
 import hydra
 import typer
 from pydantic import BaseModel, Field, model_validator
+from rich.console import Console
+from rich.table import Table
 
 from openbench.dataset import DatasetRegistry
 from openbench.metric import MetricOptions
 from openbench.pipeline import PipelineRegistry
-from openbench.runner import BenchmarkConfig, BenchmarkRunner, WandbConfig
+from openbench.runner import BenchmarkConfig, BenchmarkResult, BenchmarkRunner, WandbConfig
 
 from ..command_utils import (
     get_datasets_help_text,
@@ -112,7 +114,7 @@ def run_config_file_mode(
     evaluation_config_path: Path,
     evaluation_config_overrides: list[str] | None,
     verbose: bool,
-) -> None:
+) -> BenchmarkResult:
     """Run evaluation using a config file."""
     if verbose:
         typer.echo("🚀 Starting evaluation with config file...")
@@ -153,6 +155,8 @@ def run_config_file_mode(
         else:
             typer.echo("⚠️  Evaluation completed but no results were returned", err=True)
 
+        return result
+
     except Exception as e:
         typer.echo(f"❌ Evaluation failed: {e}", err=True)
         if verbose:
@@ -171,7 +175,7 @@ def run_alias_mode(
     wandb_run_name: str | None,
     wandb_tags: list[str] | None,
     verbose: bool,
-) -> None:
+) -> BenchmarkResult:
     """Run evaluation using pipeline and dataset aliases."""
     try:
         # Validate cross-parameter compatibility
@@ -222,6 +226,8 @@ def run_alias_mode(
         else:
             typer.echo("⚠️  Evaluation completed but no results were returned", err=True)
 
+        return result
+
     except Exception as e:
         typer.echo(f"❌ Evaluation failed: {e}", err=True)
         if verbose:
@@ -243,6 +249,27 @@ def get_output_dir() -> Path:
     output_dir = BASE_OUTPUT_DIR / date_str / time_str
     output_dir.mkdir(parents=True, exist_ok=True)
     return output_dir
+
+
+def display_result(result: BenchmarkResult) -> None:
+    """Display global benchmark result for every metric in a pretty rich table."""
+    table = Table(title="Benchmark Result")
+    table.add_column("Dataset", justify="center", style="cyan", no_wrap=True)
+    table.add_column("Pipeline", justify="center", style="cyan", no_wrap=True)
+    table.add_column("Metric", justify="center", style="cyan", no_wrap=True)
+    table.add_column("Value", justify="center", style="cyan", no_wrap=True)
+
+    global_results = result.global_results
+    for global_result in global_results:
+        row = [
+            global_result.dataset_name,
+            global_result.pipeline_name,
+            global_result.metric_name,
+            f"{global_result.global_result:.4f}",
+        ]
+        table.add_row(*row)
+    console = Console()
+    console.print(table)
 
 
 def evaluate(
@@ -337,10 +364,10 @@ def evaluate(
         # Validate mutually exclusive modes
         if evaluation_config_path is not None:
             typer.echo("🔧 Running with config file mode")
-            run_config_file_mode(evaluation_config_path, evaluation_config_overrides, verbose)
+            result = run_config_file_mode(evaluation_config_path, evaluation_config_overrides, verbose)
         else:
             typer.echo("🔧 Running with alias mode")
-            run_alias_mode(
+            result = run_alias_mode(
                 pipeline_name=pipeline_name,
                 dataset_name=dataset_name,
                 metrics=metrics,
@@ -350,6 +377,8 @@ def evaluate(
                 wandb_tags=wandb_tags,
                 verbose=verbose,
             )
+        display_result(result)
+
     finally:
         # Restore original working directory
         os.chdir(original_cwd)

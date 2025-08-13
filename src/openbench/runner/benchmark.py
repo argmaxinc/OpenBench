@@ -305,7 +305,7 @@ class BenchmarkRunner:
         wandb_config = self.config.get_wandb_config_to_log()
         for pipeline in self.pipelines:
             # Get logger
-            wandb_logger = self.logger_map[pipeline.pipeline_type](output_dir=pipeline.config.out_dir)
+            wandb_logger = self.logger_map[pipeline.pipeline_type](output_dir=".")
             # Add pipeline info to wandb config
             wandb_config["pipeline_name"] = pipeline.__class__.__name__
             wandb_config["pipeline_config"] = pipeline.config.model_dump()
