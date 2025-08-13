@@ -261,6 +261,9 @@ def display_result(result: BenchmarkResult) -> None:
 
     global_results = result.global_results
     for global_result in global_results:
+        # For streaming pipelines we can have metrics that are not compatible and return N/A values
+        if global_result.global_result is None:
+            continue
         row = [
             global_result.dataset_name,
             global_result.pipeline_name,
