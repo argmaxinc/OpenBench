@@ -33,7 +33,9 @@ dependencies = [
     "typer>=0.16.0",
     "pydub>=0.25.1,<0.26",
     "rich>=13.0.0,<14",
-    "nemo-toolkit[asr]>=2.2.0",
+    "cython>=3.1.3",
+    "packaging>=24.2",
+    "nemo-toolkit[asr]",
 ]
 
 [project.scripts]
@@ -93,3 +95,6 @@ skip-magic-trailing-comma = false
 
 # Like Black, automatically detect the appropriate line ending.
 line-ending = "auto"
+
+[tool.uv.sources]
+nemo-toolkit = { git = "https://github.com/NVIDIA/NeMo.git", rev = "main" }

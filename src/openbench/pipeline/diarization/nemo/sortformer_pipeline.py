@@ -61,11 +61,34 @@ class NeMoSortformerPipeline(Pipeline):
     ) -> Callable[
         [dict[str, torch.FloatTensor | int]], DiarizationAnnotation
     ]:
-        # Using MPS backend can cause issues with the pipeline
+        # load model from Hugging Face model card directly (You need a Hugging Face token)
         pipeline = SortformerEncLabelModel.from_pretrained(
-            "nvidia/diar_sortformer_4spk-v1"
+            "nvidia/diar_streaming_sortformer_4spk-v2",
+            map_location="mps",
         )
-        pipeline.to(self.config.device)
+
+        # switch to inference mode
+        pipeline.eval()
+
+        # VERY HIGH LATENCY
+        CHUNK_SIZE = 340
+        RIGHT_CONTEXT = 40
+        FIFO_SIZE = 40
+        UPDATE_PERIOD = 300
+        SPEAKER_CACHE_SIZE = 188
+
+        # # LOW LATENCY
+        # CHUNK_SIZE = 6
+        # RIGHT_CONTEXT = 7
+        # FIFO_SIZE = 188
+        # UPDATE_PERIOD = 144
+        # SPEAKER_CACHE_SIZE = 188
+
+        pipeline.sortformer_modules.chunk_len = CHUNK_SIZE
+        pipeline.sortformer_modules.chunk_right_context = RIGHT_CONTEXT
+        pipeline.sortformer_modules.fifo_len = FIFO_SIZE
+        pipeline.sortformer_modules.spkcache_update_period = UPDATE_PERIOD
+        pipeline.sortformer_modules.spkcache_len = SPEAKER_CACHE_SIZE
 
         def call_pipeline(
             inputs: NeMoSortformerPipelineInput,
@@ -79,7 +102,7 @@ class NeMoSortformerPipeline(Pipeline):
                     else torch.float32
                 ),
             ):
-                result = pipeline.diarize(str(inputs.audio_path))
+                result = pipeline.diarize(str(inputs.audio_path), batch_size=1)
             annot: Annotation = labels_to_pyannote_object(result[0])
             return DiarizationAnnotation.from_pyannote_annotation(annot)
 
