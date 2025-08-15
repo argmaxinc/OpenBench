@@ -56,14 +56,14 @@
 - **Latest Run:** `2025-02-17`
 - **Model Version:** `pyannote-flagship (default)`
 - **Configuration:** Job polling based on `X-RateLimit-Remaining` and `X-RateLimit-Reset` headers which leads to sub-second polling checks. See [pyannoteAI Documentation](https://docs.pyannote.ai/api-reference/diarize) for more details.
-- **Code Reference:** At `OpenBench` as [pyannote-api](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/diarization/pyannote_api.py)
+- **Code Reference:** [openbench/pipeline/diarization/pyannote_api](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/diarization/pyannote_api.py)
 - **Hardware**: Unknown (Cloud API)
 
 ### Argmax
 - **Latest Run:** `2025-05-29`
 - **Model Version:** `pyannote-v3`
 - **Configuration:** Argmax SDK `SpeakerKit` CLI with default settings. See [Interspeech 2025 Paper](https://arxiv.org/abs/2507.16136) for more details.
-- **Code Reference:** At `OpenBench` as [openbench/pipeline/diarization/speakerkit](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/diarization/speakerkit.py)
+- **Code Reference:** [openbench/pipeline/diarization/speakerkit](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/diarization/speakerkit.py)
 - **Hardware**: M2 Ultra Mac Studio
 
 </details>
