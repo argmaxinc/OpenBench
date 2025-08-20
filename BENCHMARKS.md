@@ -221,8 +221,8 @@
 
 | Dataset        | Deepgram<br/>(nova-3) | OpenAI <br/>(GPT-4o) | Gladia |  Argmax <br/>(Parakeet V2) |  Argmax <br/>(Whisper Large V3 Turbo) |
 |----------------|----------|-----------------|----------------------------|---------------------------------------|---------------------------------------|
-| Short-form (timit)          | 2.3                 | 7.42           | 2.26                 | 3.54                 | 2.88                            |
-| Long-form <br/>(timit-stitched) | 2.36                | 2.47           | 2.11                 | 2.17             | 2.3                             |
+| Short-form (timit)          | 2.3                 | 7.42           | 2.26                 | 3.54                 | 2.77                            |
+| Long-form <br/>(timit-stitched) | 2.36                | 2.47           | 2.11                 | 2.17             | 2.08                             |
 
 <br/><br/>
 ## Streaming Latency
@@ -242,8 +242,8 @@
 
 | Dataset        | Deepgram<br/>(nova-3) | OpenAI <br/>(GPT-4o) | Gladia |  Argmax <br/>(Parakeet V2) |  Argmax <br/>(Whisper Large V3 Turbo) |
 |----------------|----------|-----------------|----------------------------|---------------------------------------|---------------------------------------|
-| Short-form (timit) | 0.67  | N/A  | N/A | 0.23 | 0.73  |
-| Long-form <br/>(timit-stitched) | 1.03 | N/A | N/A  | 0.42 | 0.77  |
+| Short-form (timit) | 0.67  | N/A  | N/A | 0.23 | 0.92  |
+| Long-form <br/>(timit-stitched) | 1.03 | N/A | N/A  | 0.42 | 1.08  |
 
 </br></br>
 
@@ -263,5 +263,5 @@
 
 | Dataset        | Deepgram<br/>(nova-3) | OpenAI <br/>(GPT-4o) | Gladia |  Argmax <br/>(Parakeet V2) |  Argmax <br/>(Whisper Large V3 Turbo) |
 |----------------|----------|-----------------|----------------------------|---------------------------------------|---------------------------------------|
-| Short-form (timit) | 1.64  | 1.68  | 1.81 | 1.83 | 1.39  |
-| Long-form <br/>(timit-stitched) | 2.37 | 56.95 | 5.96  | 4.77 | 2.36  |
+| Short-form (timit) | 1.64  | 1.68  | 1.81 | 1.83 | 1.49  |
+| Long-form <br/>(timit-stitched) | 2.37 | 56.95 | 5.96  | 4.77 | 2.92  |
