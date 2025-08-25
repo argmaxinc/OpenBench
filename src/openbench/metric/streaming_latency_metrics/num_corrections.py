@@ -42,7 +42,7 @@ class BaseNumCorrections(BaseMetric):
                 elif alig.type == "substitute":
                     n_subs += alig.ref_end_idx - alig.ref_start_idx
                 elif alig.type == "insert":
-                    n_insertion += (alig.hyp_end_idx - alig.hyp_start_idx)
+                    n_insertion += alig.hyp_end_idx - alig.hyp_start_idx
         if correction_type == "insertion":
             # Intentionally Flipped
             return n_deletion
