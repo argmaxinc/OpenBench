@@ -3,8 +3,8 @@
 
 from .apple_speech_analyzer import SpeechAnalyzerConfig, SpeechAnalyzerPipeline
 from .common import TranscriptionOutput
+from .transcription_whisperkitpro import WhisperKitProTranscriptionConfig, WhisperKitProTranscriptionPipeline
 from .whisperkit import WhisperKitTranscriptionConfig, WhisperKitTranscriptionPipeline
-from .whisperkitpro import WhisperKitProTranscriptionConfig, WhisperKitProTranscriptionPipeline
 
 
 __all__ = [

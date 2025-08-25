@@ -7,7 +7,7 @@ from typing import Literal
 
 import coremltools as ct
 from argmaxtools.utils import get_logger
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field
 
 
 logger = get_logger(__name__)
@@ -78,12 +78,6 @@ class WhisperKitProConfig(BaseModel):
         description="The path to the speaker models directory",
     )
 
-    @model_validator(mode="after")
-    def validate_speaker_models_path(self) -> "WhisperKitProConfig":
-        if self.diarization and self.speaker_models_path is None:
-            raise ValueError("speaker_models_path must be provided if diarization is True")
-        return self
-
     @property
     def rttm_path(self) -> str | None:
         # Path to the directory where the .rttm file with transcription should be saved
@@ -126,6 +120,8 @@ class WhisperKitProConfig(BaseModel):
         if self.diarization:
             args.extend(["--diarization"])
             args.extend(["--orchestration-strategy", self.orchestration_strategy])
+            # Add rttm path
+            args.extend(["--rttm-path", self.rttm_path])
             # If speaker models path is provided use it
             if self.speaker_models_path:
                 args.extend(["--speaker-models-path", self.speaker_models_path])
