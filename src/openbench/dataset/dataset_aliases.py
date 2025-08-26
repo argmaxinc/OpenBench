@@ -460,6 +460,16 @@ def register_dataset_aliases() -> None:
         description="Common Voice dataset for transcription evaluation with up to 400 samples per language this subset contains only catalan",
     )
 
+    # Russian
+    DatasetRegistry.register_alias(
+        "common-voice-ru",
+        DatasetConfig(dataset_id="argmaxinc/common_voice_17_0-argmax_subset-400-openbench", split="test", subset="ru"),
+        supported_pipeline_types={
+            PipelineType.TRANSCRIPTION,
+        },
+        description="Common Voice dataset for transcription evaluation with up to 400 samples per language this subset contains only russian",
+    )
+
     ########## STREAMING TRANSCRIPTION ##########
 
     DatasetRegistry.register_alias(
