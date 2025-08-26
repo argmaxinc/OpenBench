@@ -32,6 +32,7 @@ dependencies = [
     "pydub>=0.25.1,<0.26",
     "rich>=13.0.0,<14",
     "deepgram-sdk>=4.8.0",
+    "groq>=0.31.0",
 ]
 
 [project.scripts]

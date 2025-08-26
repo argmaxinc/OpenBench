@@ -26,6 +26,7 @@ from .streaming_transcription import (
     OpenAIStreamingPipeline,
 )
 from .transcription import (
+    GroqTranscriptionPipeline,
     SpeechAnalyzerPipeline,
     WhisperKitProTranscriptionPipeline,
     WhisperKitTranscriptionPipeline,
@@ -388,6 +389,29 @@ def register_pipeline_aliases() -> None:
         },
         description="WhisperKitPro transcription pipeline using the parakeet-v3 version of the model compressed to 494MB. Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
     )
+
+    PipelineRegistry.register_alias(
+        "groq-whisper-large-v3-turbo",
+        GroqTranscriptionPipeline,
+        default_config={
+            "model_id": "whisper-large-v3-turbo",
+            "temperature": 0.0,
+            "force_language": False,
+        },
+        description="Groq transcription pipeline using the whisper-large-v3-turbo model. Requires `GROQ_API_KEY` env var.",
+    )
+
+    PipelineRegistry.register_alias(
+        "groq-whisper-large-v3",
+        GroqTranscriptionPipeline,
+        default_config={
+            "model_id": "whisper-large-v3",
+            "temperature": 0.0,
+            "force_language": False,
+        },
+        description="Groq transcription pipeline using the whisper-large-v3 model. Requires `GROQ_API_KEY` env var.",
+    )
+
     ################# STREAMING TRANSCRIPTION PIPELINES #################
 
     PipelineRegistry.register_alias(
