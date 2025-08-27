@@ -24,7 +24,7 @@ dependencies = [
     "pvfalcon>=1.0.4,<2",
     "jiwer>=3.1.0,<4",
     "whisperx>=3.3.1,<4",
-    "torch==2.6.0",
+    "torch==2.8",
     "scikit-learn==1.5.1",
     "speechbrain==1.0.2",
     "websocket-client>=1.8.0,<2",
