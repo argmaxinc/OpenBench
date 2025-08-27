@@ -34,7 +34,7 @@ def register_dataset_aliases() -> None:
 
     DatasetRegistry.register_alias(
         "msdwild",
-        DatasetConfig(dataset_id="argmaxinc/msdwild", split="test"),
+        DatasetConfig(dataset_id="argmaxinc/msdwild", split="validation"),
         supported_pipeline_types={
             PipelineType.DIARIZATION,
         },
