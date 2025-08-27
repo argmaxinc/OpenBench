@@ -4,6 +4,7 @@
 import argparse
 import json
 import os
+import re
 import shutil
 import subprocess
 import tarfile
@@ -19,6 +20,7 @@ import datasets
 import gdown  # Used for MSDWild dataset
 import pandas as pd
 import requests
+import soundfile as sf
 from argmaxtools.utils import get_logger
 from bs4 import BeautifulSoup
 from huggingface_hub import snapshot_download
@@ -477,8 +479,8 @@ class Earnings21Dataset(SpeakerDiarizationDataset):
         audio_dir = Path("speech-datasets", "earnings21", "media")
         transcript_dir = Path("speech-datasets", "earnings21", "transcripts", "nlp_references")
 
-        rttm_files = sorted(list(rttm_dir.glob("*.rttm")))
-        audio_files = sorted(list(audio_dir.glob("*.mp3")))
+        rttm_files = sorted((rttm_dir.glob("*.rttm")))
+        audio_files = sorted((audio_dir.glob("*.mp3")))
         audio_files_wav = [audio_file.with_suffix(".wav") for audio_file in audio_files]
 
         transcripts: list[list[str]] = []
@@ -567,7 +569,7 @@ class MSDWildDataset(SpeakerDiarizationDataset):
         split_dirs = list(rttm_dir.glob("*"))
 
         for split_dir in split_dirs:
-            rttm_files = sorted(list(split_dir.glob("*.rttm")))
+            rttm_files = sorted((split_dir.glob("*.rttm")))
             audio_files = []
             for rttm_file in rttm_files:
                 audio_file = wav_dir / f"{rttm_file.stem}.wav"
@@ -673,7 +675,7 @@ class ICSIMeetingsDataset(SpeakerDiarizationDataset):
         rttm_dir.mkdir(parents=True, exist_ok=True)
 
         xml_dir = Path("ICSI", "Segments")
-        xml_files = sorted(list(xml_dir.glob("*.xml")))
+        xml_files = sorted((xml_dir.glob("*.xml")))
 
         annotation_dict: dict[str, Annotation] = {}
         for xml_file in tqdm(
@@ -716,8 +718,8 @@ class ICSIMeetingsDataset(SpeakerDiarizationDataset):
         rttm_dir = Path("rttms")
         wav_dir = Path("Signals")
 
-        rttm_files = sorted(list(rttm_dir.glob("*.rttm")))
-        wav_files = sorted(list(wav_dir.glob("*/*.wav")))
+        rttm_files = sorted((rttm_dir.glob("*.rttm")))
+        wav_files = sorted((wav_dir.glob("*/*.wav")))
         wav_ids = [wav_file.parent.name for wav_file in wav_files]
 
         for rttm_file, wav_id in zip(rttm_files, wav_ids):
@@ -750,7 +752,7 @@ class AliMeetingsDataset(SpeakerDiarizationDataset):
 
     def _convert_textgrid_to_rttm(self) -> None:
         textgrid_dir = Path("Test_Ali", "Test_Ali_far", "textgrid_dir")
-        textgrid_files = sorted(list(textgrid_dir.glob("*.TextGrid")))
+        textgrid_files = sorted((textgrid_dir.glob("*.TextGrid")))
 
         rttm_dir = Path("rttms")
         rttm_dir.mkdir(parents=True, exist_ok=True)
@@ -780,13 +782,13 @@ class AliMeetingsDataset(SpeakerDiarizationDataset):
         audio_dir = Path("Test_Ali", "Test_Ali_far", "audio_dir")
         rttm_dir = Path("rttms")
 
-        audio_files = sorted(list(audio_dir.glob("*.wav")))
-        rttm_files = sorted(list(rttm_dir.glob("*.rttm")))
+        audio_files = sorted((audio_dir.glob("*.wav")))
+        rttm_files = sorted((rttm_dir.glob("*.rttm")))
 
         for audio_file, rttm_file in zip(audio_files, rttm_files):
             # For some reason the naming convention is slightly different for audio and annotations
             audio_stem = audio_file.stem  # e.g. R8001_M8004_MS801
-            audio_id = "_".join([part for part in audio_stem.split("_")[:-1]])
+            audio_id = "_".join(audio_stem.split("_")[:-1])
             rttm_id = rttm_file.stem  # e.g. R8001_M8004
             if audio_id != rttm_id:
                 raise ValueError(f"Audio file {audio_file} and annotation file {rttm_file} do not match")
@@ -819,8 +821,8 @@ class AIShell4Dataset(SpeakerDiarizationDataset):
         audio_dir = Path("test", "wav")
         annot_dir = Path("test", "TextGrid")
 
-        audio_files = sorted(list(audio_dir.glob("*.flac")))
-        rttm_files = sorted(list(annot_dir.glob("*.rttm")))
+        audio_files = sorted((audio_dir.glob("*.flac")))
+        rttm_files = sorted((annot_dir.glob("*.rttm")))
 
         logger.info(f"Found {len(audio_files)} audio files and {len(rttm_files)} annotation files")
         logger.info("Veryfing that audio and annotation files match...")
@@ -874,7 +876,7 @@ class AmericanLifeDataset(SpeakerDiarizationDataset):
 
     def _get_episode_to_download(self) -> set[int]:
         annot_dir = Path("kaggle_annotations")
-        annot_files = sorted(list(annot_dir.glob("*.json")))
+        annot_files = sorted((annot_dir.glob("*.json")))
         # Get only the transcripts
         annot_files = [annot_file for annot_file in annot_files if "transcripts" in annot_file.stem]
         # Get episode number
@@ -883,7 +885,7 @@ class AmericanLifeDataset(SpeakerDiarizationDataset):
             data = load_json(annot_file)
             episodes_in_split = [int(key.split("-")[1]) for key in data.keys()]
             eps_to_download.extend(episodes_in_split)
-        return set(sorted(eps_to_download))
+        return set(eps_to_download)
 
     def _download_audio(self) -> None:
         audio_dir = Path("audio")
@@ -953,7 +955,7 @@ class AmericanLifeDataset(SpeakerDiarizationDataset):
         data = {}
         for split in splits:
             annot_dir = Path(f"{split}_annotations")
-            rttm_files = sorted(list(annot_dir.glob("*.rttm")))
+            rttm_files = sorted((annot_dir.glob("*.rttm")))
             audio_files = [audio_dir / f"{rttm_file.stem}.mp3" for rttm_file in rttm_files]
             data[split] = SpeakerDiarizationData(
                 split=split,
@@ -1091,8 +1093,8 @@ class AVAAvdDataset(SpeakerDiarizationDataset):
                 logger.info(f"Copying {path_from} to {path_to}")
                 shutil.copy(path_from, path_to)
 
-            audio_paths = sorted(list(audio_split_dir.glob("*.wav")))
-            annotation_paths = sorted(list(rttm_split_dir.glob("*.rttm")))
+            audio_paths = sorted((audio_split_dir.glob("*.wav")))
+            annotation_paths = sorted((rttm_split_dir.glob("*.rttm")))
 
             data[split_name] = SpeakerDiarizationData(
                 split=split_name,
@@ -1481,8 +1483,8 @@ class Ego4dDataset(SpeakerDiarizationDataset):
         for split in splits:
             audio_split_dir = self.audio_dir / split
             rttm_split_dir = self.rttm_dir / split
-            audio_paths = sorted(list(audio_split_dir.glob("*.wav")))
-            rttm_paths = sorted(list(rttm_split_dir.glob("*.rttm")))
+            audio_paths = sorted((audio_split_dir.glob("*.wav")))
+            rttm_paths = sorted((rttm_split_dir.glob("*.rttm")))
 
             if any(audio_path.stem != rttm_path.stem for audio_path, rttm_path in zip(audio_paths, rttm_paths)):
                 raise ValueError(f"Mismatch in audio and RTTM files for split {split}")
@@ -1493,6 +1495,313 @@ class Ego4dDataset(SpeakerDiarizationDataset):
                 annotation_paths=[str(rttm_path) for rttm_path in rttm_paths],
             )
         return data
+
+
+# ForCallHome English Transcript which contains transcript with word-level speaker labels.
+# To get access to the data on has to license it from LDC.
+# Transcripts can be found at: https://catalog.ldc.upenn.edu/LDC97T14
+# Audios can be found at: https://catalog.ldc.upenn.edu/LDC97S42
+class CallHomeEnglishTranscript(SpeakerDiarizationDataset):
+    audio_data_dir_path: Path = (
+        os.getenv("CALLHOME_ENGLISH_AUDIO_DIR")
+        or Path(
+            "~",
+            "callhome_eng",
+            "data",
+        ).expanduser()
+    )
+    transcript_data_dir_path: Path = (
+        os.getenv("CALLHOME_ENGLISH_ANNOT_DIR")
+        or Path(
+            "~",
+            "callhome_english_trans_970711",
+            "transcrpt",
+        ).expanduser()
+    )
+    split_name_mapping: dict[str, str] = {
+        "devtest": "validation",
+        "evaltest": "test",
+        "train": "train",
+    }
+    dst_audio_dir: Path = Path("audios")
+    dst_rttm_dir: Path = Path("rttms")
+    dst_transcript_dir: Path = Path("transcripts")
+    sph2pipe_url: str = "https://github.com/EduardoPach/sph2pipe.git"
+    sph2pipe_dir = Path("sph2pipe")
+
+    @property
+    def dataset_name(self) -> str:
+        return "callhome-english"
+
+    def _clean_content(self, content: str) -> str:
+        """Clean the content text according to specific rules.
+
+        Args:
+            content: The raw content text
+
+        Returns:
+            Cleaned content text
+        """
+        # Remove sound made by the talker {text}
+        content = re.sub(r"\{[^}]*\}", "", content)
+
+        # Remove sound not made by the talker [text]
+        content = re.sub(r"\[[^\]]*\]", "", content)
+
+        # Remove annotator comments [ [ text ] ]
+        content = re.sub(r"\[\s*\[\s*[^\]]*\s*\]\s*\]", "", content)
+
+        # Remove end of continuous or intermittent sound [/text]
+        content = re.sub(r"\[/[^\]]*\]", "", content)
+
+        # Keep aside talking //text//
+        content = re.sub(r"//([^/]*)//", r"\1", content)
+
+        # Keep mispronounced word +text+
+        content = re.sub(r"\+([^+]*)\+", r"\1", content)
+
+        # Remove ampersands to mark names and places &text
+        content = re.sub(r"&([^\s]+)", r"\1", content)
+
+        # Remove partial words -text or text-
+        content = re.sub(r"-([^-]+)|([^-]+)-", "", content)
+
+        # Remove % for non-lexemes %text
+        content = re.sub(r"%([^\s]+)", r"\1", content)
+
+        # Remove ** from idiosyncratic word **text**
+        content = re.sub(r"\*\*([^*]+)\*\*", r"\1", content)
+
+        # Remove unintelligible symbols (( ))
+        content = re.sub(r"\(\(\s*\)\)", "[UNINTELLIGIBLE]", content)
+
+        # Remove unrecognized language symbols <? (( ))?
+        content = re.sub(r"<\?\s*\(\(\s*\)\)\s*>", "[UNINTELLIGIBLE]", content)
+
+        # Keep text in different language, remove the <>
+        content = re.sub(r"<([^>]+)>", r"\1", content)
+
+        # Keep unintelligible text, remove (()) from it
+        content = re.sub(r"\(\(([^)]+)\)\)", r"\1", content)
+
+        return content
+
+    def _preprocess_transcript(self, transcript: str) -> tuple[list[str], list[str]]:
+        """Process a CallHome English transcript file.
+
+        Args:
+            transcript: The raw transcript text
+
+        Returns:
+            A tuple containing:
+            - List of words
+            - List of speaker labels (A or B) corresponding to each word
+        """
+        # Matches lines in the format:
+        # <start_timestamp> <end_timestamp> <speaker_tag>: <text>
+        # where timestamps are integers or decimals (e.g., 451.37), the speaker tag is a single uppercase letter,
+        # and the line contains at least one character and may contain breaks.
+        pattern = r"(\d+\.\d+)\s+(\d+\.\d+)\s+([A-Z]):\s+(.*?)(?=\n\d+\.\d+\s+\d+\.\d+\s+[A-Z]:|$)"
+        matches = re.findall(pattern, transcript, flags=re.DOTALL)
+
+        df = (
+            pd.DataFrame(matches, columns=["start", "end", "speaker", "content"])
+            .astype({"start": "float", "end": "float"})
+            # Clean the content column
+            .assign(content=lambda df: df["content"].apply(self._clean_content))
+            # Kepp only lines with content
+            .pipe(lambda df: df.loc[df["content"].str.strip().str.len() > 0])
+        )
+
+        # Get speech start and end
+        start_speech_segments = df["start"].tolist()
+        end_speech_segments = df["end"].tolist()
+        speaker_speech_segments = df["speaker"].tolist()
+
+        # Get words and speakers
+        word_speakers, words = (
+            df.assign(words=df["content"].str.split())
+            .explode("words")[["speaker", "words"]]
+            .transpose()
+            .values.tolist()
+        )
+
+        return (
+            words,
+            word_speakers,
+            speaker_speech_segments,
+            start_speech_segments,
+            end_speech_segments,
+        )
+
+    def _setup_sph2pipe(self) -> None:
+        """Clone the sph2pipe repository and build the executable."""
+        logger.info("Cloning sph2pipe repository...")
+        if not self.sph2pipe_dir.exists():
+            subprocess.run(
+                f"git clone {self.sph2pipe_url}",
+                shell=True,
+                check=True,
+            )
+        # Build the docker image based on the instructions in sph2pipe README
+        # See https://github.com/EduardoPach/sph2pipe?tab=readme-ov-file#docker-usage
+        logger.info("Building docker image...")
+        subprocess.run("make docker-build", shell=True, check=True, cwd="sph2pipe")
+        logger.info("Docker image built successfully")
+
+    def _docker_run(self, sph_path: Path, wav_path: Path) -> None:
+        """Run make docker-run from sph2pipe directory."""
+        # Step 1. Copy the .sph file to the sph2pipe directory - because of the docker mounted volume
+        logger.info(f"Copying {sph_path} to {self.sph2pipe_dir / sph_path.name}")
+        shutil.copy(sph_path, self.sph2pipe_dir / sph_path.name)
+        # Step 2. Run the docker-run command
+        logger.info(f"Running docker-run command: make docker-run INPUT={sph_path.name} OUTPUT={wav_path.name}")
+        cmd = f"make docker-run INPUT={sph_path.name} OUTPUT={wav_path.name}"
+        subprocess.run(cmd, shell=True, check=True, cwd=self.sph2pipe_dir)
+        # Step 3. Move the .wav from the sph2pipe directory to the output directory
+        logger.info(f"Moving {self.sph2pipe_dir / wav_path.name} to {wav_path}")
+        shutil.move(self.sph2pipe_dir / wav_path.name, wav_path)
+        # Step 4. Clean up the .sph copy in the sph2pipe directory
+        logger.info(f"Cleaning up {self.sph2pipe_dir / sph_path.name}")
+        (self.sph2pipe_dir / sph_path.name).unlink()
+
+    def _convert_sph_to_wav(self, sph_path: Path, wav_path: Path, between: tuple[float, float]) -> None:
+        """Convert a SPH audio file to WAV format using sph2pipe in docker and resample to 16kHz."""
+        logger.info(f"Converting {sph_path} to {wav_path}")
+        try:
+            # Step 1: Convert SPH to WAV at original 8kHz using docker
+            temp_wav = wav_path.with_name(f"temp_{wav_path.name}")
+            self._docker_run(sph_path, temp_wav)
+            # Step 2: Resample from 8kHz to 16kHz
+            logger.info(f"Resampling {temp_wav} from 8kHz to 16kHz")
+            cmd_resample = f"ffmpeg -y -i {temp_wav} -ar 16000 {wav_path}"
+            subprocess.run(
+                cmd_resample,
+                shell=True,
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+            # Step 3: Trim the audio to the between region
+            logger.info(f"Trimming {wav_path} to {between}")
+            start, end = between
+            wav, sr = sf.read(wav_path)
+            wav = wav[int(start * sr) : int(end * sr)]
+            sf.write(wav_path, wav, sr)
+
+            # Clean up temporary file
+            temp_wav.unlink()
+
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Failed to convert {sph_path} to WAV: {e}")
+            if temp_wav.exists():
+                temp_wav.unlink()
+            raise
+
+    def _save_word_speaker_pairs(self, dst_transcript_file: Path, word_speakers: list[str], words: list[str]) -> None:
+        df = pd.DataFrame({"word": words, "speaker": word_speakers})
+        df.to_csv(dst_transcript_file, index=False)
+
+    def _save_rttm(
+        self,
+        rttm_file: Path,
+        speakers: list[str],
+        start_times: list[float],
+        end_times: list[float],
+    ) -> None:
+        """Save speaker segments to RTTM format file using pyannote.core.
+
+        Args:
+            rttm_file: Path to output RTTM file
+            speakers: List of speaker IDs for each segment
+            start_times: List of segment start times in seconds
+            end_times: List of segment end times in seconds
+        """
+        annotation = Annotation(uri=rttm_file.stem)
+        offset = min(start_times)
+        for spk, start, end in zip(speakers, start_times, end_times):
+            segment = Segment(start - offset, end - offset)
+            annotation[segment] = spk
+
+        with rttm_file.open("w") as f:
+            annotation.write_rttm(f)
+
+    def _process_split(self, split_key: str, split_name: str) -> SpeakerDiarizationData:
+        transcript_dir = self.transcript_data_dir_path / split_key
+        source_audio_dir = self.audio_data_dir_path / split_key
+
+        transcript_files: list[Path] = sorted((transcript_dir.glob("*.txt")))
+        audio_files: list[Path] = sorted((source_audio_dir.glob("*.sph")))
+
+        split_audio_dir = self.dst_audio_dir / split_name
+        split_rttm_dir = self.dst_rttm_dir / split_name
+        split_transcript_dir = self.dst_transcript_dir / split_name
+
+        split_audio_dir.mkdir(parents=True, exist_ok=True)
+        split_rttm_dir.mkdir(parents=True, exist_ok=True)
+        split_transcript_dir.mkdir(parents=True, exist_ok=True)
+
+        dst_audio_files: list[str] = []
+        dst_words: list[list[str]] = []
+        dst_speakers: list[list[str]] = []
+        dst_rttm_files: list[list[str]] = []
+
+        for audio_file, transcript_file in tqdm(zip(audio_files, transcript_files)):
+            (
+                words,
+                word_speakers,
+                speaker_speech_segments,
+                start_speech_segments,
+                end_speech_segments,
+            ) = self._preprocess_transcript(transcript_file.read_text())
+            dst_words.append(words)
+            dst_speakers.append(word_speakers)
+
+            # Get paths for the output files
+            dst_audio_file = split_audio_dir / audio_file.with_suffix(".wav").name
+            dst_rttm_file = split_rttm_dir / audio_file.with_suffix(".rttm").name
+            dst_transcript_file = split_transcript_dir / audio_file.with_suffix(".txt").name
+
+            # Save audio
+            between = (min(start_speech_segments), max(end_speech_segments))
+            self._convert_sph_to_wav(audio_file, dst_audio_file, between)
+
+            # Save rttm
+            self._save_rttm(
+                dst_rttm_file,
+                speaker_speech_segments,
+                start_speech_segments,
+                end_speech_segments,
+            )
+
+            # Save word-speaker pairs
+            self._save_word_speaker_pairs(dst_transcript_file, word_speakers, words)
+
+            dst_audio_files.append(str(dst_audio_file))
+            dst_rttm_files.append(str(dst_rttm_file))
+
+        return SpeakerDiarizationData(
+            split=split_name,
+            audio_paths=dst_audio_files,
+            annotation_paths=dst_rttm_files,
+            uem_paths=None,
+            transcript=dst_words,
+            word_speakers=dst_speakers,
+            word_timestamps=None,
+            metadata=None,
+        )
+
+    # We don't need to download
+    def download(self) -> None:
+        pass
+
+    def create_dataset(self) -> dict[str, SpeakerDiarizationData]:
+        self._setup_sph2pipe()
+        data_dict = {
+            split_name: self._process_split(split_key, split_name)
+            for split_key, split_name in self.split_name_mapping.items()
+        }
+        return data_dict
 
 
 def main(dataset_name: str, generate_only: bool, hf_repo_owner: str) -> None:
@@ -1516,6 +1825,8 @@ def main(dataset_name: str, generate_only: bool, hf_repo_owner: str) -> None:
         ds = CallHomeDataset(hf_repo_owner)
     elif dataset_name == "ego4d":
         ds = Ego4dDataset(hf_repo_owner)
+    elif dataset_name == "callhome-english":
+        ds = CallHomeEnglishTranscript(hf_repo_owner)
     else:
         raise ValueError(f"Unknown dataset name: {dataset_name}")
 
@@ -1542,6 +1853,7 @@ if __name__ == "__main__":
             "dihard-3",
             "callhome",
             "ego4d",
+            "callhome-english",
         ],
     )
     parser.add_argument("--generate-only", action="store_true", help="Generate the dataset only,")

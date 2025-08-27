@@ -4,7 +4,7 @@
   <img alt="OpenBench Logo" src="assets/openbench-light.png">
 </picture>
 
-[![Paper](https://img.shields.io/badge/Paper-📄-blue)](https://www.arxiv.org/abs/2507.16136)
+[![arXiv](https://img.shields.io/badge/arXiv-2507.16136-b31b1b.svg)](https://arxiv.org/abs/2507.16136)
 [![Discord](https://img.shields.io/discord/1171912382512115722?style=flat&logo=discord&logoColor=969da4&label=Discord&labelColor=353a41&color=32d058&link=https%3A%2F%2Fdiscord.gg%2FG5F5GZGecC)](https://discord.gg/G5F5GZGecC)
 
 > [!NOTE]
@@ -13,7 +13,7 @@
 > - The datasets used in this benchmark have their own licenses and usage restrictions (see [Diarization Datasets](#diarization-datasets) section for details)
 
 > [!IMPORTANT]
-> **OpenBench** is the evolution of **SDBench**, originally introduced in the paper *"SDBench: A Comprehensive Benchmark Suite for Speaker Diarization"*. While SDBench focused specifically on speaker diarization, OpenBench has expanded to encompass a broader range of speech processing tasks and is designed to accommodate future modalities beyond speech.
+> **OpenBench** is the evolution of **SDBench**, originally introduced in the paper *["SDBench: A Comprehensive Benchmark Suite for Speaker Diarization"](https://arxiv.org/abs/2507.16136)*. While SDBench focused specifically on speaker diarization, OpenBench has expanded to encompass a broader range of speech processing tasks and is designed to accommodate future modalities beyond speech.
 
 `OpenBench` is an open-source benchmarking framework for speech processing systems. Originally focused on speaker diarization (as SDBench), the framework has evolved to support comprehensive evaluation of:
 
@@ -34,10 +34,14 @@ Key features include:
 - Availability of 13+ commonly used datasets (Original dataset license restrictions apply)
 
 > [!TIP]
-> Want to add your own diarization, ASR, or combined pipeline? Check out our [Adding a New Diarization Pipeline](#adding-a-new-diarization-pipeline) section for a step-by-step guide!
+> Want to add your own diarization, ASR, or orchestration pipeline? Check out our [Adding a New Diarization Pipeline](#adding-a-new-diarization-pipeline) section for a step-by-step guide!
 
 > [!IMPORTANT]
 > Before getting started, please note that some datasets in our [Datasets](#datasets) section require special access or have license restrictions. While we provide dataset preparation utilities in `common/download_dataset`, you'll need to procure the raw data independently for these datasets. See the dataset table for details on access requirements.
+
+## Results
+
+For comprehensive benchmark results across all supported tasks, please see [BENCHMARKS.md](BENCHMARKS.md).
 
 ## 🚀 Roadmap
 

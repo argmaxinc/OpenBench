@@ -38,12 +38,11 @@ class BaseNumCorrections(BaseMetric):
             prev_len = len(out.hypotheses[0])
             for alig in out.alignments[0]:
                 if alig.type == "delete" and alig.ref_start_idx < prev_len:
-                    n_deletion = n_deletion + n_subs + alig.ref_end_idx - alig.ref_start_idx
+                    n_deletion += alig.ref_end_idx - alig.ref_start_idx
                 elif alig.type == "substitute":
-                    n_subs = n_subs + alig.ref_end_idx - alig.ref_start_idx
+                    n_subs += alig.ref_end_idx - alig.ref_start_idx
                 elif alig.type == "insert":
-                    n_insertion = n_insertion + (alig.ref_end_idx - alig.ref_start_idx) + 1
-
+                    n_insertion += alig.hyp_end_idx - alig.hyp_start_idx
         if correction_type == "insertion":
             # Intentionally Flipped
             return n_deletion

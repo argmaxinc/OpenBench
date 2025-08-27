@@ -101,6 +101,7 @@ class BaseDataset(ABC, Generic[SampleType]):
     def __getitem__(self, idx: int) -> SampleType:
         """Get a sample by index - concrete implementation using prepare_sample."""
         row = self.ds[idx]
+        row["idx"] = idx
         audio_name, waveform, sample_rate = self._extract_audio_info(row)
         reference, extra_info = self.prepare_sample(row)
 
@@ -142,7 +143,7 @@ class BaseDataset(ABC, Generic[SampleType]):
     def _extract_audio_info(self, row: dict) -> tuple[str, np.ndarray, int]:
         """Extract common audio information from dataset row."""
         audio = row["audio"]
-        audio_name = f"sample_{row.get('idx', 0)}"
+        audio_name = f"sample_{row['idx']}"
         if "path" in audio and audio["path"] is not None:
             audio_name = Path(audio["path"]).stem
         return audio_name, audio["array"], audio["sampling_rate"]

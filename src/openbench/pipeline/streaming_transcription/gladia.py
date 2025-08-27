@@ -10,7 +10,6 @@ from typing import Literal, TypedDict
 import numpy as np
 import requests
 from argmaxtools.utils import get_logger
-from dotenv import load_dotenv
 from websockets.client import ClientConnection, connect
 from websockets.exceptions import ConnectionClosedOK
 
@@ -21,8 +20,6 @@ from ...pipeline_prediction import StreamingTranscript
 from ...types import PipelineType
 from .common import StreamingTranscriptionConfig, StreamingTranscriptionOutput
 
-
-load_dotenv()
 
 logger = get_logger(__name__)
 

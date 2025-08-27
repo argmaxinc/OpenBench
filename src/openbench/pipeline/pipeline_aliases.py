@@ -7,13 +7,16 @@ import os
 
 from .diarization import (
     AWSTranscribePipeline,
+    DeepgramDiarizationPipeline,
+    NeMoSortformerPipeline,
     PicovoicePipeline,
     PyannoteApiPipeline,
     PyAnnotePipeline,
-    NeMoSortformerPipeline,
     SpeakerKitPipeline,
 )
 from .orchestration import (
+    DeepgramOrchestrationPipeline,
+    WhisperKitProOrchestrationPipeline,
     WhisperXPipeline,
 )
 from .pipeline_registry import PipelineRegistry
@@ -24,7 +27,9 @@ from .streaming_transcription import (
     OpenAIStreamingPipeline,
 )
 from .transcription import (
+    GroqTranscriptionPipeline,
     SpeechAnalyzerPipeline,
+    WhisperKitProTranscriptionPipeline,
     WhisperKitTranscriptionPipeline,
 )
 
@@ -38,7 +43,7 @@ def register_pipeline_aliases() -> None:
         AWSTranscribePipeline,
         default_config={
             "out_dir": "./aws_diarization_results",
-            "bucket_name": "openbench",
+            "bucket_name": "diarization-benchmarks",
             "region_name": "us-east-2",
             "max_speakers": 30,
             "num_worker_processes": 8,
@@ -107,10 +112,20 @@ def register_pipeline_aliases() -> None:
         description="Picovoice diarization pipeline. Requires API key from https://www.picovoice.ai/. Set `PICOVOICE_API_KEY` env var.",
     )
 
+    PipelineRegistry.register_alias(
+        "deepgram-diarization",
+        DeepgramDiarizationPipeline,
+        default_config={
+            "out_dir": "./deepgram_diarization_results",
+            "model_version": "nova-3",
+        },
+        description="Deepgram diarization pipeline. Requires API key from https://www.deepgram.com/. Set `DEEPGRAM_API_KEY` env var.",
+    )
+
     ################# ORCHESTRATION PIPELINES #################
 
     PipelineRegistry.register_alias(
-        "whisperx",
+        "whisperx-tiny",
         WhisperXPipeline,
         default_config={
             "out_dir": "./whisperx_output",
@@ -121,6 +136,134 @@ def register_pipeline_aliases() -> None:
             "threads": 8,
         },
         description="WhisperX diarized transcription pipeline from https://github.com/m-bain/whisperX",
+    )
+
+    PipelineRegistry.register_alias(
+        "whisperx-large-v3-turbo",
+        WhisperXPipeline,
+        default_config={
+            "out_dir": "./whisperx_output",
+            "model_name": "large-v3-turbo",
+            "device": "cpu",
+            "compute_type": "int8",
+            "batch_size": 16,
+            "threads": 8,
+        },
+        description="WhisperX diarzed transcription pipeline from https://github.com/m-bain/whisperX",
+    )
+
+    PipelineRegistry.register_alias(
+        "deepgram-orchestration",
+        DeepgramOrchestrationPipeline,
+        default_config={
+            "out_dir": "./deepgram_orchestration_results",
+            "model_version": "nova-3",
+        },
+        description="Deepgram orchestration pipeline. Requires API key from https://www.deepgram.com/. Set `DEEPGRAM_API_KEY` env var.",
+    )
+
+    PipelineRegistry.register_alias(
+        "whisperkitpro-orchestration-tiny",
+        WhisperKitProOrchestrationPipeline,
+        default_config={
+            "model_version": "tiny",
+            "model_prefix": "openai",
+            "model_repo_name": "argmaxinc/whisperkit-pro",
+            "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
+            "orchestration_strategy": "segment",
+        },
+        description="WhisperKitPro orchestration pipeline using the tiny version of the model. Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
+    )
+
+    PipelineRegistry.register_alias(
+        "whisperkitpro-orchestration-large-v3",
+        WhisperKitProOrchestrationPipeline,
+        default_config={
+            "model_version": "large-v3",
+            "model_prefix": "openai",
+            "model_repo_name": "argmaxinc/whisperkit-pro",
+            "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
+            "orchestration_strategy": "segment",
+        },
+        description="WhisperKitPro orchestration pipeline using the large-v3 version of the model. Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
+    )
+
+    PipelineRegistry.register_alias(
+        "whisperkitpro-orchestration-large-v3-turbo",
+        WhisperKitProOrchestrationPipeline,
+        default_config={
+            "model_version": "large-v3-v20240930",
+            "model_prefix": "openai",
+            "model_repo_name": "argmaxinc/whisperkit-pro",
+            "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
+            "orchestration_strategy": "segment",
+        },
+        description="WhisperKitPro orchestration pipeline using the large-v3-v20240930 version of the model (which is the same as large-v3-turbo from OpenAI). Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
+    )
+
+    PipelineRegistry.register_alias(
+        "whisperkitpro-orchestration-large-v3-turbo-compressed",
+        WhisperKitProOrchestrationPipeline,
+        default_config={
+            "model_version": "large-v3-v20240930_626MB",
+            "model_prefix": "openai",
+            "model_repo_name": "argmaxinc/whisperkit-pro",
+            "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
+            "orchestration_strategy": "segment",
+        },
+        description="WhisperKitPro orchestration pipeline using the large-v3-v20240930 version of the model compressed to 626MB (which is the same as large-v3-turbo from OpenAI). Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
+    )
+
+    PipelineRegistry.register_alias(
+        "whisperkitpro-orchestration-parakeet-v2",
+        WhisperKitProOrchestrationPipeline,
+        default_config={
+            "model_version": "parakeet-v2",
+            "model_prefix": "nvidia",
+            "model_repo_name": "argmaxinc/parakeetkit-pro",
+            "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
+            "orchestration_strategy": "segment",
+        },
+        description="WhisperKitPro orchestration pipeline using the parakeet-v2 version of the model. Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
+    )
+
+    PipelineRegistry.register_alias(
+        "whisperkitpro-orchestration-parakeet-v2-compressed",
+        WhisperKitProOrchestrationPipeline,
+        default_config={
+            "model_version": "parakeet-v2_476MB",
+            "model_prefix": "nvidia",
+            "model_repo_name": "argmaxinc/parakeetkit-pro",
+            "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
+            "orchestration_strategy": "segment",
+        },
+        description="WhisperKitPro orchestration pipeline using the parakeet-v2 version of the model compressed to 476MB. Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
+    )
+
+    PipelineRegistry.register_alias(
+        "whisperkitpro-orchestration-parakeet-v3",
+        WhisperKitProOrchestrationPipeline,
+        default_config={
+            "model_version": "parakeet-v3",
+            "model_prefix": "nvidia",
+            "model_repo_name": "argmaxinc/parakeetkit-pro",
+            "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
+            "orchestration_strategy": "segment",
+        },
+        description="WhisperKitPro orchestration pipeline using the parakeet-v3 version of the model. Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
+    )
+
+    PipelineRegistry.register_alias(
+        "whisperkitpro-orchestration-parakeet-v3-compressed",
+        WhisperKitProOrchestrationPipeline,
+        default_config={
+            "model_version": "parakeet-v3_494MB",
+            "model_prefix": "nvidia",
+            "model_repo_name": "argmaxinc/parakeetkit-pro",
+            "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
+            "orchestration_strategy": "segment",
+        },
+        description="WhisperKitPro orchestration pipeline using the parakeet-v3 version of the model compressed to 494MB. Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
     )
 
     ################# TRANSCRIPTION PIPELINES #################
@@ -165,6 +308,124 @@ def register_pipeline_aliases() -> None:
             "clone_dir": "./speech_analyzer_repo",
         },
         description="Speech Analyzer transcription pipeline (open-source version). Requires Swift and Xcode installed.",
+    )
+
+    PipelineRegistry.register_alias(
+        "whisperkitpro-tiny",
+        WhisperKitProTranscriptionPipeline,
+        default_config={
+            "model_version": "tiny",
+            "model_prefix": "openai",
+            "model_repo_name": "argmaxinc/whisperkit-pro",
+            "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
+        },
+        description="WhisperKitPro transcription pipeline using the tiny version of the model. Requires Swift and Xcode installed. Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
+    )
+
+    PipelineRegistry.register_alias(
+        "whisperkitpro-large-v3",
+        WhisperKitProTranscriptionPipeline,
+        default_config={
+            "model_version": "large-v3",
+            "model_prefix": "openai",
+            "model_repo_name": "argmaxinc/whisperkit-pro",
+            "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
+        },
+        description="WhisperKitPro transcription pipeline using the large-v3 version of the model. Requires Swift and Xcode installed. Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
+    )
+
+    PipelineRegistry.register_alias(
+        "whisperkitpro-large-v3-turbo",
+        WhisperKitProTranscriptionPipeline,
+        default_config={
+            "model_version": "large-v3-v20240930",
+            "model_prefix": "openai",
+            "model_repo_name": "argmaxinc/whisperkit-pro",
+            "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
+        },
+        description="WhisperKitPro transcription pipeline using the large-v3-v20240930 version of the model (which is the same as large-v3-turbo from OpenAI). Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
+    )
+
+    PipelineRegistry.register_alias(
+        "whisperkitpro-large-v3-turbo-compressed",
+        WhisperKitProTranscriptionPipeline,
+        default_config={
+            "model_version": "large-v3-v20240930_626MB",
+            "model_prefix": "openai",
+            "model_repo_name": "argmaxinc/whisperkit-pro",
+            "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
+        },
+        description="WhisperKitPro transcription pipeline using the large-v3-v20240930 version of the model compressed to 626MB (which is the same as large-v3-turbo from OpenAI). Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
+    )
+
+    PipelineRegistry.register_alias(
+        "whisperkitpro-parakeet-v2",
+        WhisperKitProTranscriptionPipeline,
+        default_config={
+            "model_version": "parakeet-v2",
+            "model_prefix": "nvidia",
+            "model_repo_name": "argmaxinc/parakeetkit-pro",
+            "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
+        },
+        description="WhisperKitPro transcription pipeline using the parakeet-v2 version of the model. Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
+    )
+
+    PipelineRegistry.register_alias(
+        "whisperkitpro-parakeet-v2-compressed",
+        WhisperKitProTranscriptionPipeline,
+        default_config={
+            "model_version": "parakeet-v2_476MB",
+            "model_prefix": "nvidia",
+            "model_repo_name": "argmaxinc/parakeetkit-pro",
+            "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
+        },
+        description="WhisperKitPro transcription pipeline using the parakeet-v2 version of the model compressed to 476MB. Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
+    )
+
+    PipelineRegistry.register_alias(
+        "whisperkitpro-parakeet-v3",
+        WhisperKitProTranscriptionPipeline,
+        default_config={
+            "model_version": "parakeet-v3",
+            "model_prefix": "nvidia",
+            "model_repo_name": "argmaxinc/parakeetkit-pro",
+            "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
+        },
+        description="WhisperKitPro transcription pipeline using the parakeet-v3 version of the model. Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
+    )
+
+    PipelineRegistry.register_alias(
+        "whisperkitpro-parakeet-v3-compressed",
+        WhisperKitProTranscriptionPipeline,
+        default_config={
+            "model_version": "parakeet-v3_494MB",
+            "model_prefix": "nvidia",
+            "model_repo_name": "argmaxinc/parakeetkit-pro",
+            "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
+        },
+        description="WhisperKitPro transcription pipeline using the parakeet-v3 version of the model compressed to 494MB. Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
+    )
+
+    PipelineRegistry.register_alias(
+        "groq-whisper-large-v3-turbo",
+        GroqTranscriptionPipeline,
+        default_config={
+            "model_id": "whisper-large-v3-turbo",
+            "temperature": 0.0,
+            "force_language": False,
+        },
+        description="Groq transcription pipeline using the whisper-large-v3-turbo model. Requires `GROQ_API_KEY` env var.",
+    )
+
+    PipelineRegistry.register_alias(
+        "groq-whisper-large-v3",
+        GroqTranscriptionPipeline,
+        default_config={
+            "model_id": "whisper-large-v3",
+            "temperature": 0.0,
+            "force_language": False,
+        },
+        description="Groq transcription pipeline using the whisper-large-v3 model. Requires `GROQ_API_KEY` env var.",
     )
 
     ################# STREAMING TRANSCRIPTION PIPELINES #################
