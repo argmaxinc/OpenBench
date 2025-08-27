@@ -80,7 +80,7 @@ class WhisperKitProOrchestrationPipeline(Pipeline):
     def parse_input(self, input_sample: OrchestrationSample) -> WhisperKitProInput:
         return WhisperKitProInput(
             audio_path=input_sample.save_audio(TEMP_AUDIO_DIR),
-            keep_audio=True,
+            keep_audio=False,
         )
 
     def parse_output(self, output: WhisperKitProOutput) -> OrchestrationOutput:

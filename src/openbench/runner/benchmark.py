@@ -6,6 +6,7 @@ from typing import NamedTuple
 
 import tqdm
 import wandb
+import yaml
 from argmaxtools.utils import get_logger
 from pyannote.metrics.base import BaseMetric
 
@@ -303,6 +304,7 @@ class BenchmarkRunner:
 
         # Getting config to log to wandb
         wandb_config = self.config.get_wandb_config_to_log()
+
         for pipeline in self.pipelines:
             # Get logger
             wandb_logger = self.logger_map[pipeline.pipeline_type](output_dir=".")
@@ -324,6 +326,10 @@ class BenchmarkRunner:
                     config=wandb_config,
                 ),
             ):
+                # Save a copy of the wandb_config locally as a .yaml
+                with open("config.yaml", "w") as f:
+                    yaml.dump(wandb_config, f)
+
                 for dataset_name, dataset_config in self.config.datasets.items():
                     # Use DatasetRegistry to get the appropriate dataset for the pipeline type
                     ds = DatasetRegistry.get_dataset_for_pipeline(
