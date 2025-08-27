@@ -72,12 +72,12 @@ def register_pipeline_aliases() -> None:
         NeMoSortformerPipeline,
         default_config={
             "out_dir": "./nemo_sortformer_logs",
-            "num_speakers": None,
-            "min_speakers": None,
-            "max_speakers": 4,
-            "use_oracle_clustering": False,
-            "use_oracle_segmentation": False,
-            "use_float16": False,
+            "use_float16": True,
+            "chunk_size": 340,
+            "right_context": 40,
+            "fifo_size": 40,
+            "update_period": 300,
+            "speaker_cache_size": 188,
         },
         description="NeMo Sortformer speaker diarization pipeline.",
     )
