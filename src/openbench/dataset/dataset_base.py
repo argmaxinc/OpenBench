@@ -59,7 +59,7 @@ class BaseSample(BaseModel, Generic[ReferenceType, ExtraInfoType]):
         if not isinstance(output_dir, Path):
             output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
-        output_path = output_dir / f"{self.audio_name}.wav"
+        output_path = output_dir / f"{self.audio_name}.flac"
         logger.info(f"Saving audio to {output_path}")
         sf.write(output_path, self.waveform, self.sample_rate)
         return output_path

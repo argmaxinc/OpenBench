@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 
 from deepgram import DeepgramClient, FileSource, PrerecordedOptions, PrerecordedResponse
+from httpx import Timeout
 from pydantic import BaseModel, model_validator
 
 
@@ -27,8 +28,9 @@ class DeepgramApiResponse(BaseModel):
 
 
 class DeepgramApi:
-    def __init__(self, options: PrerecordedOptions):
+    def __init__(self, options: PrerecordedOptions, timeout: Timeout = Timeout(300)):
         self.options = options
+        self.timeout = timeout
 
         # Check that the API key is set
         if not os.getenv("DEEPGRAM_API_KEY"):
@@ -45,7 +47,9 @@ class DeepgramApi:
             buffer_data = file.read()
         payload: FileSource = {"buffer": buffer_data}
 
-        response: PrerecordedResponse = self.client.listen.rest.v("1").transcribe_file(payload, self.options)
+        response: PrerecordedResponse = self.client.listen.rest.v("1").transcribe_file(
+            payload, self.options, timeout=self.timeout
+        )
 
         return DeepgramApiResponse(
             words=[w.punctuated_word for w in response.results.channels[0].alternatives[0].words],
