@@ -4,6 +4,7 @@
 
 - [Speaker Diarization](#speaker-diarization)
   - [Benchmarked Systems](#benchmarked-systems)
+  - [Benchmarked Datasets](#benchmarked-datasets)
   - [Diarization Error Rate (DER)](#diarization-error-rate-der)
   - [Speed Factor (SF)](#speed-factor-sf)
   - [Speaker Count Accuracy (SCA)](#speaker-count-accuracy-sca)
@@ -62,9 +63,83 @@
 ### Argmax
 - **Latest Run:** `2025-05-29`
 - **Model Version:** `pyannote-v3`
-- **Configuration:** Argmax SDK `SpeakerKit` CLI with default settings. See [Interspeech 2025 Paper](https://arxiv.org/abs/2507.16136) for more details.
+- **Configuration:** Argmax SDK `SpeakerKit` CLI with default settings. See [Interspeech 2025 Paper](https://www.isca-archive.org/interspeech_2025/durmus25_interspeech.html) for more details.
 - **Code Reference:** [openbench/pipeline/diarization/speakerkit](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/diarization/speakerkit.py)
 - **Hardware**: M2 Ultra Mac Studio
+
+</details>
+
+<br/>
+
+## Benchmarked Datasets
+
+<details>
+<summary>Click to expand</summary>
+
+### AISHELL-4
+- **Language:** Chinese
+- **Domain:** In-Person Meeting
+- **Description:** A large-scale Chinese meeting dataset containing multi-speaker conversations recorded in real meeting rooms with multiple microphones.
+
+### AMI-IHM
+- **Language:** English
+- **Domain:** In-Person Meeting
+- **Description:** The AMI Individual Headset Microphone dataset contains English meeting recordings where each participant wears a headset microphone, providing clean individual speaker audio.
+
+### AMI-SDM
+- **Language:** English
+- **Domain:** In-Person Meeting
+- **Description:** The AMI Single Distant Microphone dataset contains the same meetings as AMI-IHM but recorded using a single microphone placed in the center of the room, creating more challenging audio conditions.
+
+### AVA-AVD
+- **Language:** Multilingual
+- **Domain:** YouTube/In-the-Wild
+- **Description:** The AVA Audio-Visual Diarization dataset contains YouTube videos with diverse content types, languages, and recording conditions, making it challenging for speaker diarization systems.
+
+### AliMeeting
+- **Language:** Chinese
+- **Domain:** In-Person Meeting
+- **Description:** A Chinese meeting dataset featuring real-world business meetings with multiple speakers, overlapping speech, and natural conversation patterns.
+
+### American-Life-Podcast
+- **Language:** English
+- **Domain:** Podcast
+- **Description:** A collection of podcast episodes from "This American Life" featuring interviews, storytelling, and conversational content with varying audio quality and speaker dynamics.
+
+### CALLHOME
+- **Language:** Multilingual
+- **Domain:** Phone Call
+- **Description:** A collection of telephone conversations in multiple languages, featuring natural speech patterns and the audio quality challenges typical of phone calls.
+
+### DIHARD-III
+- **Language:** Multilingual
+- **Domain:** Multi Domain
+- **Description:** The DIHARD-III challenge dataset contains diverse audio recordings from multiple domains (meetings, courts, audiobooks, etc.) in various languages, designed to test robust speaker diarization systems.
+
+### EGO4D
+- **Language:** Multilingual
+- **Domain:** In-the-Wild
+- **Description:** A large-scale egocentric video dataset captured from first-person perspectives, containing natural conversations and interactions in real-world environments with varying audio conditions.
+
+### Earnings-21
+- **Language:** English
+- **Domain:** Meeting
+- **Description:** A dataset of corporate earnings call recordings featuring financial presentations and Q&A sessions with executives, analysts, and investors.
+
+### ICSI
+- **Language:** English
+- **Domain:** In-Person Meeting
+- **Description:** The ICSI Meeting Corpus contains academic research meetings with multiple participants, featuring technical discussions and natural conversation flow.
+
+### MSDWILD
+- **Language:** Multilingual
+- **Domain:** YouTube/In-the-Wild
+- **Description:** A diverse collection of YouTube videos featuring multiple speakers in various languages and contexts, including interviews, discussions, and entertainment content.
+
+### VoxConverse
+- **Language:** English
+- **Domain:** YouTube/In-the-Wild
+- **Description:** A dataset of English YouTube videos containing multi-speaker conversations from various content types, including interviews, debates, and talk shows.
 
 </details>
 

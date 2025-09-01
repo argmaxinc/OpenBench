@@ -13,7 +13,7 @@
 > - The datasets used in this benchmark have their own licenses and usage restrictions (see [Diarization Datasets](#diarization-datasets) section for details)
 
 > [!IMPORTANT]
-> **OpenBench** is the evolution of **SDBench**, originally introduced in the paper *["SDBench: A Comprehensive Benchmark Suite for Speaker Diarization"](https://arxiv.org/abs/2507.16136)*. While SDBench focused specifically on speaker diarization, OpenBench has expanded to encompass a broader range of speech processing tasks and is designed to accommodate future modalities beyond speech.
+> **OpenBench** is the evolution of **SDBench**, originally introduced in the paper *["SDBench: A Comprehensive Benchmark Suite for Speaker Diarization"](https://www.isca-archive.org/interspeech_2025/durmus25_interspeech.html)*. While SDBench focused specifically on speaker diarization, OpenBench has expanded to encompass a broader range of speech processing tasks and is designed to accommodate future modalities beyond speech.
 
 `OpenBench` is an open-source benchmarking framework for speech processing systems. Originally focused on speaker diarization (as SDBench), the framework has evolved to support comprehensive evaluation of:
 
