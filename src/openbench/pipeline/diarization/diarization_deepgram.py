@@ -7,7 +7,7 @@ from pyannote.core import Segment
 from pydantic import Field
 
 from ...dataset import DiarizationSample
-from ...engine import DeepgramApi, DeepgramApiResponse
+from ...engine import DeepgramApi, DeepgramApiInput, DeepgramApiResponse
 from ...pipeline_prediction import DiarizationAnnotation
 from ..base import Pipeline, PipelineType, register_pipeline
 from .common import DiarizationOutput, DiarizationPipelineConfig
@@ -32,7 +32,7 @@ class DeepgramDiarizationPipeline(Pipeline):
     _config_class = DeepgramDiarizationPipelineConfig
     pipeline_type = PipelineType.DIARIZATION
 
-    def build_pipeline(self) -> Callable[[Path], DeepgramApiResponse]:
+    def build_pipeline(self) -> Callable[[DeepgramApiInput], DeepgramApiResponse]:
         options = PrerecordedOptions(
             model=self.config.model_version, diarize=True, smart_format=True, detect_language=True
         )
@@ -42,16 +42,17 @@ class DeepgramDiarizationPipeline(Pipeline):
 
         self.api_client = DeepgramApi(options)
 
-        def transcribe(audio_path: Path) -> DeepgramApiResponse:
-            response = self.api_client.transcribe(audio_path)
+        def transcribe(inputs: DeepgramApiInput) -> DeepgramApiResponse:
+            response = self.api_client.transcribe(inputs)
             # Remove temporary audio path
-            audio_path.unlink(missing_ok=True)
+            inputs.audio_path.unlink(missing_ok=True)
             return response
 
         return transcribe
 
-    def parse_input(self, input_sample: DiarizationSample) -> Path:
-        return input_sample.save_audio(output_dir=TEMP_AUDIO_DIR)
+    def parse_input(self, input_sample: DiarizationSample) -> DeepgramApiInput:
+        audio_path = input_sample.save_audio(output_dir=TEMP_AUDIO_DIR)
+        return DeepgramApiInput(audio_path=audio_path)
 
     def parse_output(self, output: DeepgramApiResponse) -> DiarizationOutput:
         annotation = DiarizationAnnotation()

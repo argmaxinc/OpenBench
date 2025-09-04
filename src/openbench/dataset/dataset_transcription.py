@@ -11,6 +11,7 @@ class TranscriptionExtraInfo(TypedDict, total=False):
     """Extra info for transcription samples."""
 
     language: str
+    keywords: list[str]
 
 
 class TranscriptionSample(BaseSample[Transcript, TranscriptionExtraInfo]):
@@ -20,6 +21,11 @@ class TranscriptionSample(BaseSample[Transcript, TranscriptionExtraInfo]):
     def language(self) -> str | None:
         """Convenience property to access language from extra_info."""
         return self.extra_info.get("language")
+
+    @property
+    def keywords(self) -> list[str] | None:
+        """Convenience property to access keywords from extra_info."""
+        return self.extra_info.get("keywords")
 
 
 class TranscriptionDataset(BaseDataset[TranscriptionSample]):
@@ -38,6 +44,9 @@ class TranscriptionDataset(BaseDataset[TranscriptionSample]):
             speaker=None,  # No speakers for pure transcription
         )
         extra_info: TranscriptionExtraInfo = {}
+        if "keywords" in row:
+            extra_info["keywords"] = row["keywords"]
         if "language" in row:
             extra_info["language"] = row["language"]
+
         return reference, extra_info

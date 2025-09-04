@@ -3,7 +3,7 @@ from pathlib import Path
 
 from deepgram import DeepgramClient, FileSource, PrerecordedOptions, PrerecordedResponse
 from httpx import Timeout
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, Field, model_validator
 
 
 class DeepgramApiResponse(BaseModel):
@@ -27,6 +27,11 @@ class DeepgramApiResponse(BaseModel):
         return self
 
 
+class DeepgramApiInput(BaseModel):
+    audio_path: Path | str = Field(..., description="Path to the audio file to transcribe")
+    keywords: list[str] | None = Field(default=None, description="Keywords to boost the transcription")
+
+
 class DeepgramApi:
     def __init__(self, options: PrerecordedOptions, timeout: Timeout = Timeout(300)):
         self.options = options
@@ -38,8 +43,13 @@ class DeepgramApi:
 
         self.client = DeepgramClient(os.getenv("DEEPGRAM_API_KEY"))
 
-    # Only intended to be used with offiline transcription
-    def transcribe(self, audio_path: Path | str) -> DeepgramApiResponse:
+    def transcribe(self, inputs: DeepgramApiInput) -> DeepgramApiResponse:
+        audio_path = inputs.audio_path
+        keywords = inputs.keywords
+
+        if keywords is not None:
+            self.options.keyterms = keywords
+
         if isinstance(audio_path, str):
             audio_path = Path(audio_path)
 

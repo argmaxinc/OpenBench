@@ -1,4 +1,4 @@
-from .deepgram_engine import DeepgramApi, DeepgramApiResponse
+from .deepgram_engine import DeepgramApi, DeepgramApiInput, DeepgramApiResponse
 from .whisperkitpro_engine import (
     WhisperKitPro,
     WhisperKitProConfig,
@@ -10,6 +10,7 @@ from .whisperkitpro_engine import (
 __all__ = [
     "DeepgramApi",
     "DeepgramApiResponse",
+    "DeepgramApiInput",
     "WhisperKitPro",
     "WhisperKitProInput",
     "WhisperKitProOutput",

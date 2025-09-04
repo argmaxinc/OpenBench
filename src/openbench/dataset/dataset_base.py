@@ -3,7 +3,7 @@
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Generic, TypeVar
+from typing import Any, Callable, Generic, Mapping, TypeVar
 
 import numpy as np
 import soundfile as sf
@@ -32,10 +32,26 @@ class DatasetConfig(BaseModel):
     num_samples: int | None = Field(
         None, description="Number of samples to take from the dataset. If None, take all samples."
     )
+    column_mapper: Mapping[str, str] | None = Field(
+        None, description="A mapping of the column names in the dataset to the expected column names"
+    )
+    column_preprocessor: Callable[[dict[str, Any]], dict[str, Any]] | None = Field(
+        None,
+        description="A function that takes a row of the dataset and returns an updated version of the row applying the preprocessing function to the column values",
+    )
+
+    class Config:
+        arbitrary_types_allowed = True
 
     def load(self) -> HfDataset:
         # TODO: Add support for streaming datasets
         ds = load_dataset(self.dataset_id, self.subset, split=self.split)
+        # Rename columns if a column mapper is provided
+        if self.column_mapper is not None:
+            ds = ds.rename_columns(self.column_mapper)
+        # Preprocess columns if a column preprocessor is provided
+        if self.column_preprocessor is not None:
+            ds = ds.map(self.column_preprocessor)
         if self.num_samples is not None:
             ds = ds.take(self.num_samples)
         return ds
