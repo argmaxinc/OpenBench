@@ -511,5 +511,63 @@ def register_dataset_aliases() -> None:
         description="TIMIT stitched dataset for streaming transcription evaluation",
     )
 
+    ########## END POINTING TEST DATASETS ##########
+
+    DatasetRegistry.register_alias(
+        "timit-stitched-short-silences-debug",
+        DatasetConfig(dataset_id="argmaxinc/timit_stitched_silenced-v1", split="train", num_samples=1),
+        supported_pipeline_types={PipelineType.STREAMING_TRANSCRIPTION},
+        description="TIMIT stitched Debug dataset with short silences for endpointing evals",
+    )
+
+    DatasetRegistry.register_alias(
+        "timit-stitched-medium-silences-debug",
+        DatasetConfig(dataset_id="argmaxinc/timit_stitched_silenced-v2", split="train", num_samples=1),
+        supported_pipeline_types={PipelineType.STREAMING_TRANSCRIPTION},
+        description="TIMIT stitched Debug dataset with medium silences for endpointing evals",
+    )
+
+    DatasetRegistry.register_alias(
+        "timit-stitched-long-silences-debug",
+        DatasetConfig(dataset_id="argmaxinc/timit_stitched_silenced-v3", split="train", num_samples=1),
+        supported_pipeline_types={PipelineType.STREAMING_TRANSCRIPTION},
+        description="TIMIT stitched Debug dataset with long silences for endpointing evals",
+    )
+
+    DatasetRegistry.register_alias(
+        "timit-stitched-very-long-silences-debug",
+        DatasetConfig(dataset_id="argmaxinc/timit_stitched_silenced-v4", split="train", num_samples=1),
+        supported_pipeline_types={PipelineType.STREAMING_TRANSCRIPTION},
+        description="TIMIT stitched Debug dataset with very long silences for endpointing evals",
+    )
+
+    DatasetRegistry.register_alias(
+        "timit-stitched-short-silences",
+        DatasetConfig(dataset_id="argmaxinc/timit_stitched_silenced-v1", split="train"),
+        supported_pipeline_types={PipelineType.STREAMING_TRANSCRIPTION},
+        description="TIMIT stitched dataset with short silences for endpointing evals",
+    )
+
+    DatasetRegistry.register_alias(
+        "timit-stitched-medium-silences",
+        DatasetConfig(dataset_id="argmaxinc/timit_stitched_silenced-v2", split="train"),
+        supported_pipeline_types={PipelineType.STREAMING_TRANSCRIPTION},
+        description="TIMIT stitched dataset with medium silences for endpointing evals",
+    )
+
+    DatasetRegistry.register_alias(
+        "timit-stitched-long-silences",
+        DatasetConfig(dataset_id="argmaxinc/timit_stitched_silenced-v3", split="train"),
+        supported_pipeline_types={PipelineType.STREAMING_TRANSCRIPTION},
+        description="TIMIT stitched dataset with long silences for endpointing evals",
+    )
+
+    DatasetRegistry.register_alias(
+        "timit-stitched-very-long-silences",
+        DatasetConfig(dataset_id="argmaxinc/timit_stitched_silenced-v4", split="train"),
+        supported_pipeline_types={PipelineType.STREAMING_TRANSCRIPTION},
+        description="TIMIT stitched dataset with very long silences for endpointing evals",
+    )
+
 
 register_dataset_aliases()
