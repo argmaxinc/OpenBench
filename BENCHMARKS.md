@@ -57,7 +57,7 @@
 - **Latest Run:** `2025-02-17`
 - **Model Version:** `pyannote-flagship (default)`
 - **Configuration:** Job polling based on `X-RateLimit-Remaining` and `X-RateLimit-Reset` headers which leads to sub-second polling checks. See [pyannoteAI Documentation](https://docs.pyannote.ai/api-reference/diarize) for more details.
-- **Code Reference:** [openbench/pipeline/diarization/pyannote_api](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/diarization/pyannote_api.py)
+- **Code Reference:** [openbench/pipeline/diarization/pyannote-api](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/diarization/pyannote_api.py)
 - **Hardware**: Unknown (Cloud API)
 
 ### Argmax
@@ -260,19 +260,25 @@
 - **Hardware**: Unknown (Cloud API)
 
 ### Gladia
-- **Latest Run:** `08-12-2025`
+- **Latest Run:** `09-16-2025`
 - **Configuration:** [Code](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/streaming_transcription/gladia.py#L112)
 - **Code Reference:** [openbench/pipeline/streaming_transcription/gladia](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/streaming_transcription/gladia.py)
 - **Hardware**: Unknown (Cloud API)
 
 ### Argmax (Parakeet V2)
-- **Latest Run:** `08-13-2025`
+- **Latest Run:** `09-12-2025`
 - **Configuration:** Reuses the Deepgram pipeline with `DEEPGRAM_HOST_URL=ws://localhost:port` while [Argmax Local Server](https://www.argmaxinc.com/blog/argmax-local-server) is running with our compressed optimized model `--model parakeet-v2_476MB` at `ws://localhost:port`
 - **Code Reference:** [openbench/pipeline/streaming_transcription/deepgram](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/streaming_transcription/deepgram.py)
 - **Hardware**: M2 Ultra Mac Studio
 
+### Argmax (Parakeet V3)
+- **Latest Run:** `09-12-2025`
+- **Configuration:** Reuses the Deepgram pipeline with `DEEPGRAM_HOST_URL=ws://localhost:port` while [Argmax Local Server](https://www.argmaxinc.com/blog/argmax-local-server) is running with our compressed optimized model `--model parakeet-v3_494MB` at `ws://localhost:port`
+- **Code Reference:** [openbench/pipeline/streaming_transcription/deepgram](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/streaming_transcription/deepgram.py)
+- **Hardware**: M2 Ultra Mac Studio
+
 ### Argmax (Whisper Large V3 Turbo)
-- **Latest Run:** `08-13-2025`
+- **Latest Run:** `09-12-2025`
 - **Configuration:** Reuses the Deepgram pipeline with `DEEPGRAM_HOST_URL=ws://localhost:port` while [Argmax Local Server](https://www.argmaxinc.com/blog/argmax-local-server) is running with our compressed optimized model `--model large-v3-v20240930_626MB` at `ws://localhost:port`
 - **Code Reference:** [openbench/pipeline/streaming_transcription/deepgram](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/streaming_transcription/deepgram.py)
 - **Hardware**: M2 Ultra Mac Studio
@@ -294,10 +300,10 @@
 
 </details>
 
-| Dataset        | Deepgram<br/>(nova-3) | OpenAI <br/>(GPT-4o) | Gladia |  Argmax <br/>(Parakeet V2) |  Argmax <br/>(Whisper Large V3 Turbo) |
-|----------------|----------|-----------------|----------------------------|---------------------------------------|---------------------------------------|
-| Short-form (timit)          | 2.3                 | 7.42           | 2.26                 | 3.54                 | 2.77                            |
-| Long-form <br/>(timit-stitched) | 2.36                | 2.47           | 2.11                 | 2.17             | 2.08                             |
+| Dataset        | Deepgram<br/>(nova-3) | OpenAI <br/>(GPT-4o) | Gladia |  Argmax <br/>(Parakeet V2) | Argmax <br/>(Parakeet V3) |  Argmax <br/>(Whisper Large V3 Turbo) |
+|----------------|----------|-----------------|----------------------------|---------------------------------------|---------------------------------------|---------------------------------------|
+| Short-form (timit)          | 2.3                 | 7.42           | 2                | 3.53                 | 5.26      | 2.42                            |
+| Long-form <br/>(timit-stitched) | 2.36                | 2.47           | 2.1                 | 2.12             | 2.08         | 2.17                             |
 
 <br/><br/>
 ## Streaming Latency
@@ -315,10 +321,10 @@
 </details>
 
 
-| Dataset        | Deepgram<br/>(nova-3) | OpenAI <br/>(GPT-4o) | Gladia |  Argmax <br/>(Parakeet V2) |  Argmax <br/>(Whisper Large V3 Turbo) |
-|----------------|----------|-----------------|----------------------------|---------------------------------------|---------------------------------------|
-| Short-form (timit) | 0.67  | N/A  | N/A | 0.23 | 0.92  |
-| Long-form <br/>(timit-stitched) | 1.03 | N/A | N/A  | 0.42 | 1.08  |
+| Dataset        | Deepgram<br/>(nova-3) | OpenAI <br/>(GPT-4o) | Gladia |  Argmax <br/>(Parakeet V2) |  Argmax <br/>(Parakeet V3) | Argmax <br/>(Whisper Large V3 Turbo) |
+|----------------|----------|-----------------|----------------------------|---------------------------------------|---------------------------------------|---------------------------------------|
+| Short-form (timit) | 0.67  | N/A  | 0.56 | 0.38 | 0.39 | 1.04  |
+| Long-form <br/>(timit-stitched) | 1.03 | N/A | 0.64  | 0.54 | 0.55 | 0.94  |
 
 </br></br>
 
@@ -336,7 +342,7 @@
 
 </details>
 
-| Dataset        | Deepgram<br/>(nova-3) | OpenAI <br/>(GPT-4o) | Gladia |  Argmax <br/>(Parakeet V2) |  Argmax <br/>(Whisper Large V3 Turbo) |
-|----------------|----------|-----------------|----------------------------|---------------------------------------|---------------------------------------|
-| Short-form (timit) | 1.64  | 1.68  | 1.81 | 1.83 | 1.49  |
-| Long-form <br/>(timit-stitched) | 2.37 | 56.95 | 5.96  | 4.77 | 2.92  |
+| Dataset        | Deepgram<br/>(nova-3) | OpenAI <br/>(GPT-4o) | Gladia |  Argmax <br/>(Parakeet V2) |  Argmax <br/>(Parakeet V3) | Argmax <br/>(Whisper Large V3 Turbo) |
+|----------------|----------|-----------------|----------------------------|---------------------------------------|---------------------------------------|---------------------------------------|
+| Short-form (timit) | 1.64  | 1.68  | 1.75 | 1.82 | 1.82 | 1.54  |
+| Long-form <br/>(timit-stitched) | 2.37 | 56.95 | 2.72  | 5.51 | 5.96 | 2.51  |
