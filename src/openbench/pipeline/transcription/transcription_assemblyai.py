@@ -29,21 +29,19 @@ class AssemblyAIApi:
 
     def transcribe(self, audio_path: Path, keywords=None):
         """Transcribe audio file using AssemblyAI REST API."""
-        
-        # First, upload the audio file
+
         with open(audio_path, "rb") as f:
             upload_response = requests.post(
                 f"{self.base_url}/v2/upload",
                 headers=self.headers,
                 data=f
             )
-            
+ 
         if upload_response.status_code != 200:
             raise RuntimeError(f"Upload failed: {upload_response.status_code}, {upload_response.text}")
-            
+
         upload_url = upload_response.json()["upload_url"]
-        
-        # Prepare transcription request
+
         data = {
             "audio_url": upload_url,
             "speech_model": self.model_version
