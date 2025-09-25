@@ -21,12 +21,14 @@ from .orchestration import (
 )
 from .pipeline_registry import PipelineRegistry
 from .streaming_transcription import (
+    AssemblyAIStreamingPipeline,
     DeepgramStreamingPipeline,
     FireworksStreamingPipeline,
     GladiaStreamingPipeline,
     OpenAIStreamingPipeline,
 )
 from .transcription import (
+    AssemblyAITranscriptionPipeline,
     DeepgramTranscriptionPipeline,
     GroqTranscriptionPipeline,
     NeMoTranscriptionPipeline,
@@ -473,6 +475,20 @@ def register_pipeline_aliases() -> None:
         description="NeMo CTC transcription with context biasing for keyword spotting. Local model, no API key required.",
     )
 
+    PipelineRegistry.register_alias(
+        "assemblyai-transcription",
+        AssemblyAITranscriptionPipeline,
+        default_config={
+            "sample_rate": 16000,
+            "channels": 1,
+            "sample_width": 2,
+            "chunksize_ms": 50,
+            "endpoint_url": "wss://streaming.assemblyai.com/v3/ws",
+            "use_keywords": False,
+        },
+        description="AssemblyAI transcription pipeline with keyword boosting support. Requires API key from https://www.assemblyai.com/. Set `ASSEMBLYAI_API_KEY` env var.",
+    )
+
     ################# STREAMING TRANSCRIPTION PIPELINES #################
 
     PipelineRegistry.register_alias(
@@ -528,6 +544,19 @@ def register_pipeline_aliases() -> None:
             "model": "gpt-4o-transcribe",
         },
         description="OpenAI streaming transcription pipeline. Requires API key from https://www.openai.com/. Set `OPENAI_API_KEY` env var.",
+    )
+
+    PipelineRegistry.register_alias(
+        "assemblyai-streaming",
+        AssemblyAIStreamingPipeline,
+        default_config={
+            "sample_rate": 16000,
+            "channels": 1,
+            "sample_width": 2,
+            "chunksize_ms": 50,
+            "endpoint_url": "wss://streaming.assemblyai.com/v3/ws",
+        },
+        description="AssemblyAI streaming transcription pipeline. Requires API key from https://www.assemblyai.com/. Set `ASSEMBLYAI_API_KEY` env var.",
     )
 
 
