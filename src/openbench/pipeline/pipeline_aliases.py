@@ -479,11 +479,7 @@ def register_pipeline_aliases() -> None:
         "assemblyai-transcription",
         AssemblyAITranscriptionPipeline,
         default_config={
-            "sample_rate": 16000,
-            "channels": 1,
-            "sample_width": 2,
-            "chunksize_ms": 50,
-            "endpoint_url": "wss://streaming.assemblyai.com/v3/ws",
+            "model_version": "universal",
             "use_keywords": False,
         },
         description="AssemblyAI transcription pipeline with keyword boosting support. Requires API key from https://www.assemblyai.com/. Set `ASSEMBLYAI_API_KEY` env var.",
