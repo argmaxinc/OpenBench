@@ -1,0 +1,4 @@
+AssemblyAITranscriptionPipeline:
+  config:
+    model_version: "universal"
+    use_keywords: true

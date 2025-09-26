@@ -22,14 +22,14 @@ from nemo.collections.asr.models import (
     EncDecHybridRNNTCTCModel,
 )
 from nemo.collections.asr.parts import context_biasing
-from nemo.utils import logging
-
+from argmaxtools.utils import get_logger
 
 from ...pipeline import Pipeline, register_pipeline
 from ...pipeline_prediction import Transcript
 from ...types import PipelineType
 from .common import TranscriptionConfig, TranscriptionOutput
 
+logger = get_logger(__name__)
 
 TEMP_AUDIO_DIR = Path("temp_audio_dir")
 
@@ -85,7 +85,7 @@ class NeMoTranscriptionPipeline(Pipeline):
                 map_location=torch.device(self.config.device),
             )
         else:
-            logging.warning(
+            logger.warning(
                 "nemo_model_file does not end with .nemo, "
                 "trying to load pretrained model."
             )

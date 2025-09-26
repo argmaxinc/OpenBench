@@ -3,6 +3,7 @@
 
 from .apple_speech_analyzer import SpeechAnalyzerConfig, SpeechAnalyzerPipeline
 from .common import TranscriptionOutput
+from .transcription_assemblyai import AssemblyAITranscriptionPipelineConfig, AssemblyAITranscriptionPipeline
 from .transcription_groq import GroqTranscriptionConfig, GroqTranscriptionPipeline
 from .transcription_whisperkitpro import WhisperKitProTranscriptionConfig, WhisperKitProTranscriptionPipeline
 from .whisperkit import WhisperKitTranscriptionConfig, WhisperKitTranscriptionPipeline
@@ -15,6 +16,8 @@ __all__ = [
     "TranscriptionOutput",
     "SpeechAnalyzerPipeline",
     "SpeechAnalyzerConfig",
+    "AssemblyAITranscriptionPipeline",
+    "AssemblyAITranscriptionPipelineConfig",
     "WhisperKitTranscriptionPipeline",
     "WhisperKitTranscriptionConfig",
     "WhisperKitProTranscriptionPipeline",
