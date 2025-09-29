@@ -3077,7 +3077,7 @@ requires-dist = [
     { name = "llvmlite", specifier = "==0.43.0" },
     { name = "nemo-toolkit", extras = ["asr"], git = "https://github.com/NVIDIA/NeMo.git?rev=main" },
     { name = "numba", specifier = "~=0.60.0" },
-    { name = "numpy", specifier = ">=1.24.0,<2.1" },
+    { name = "numpy", specifier = ">=1.24.0,<2.0" },
     { name = "openai", specifier = "==1.108.0" },
     { name = "packaging", specifier = ">=24.2" },
     { name = "plotly", specifier = ">=5.24.1,<6" },
