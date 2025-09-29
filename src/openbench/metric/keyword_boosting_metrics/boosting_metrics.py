@@ -1,12 +1,13 @@
 from typing import Any
+
 import texterrors
 from argmaxtools.utils import logger
-
 from pyannote.metrics.base import BaseMetric
-from ..registry import MetricRegistry
-from ..metric import MetricOptions
-from ...types import PipelineType
+
 from ...pipeline_prediction import Transcript
+from ...types import PipelineType
+from ..metric import MetricOptions
+from ..registry import MetricRegistry
 
 
 class BaseKeywordMetric(BaseMetric):
@@ -17,6 +18,7 @@ class BaseKeywordMetric(BaseMetric):
         super().__init__()
         # Use Whisper's BasicTextNormalizer
         from transformers.models.whisper.english_normalizer import BasicTextNormalizer
+
         self.text_normalizer = BasicTextNormalizer()
 
     def compute_keyword_stats(
@@ -64,7 +66,6 @@ class BaseKeywordMetric(BaseMetric):
             key_words_stat[word] = [0, 0, 0]  # [tp, gt, fp]
 
         eps = "<eps>"
-
 
         # 1-grams
         for idx in range(len(ali)):
@@ -127,7 +128,7 @@ class BaseKeywordMetric(BaseMetric):
         fp = sum([key_words_stat[x][2] for x in key_words_stat])
 
         logger.debug(f"TP: {tp}, FP: {fp}, FN: {gt - tp}")
-        
+
         # Print detailed keyword statistics
         fp_keywords = []
         for i, keyword in enumerate(normalized_keywords, 1):
@@ -135,69 +136,62 @@ class BaseKeywordMetric(BaseMetric):
                 kw_tp = key_words_stat[keyword][0]
                 kw_gt = key_words_stat[keyword][1]
                 kw_fp = key_words_stat[keyword][2]
-                
+
                 if kw_gt > 0:  # Only print for keywords that exist in ground truth
                     if kw_tp > 0:
                         status = f"TP ({kw_tp}/{kw_gt})"
                     else:
                         status = f"FN (0/{kw_gt})"
                     logger.debug(f"{keyword} {i}/{len(normalized_keywords)} - {status}")
-                
+
                 # Collect FP keywords
                 if kw_fp > 0:
                     fp_keywords.append(f"{keyword} ({kw_fp})")
-        
+
         # Print FP keywords separately
         if fp_keywords:
             logger.debug(f"FP keywords: {fp_keywords} - FP rate: {fp}/{len(normalized_keywords)}")
-        
+
         logger.debug("---")
-        logger.info(f"Keyword statistics computed: TP={tp}, FP={fp}, FN={gt-tp}, GT={gt}")
-        
-        return {
-            "true_positives": tp,
-            "ground_truth": gt,
-            "false_positives": fp,
-            "keyword_stats": key_words_stat
-        }
+        logger.info(f"Keyword statistics computed: TP={tp}, FP={fp}, FN={gt - tp}, GT={gt}")
+
+        return {"true_positives": tp, "ground_truth": gt, "false_positives": fp, "keyword_stats": key_words_stat}
 
 
 @MetricRegistry.register_metric(PipelineType.TRANSCRIPTION, MetricOptions.KEYWORD_FSCORE)
 class KeywordFScore(BaseKeywordMetric):
     """Keyword F-Score metric for boosting transcription evaluation."""
-    
+
     @classmethod
     def metric_name(cls) -> str:
         return "keyword_fscore"
-    
+
     @classmethod
     def metric_components(cls) -> list[str]:
-        return [
-            "true_positives",
-            "ground_truth", 
-            "false_positives"
-        ]
-    
-    def compute_components(self, reference: Transcript, hypothesis: Transcript, dictionary: list[str]) -> dict[str, int]:
+        return ["true_positives", "ground_truth", "false_positives"]
+
+    def compute_components(
+        self, reference: Transcript, hypothesis: Transcript, dictionary: list[str]
+    ) -> dict[str, int]:
         """Compute keyword F-score components."""
         logger.debug("Computing KeywordFScore components")
         stats = self.compute_keyword_stats(reference, hypothesis, dictionary)
         return {
             "true_positives": stats["true_positives"],
             "ground_truth": stats["ground_truth"],
-            "false_positives": stats["false_positives"]
+            "false_positives": stats["false_positives"],
         }
-    
+
     def compute_metric(self, detail: dict[str, int]) -> float:
         """Compute F-score from components."""
         tp = detail["true_positives"]
-        gt = detail["ground_truth"] 
+        gt = detail["ground_truth"]
         fp = detail["false_positives"]
-        
+
         precision = tp / (tp + fp + 1e-8)
         recall = tp / (gt + 1e-8)
         fscore = 2 * (precision * recall) / (precision + recall + 1e-8)
-        
+
         logger.debug(f"F-score computed: precision={precision:.4f}, recall={recall:.4f}, f_score={fscore:.4f}")
         return fscore
 
@@ -205,32 +199,28 @@ class KeywordFScore(BaseKeywordMetric):
 @MetricRegistry.register_metric(PipelineType.TRANSCRIPTION, MetricOptions.KEYWORD_PRECISION)
 class KeywordPrecision(BaseKeywordMetric):
     """Keyword Precision metric for boosting transcription evaluation."""
-    
+
     @classmethod
     def metric_name(cls) -> str:
         return "keyword_precision"
-    
-    @classmethod  
+
+    @classmethod
     def metric_components(cls) -> list[str]:
-        return [
-            "true_positives",
-            "false_positives"
-        ]
-    
-    def compute_components(self, reference: Transcript, hypothesis: Transcript, dictionary: list[str]) -> dict[str, int]:
+        return ["true_positives", "false_positives"]
+
+    def compute_components(
+        self, reference: Transcript, hypothesis: Transcript, dictionary: list[str]
+    ) -> dict[str, int]:
         """Compute keyword precision components."""
         logger.debug("Computing KeywordPrecision components")
         stats = self.compute_keyword_stats(reference, hypothesis, dictionary)
-        return {
-            "true_positives": stats["true_positives"],
-            "false_positives": stats["false_positives"]
-        }
-    
+        return {"true_positives": stats["true_positives"], "false_positives": stats["false_positives"]}
+
     def compute_metric(self, detail: dict[str, int]) -> float:
         """Compute precision from components."""
         tp = detail["true_positives"]
         fp = detail["false_positives"]
-        
+
         logger.debug(f"Computing Precision: TP={tp}, FP={fp}")
         precision = tp / (tp + fp + 1e-8)
         logger.debug(f"Precision computed: {precision:.4f}")
@@ -240,26 +230,22 @@ class KeywordPrecision(BaseKeywordMetric):
 @MetricRegistry.register_metric(PipelineType.TRANSCRIPTION, MetricOptions.KEYWORD_RECALL)
 class KeywordRecall(BaseKeywordMetric):
     """Keyword Recall metric for boosting transcription evaluation."""
-    
+
     @classmethod
     def metric_name(cls) -> str:
         return "keyword_recall"
 
     @classmethod
     def metric_components(cls) -> list[str]:
-        return [
-            "true_positives",
-            "ground_truth"
-        ]
+        return ["true_positives", "ground_truth"]
 
-    def compute_components(self, reference: Transcript, hypothesis: Transcript, dictionary: list[str]) -> dict[str, int]:
+    def compute_components(
+        self, reference: Transcript, hypothesis: Transcript, dictionary: list[str]
+    ) -> dict[str, int]:
         """Compute keyword recall components."""
         logger.debug("Computing KeywordRecall components")
         stats = self.compute_keyword_stats(reference, hypothesis, dictionary)
-        return {
-            "true_positives": stats["true_positives"],
-            "ground_truth": stats["ground_truth"]
-        }
+        return {"true_positives": stats["true_positives"], "ground_truth": stats["ground_truth"]}
 
     def compute_metric(self, detail: dict[str, int]) -> float:
         """Compute recall from components."""

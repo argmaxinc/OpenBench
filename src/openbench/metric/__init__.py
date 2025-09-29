@@ -1,6 +1,11 @@
 # For licensing see accompanying LICENSE.md file.
 # Copyright (C) 2025 Argmax, Inc. All Rights Reserved.
 
+from .keyword_boosting_metrics.boosting_metrics import (
+    KeywordFScore,
+    KeywordPrecision,
+    KeywordRecall,
+)
 from .metric import MetricOptions
 from .registry import MetricRegistry
 from .speaker_count_metrics import (
@@ -18,8 +23,3 @@ from .streaming_latency_metrics import (
     StreamingLatency,
 )
 from .word_error_metrics import WordDiarizationErrorRate, WordErrorRate
-from .keyword_boosting_metrics.boosting_metrics import (
-    KeywordFScore,
-    KeywordPrecision,
-    KeywordRecall,
-)

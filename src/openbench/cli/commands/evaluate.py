@@ -201,10 +201,7 @@ def run_alias_mode(
             if verbose:
                 typer.echo(f"✅ Keywords: {'enabled' if use_keywords else 'disabled'} (override)")
 
-        pipeline = PipelineRegistry.create_pipeline(
-            pipeline_name,
-            config=pipeline_config_override
-        )
+        pipeline = PipelineRegistry.create_pipeline(pipeline_name, config=pipeline_config_override)
 
         ######### Build Benchmark Config #########
         typer.echo(f"📊 Loading dataset: {dataset_name}")

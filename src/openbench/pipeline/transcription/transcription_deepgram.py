@@ -27,15 +27,10 @@ class DeepgramTranscriptionPipeline(Pipeline):
     pipeline_type = PipelineType.TRANSCRIPTION
 
     def build_pipeline(self) -> Callable[[Path], DeepgramApiResponse]:
-        deepgram_api = DeepgramApi(
-            options=PrerecordedOptions(
-                model=self.config.model_version, smart_format=True)
-        )
+        deepgram_api = DeepgramApi(options=PrerecordedOptions(model=self.config.model_version, smart_format=True))
 
         def transcribe(audio_path: Path) -> DeepgramApiResponse:
-            response = deepgram_api.transcribe(
-                audio_path, keyterm=self.current_keywords
-            )
+            response = deepgram_api.transcribe(audio_path, keyterm=self.current_keywords)
             # Remove temporary audio path
             audio_path.unlink(missing_ok=True)
             return response
@@ -46,7 +41,7 @@ class DeepgramTranscriptionPipeline(Pipeline):
         """Override to extract keywords from sample before processing."""
         self.current_keywords = None
         if self.config.use_keywords:
-            keywords = input_sample.extra_info.get('dictionary', [])
+            keywords = input_sample.extra_info.get("dictionary", [])
             if keywords:
                 # Add + between keywords for Deepgram URL
                 self.current_keywords = "+".join(keywords)

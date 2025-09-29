@@ -16,10 +16,7 @@ class OpenAIApiResponse(BaseModel):
 
     @model_validator(mode="after")
     def validate_lengths(self) -> "OpenAIApiResponse":
-        if (
-            len(self.words) != len(self.start)
-            or len(self.words) != len(self.end)
-        ):
+        if len(self.words) != len(self.start) or len(self.words) != len(self.end):
             raise ValueError("All lists must be of the same length")
         return self
 
@@ -34,9 +31,7 @@ class OpenAIApi:
 
         self.client = OpenAI()
 
-    def transcribe(
-        self, audio_path: Path | str, prompt: str | None = None
-    ) -> OpenAIApiResponse:
+    def transcribe(self, audio_path: Path | str, prompt: str | None = None) -> OpenAIApiResponse:
         if isinstance(audio_path, str):
             audio_path = Path(audio_path)
 
@@ -46,7 +41,7 @@ class OpenAIApi:
                 "model": self.model,
                 "file": audio_file,
                 "response_format": "verbose_json",
-                "timestamp_granularities": ["word"]
+                "timestamp_granularities": ["word"],
             }
 
             if prompt is not None:
@@ -59,14 +54,14 @@ class OpenAIApi:
         start_times = []
         end_times = []
         speakers = []
-        if hasattr(response, 'words') and response.words:
+        if hasattr(response, "words") and response.words:
             # Use word-level timestamps from OpenAI
             for word_info in response.words:
                 # Handle both dict and object formats
                 if isinstance(word_info, dict):
-                    words.append(word_info['word'].strip())
-                    start_times.append(float(word_info['start']))
-                    end_times.append(float(word_info['end']))
+                    words.append(word_info["word"].strip())
+                    start_times.append(float(word_info["start"]))
+                    end_times.append(float(word_info["end"]))
                 else:
                     words.append(word_info.word.strip())
                     start_times.append(float(word_info.start))
