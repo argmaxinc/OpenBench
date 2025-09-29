@@ -58,6 +58,11 @@ class MetricOptions(Enum):
     # Ref: https://arxiv.org/pdf/1907.05337
     WDER = "wder"
 
+    # Concatenated minimum-Permutation Word Error Rate
+    # Evaluates transcription accuracy after optimal speaker assignment and concatenation
+    # Uses Hungarian algorithm to find optimal speaker mapping, then computes WER on concatenated transcripts
+    CPWER = "cpwer"
+
     # Word Error Rate
     # Evaluates transcription accuracy at word level
     # Ref: https://en.wikipedia.org/wiki/Word_error_rate
