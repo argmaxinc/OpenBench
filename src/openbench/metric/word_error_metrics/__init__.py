@@ -5,4 +5,4 @@ from .cpwer import ConcatenatedPermutationWordErrorRate
 from .english_abbreviations import ABBR
 from .text_normalizer import EnglishTextNormalizer
 from .wder import WordDiarizationErrorRate
-from .wer import WordErrorRate
+from .wer import DeletionRate, InsertionRate, SubstitutionRate, WordErrorRate

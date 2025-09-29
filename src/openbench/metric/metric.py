@@ -68,6 +68,21 @@ class MetricOptions(Enum):
     # Ref: https://en.wikipedia.org/wiki/Word_error_rate
     WER = "wer"
 
+    # Substitution Rate
+    # Evaluates word substitution errors as a rate (S/N)
+    # Ref: https://en.wikipedia.org/wiki/Word_error_rate
+    SUBSTITUTION_RATE = "substitution_rate"
+
+    # Deletion Rate
+    # Evaluates word deletion errors as a rate (D/N)
+    # Ref: https://en.wikipedia.org/wiki/Word_error_rate
+    DELETION_RATE = "deletion_rate"
+
+    # Insertion Rate
+    # Evaluates word insertion errors as a rate (I/N)
+    # Ref: https://en.wikipedia.org/wiki/Word_error_rate
+    INSERTION_RATE = "insertion_rate"
+
     # Streaming Transcription Latency Based on Hypothesis(Unconfirmed) Transcript
     # Evaluates the Latency of Realtime Transcription
     # Time passed after an audio chunk is sent until its corresponding transcription is received.
