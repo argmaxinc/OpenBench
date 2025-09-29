@@ -15,6 +15,7 @@ from ...pipeline_prediction import StreamingTranscript
 from ...types import PipelineType
 from .common import StreamingTranscriptionConfig, StreamingTranscriptionOutput
 
+
 logger = get_logger(__name__)
 
 
@@ -31,9 +32,7 @@ class AssemblyAIApi:
             "format_turns": False,
         }
         self.api_endpoint_base_url = cfg.endpoint_url
-        self.api_endpoint = (
-            f"{self.api_endpoint_base_url}?{urlencode(CONNECTION_PARAMS)}"
-        )
+        self.api_endpoint = f"{self.api_endpoint_base_url}?{urlencode(CONNECTION_PARAMS)}"
 
     def scale_model_timestamps(self, timestamps):
         for sublist in timestamps:
@@ -93,37 +92,21 @@ class AssemblyAIApi:
                     if data["transcript"] != "":
                         audio_cursor_l.append(audio_cursor)
                         model_timestamps_confirmed.append(
-                            [
-                                item
-                                for item in data["words"]
-                                if item.get("word_is_final", True)
-                            ]
+                            [item for item in data["words"] if item.get("word_is_final", True)]
                         )
-                        model_timestamps_hypot.append([item for item in data["words"]])
-                        updated_segments_hypot = {
-                            data["turn_order"]: " ".join(
-                                word["text"] for word in data["words"]
-                            )
-                        }
+                        model_timestamps_hypot.append(data["words"])
+                        updated_segments_hypot = {data["turn_order"]: " ".join(word["text"] for word in data["words"])}
                         updated_segments = {data["turn_order"]: data["transcript"]}
 
                         with lock:
                             segments.update(updated_segments)
-                            confirmed_predicted_transcript = " ".join(
-                                v for k, v in segments.items()
-                            )
-                            confirmed_interim_transcripts.append(
-                                confirmed_predicted_transcript
-                            )
+                            confirmed_predicted_transcript = " ".join(v for k, v in segments.items())
+                            confirmed_interim_transcripts.append(confirmed_predicted_transcript)
 
                         with lock:
                             segments_hypot.update(updated_segments_hypot)
-                            predicted_transcript_hypot = " ".join(
-                                v for k, v in segments_hypot.items()
-                            )
-                            logger.debug(
-                                "\n" + "Transcription: " + predicted_transcript_hypot
-                            )
+                            predicted_transcript_hypot = " ".join(v for k, v in segments_hypot.items())
+                            logger.debug("\n" + "Transcription: " + predicted_transcript_hypot)
                             interim_transcripts.append(predicted_transcript_hypot)
 
                 elif msg_type == "Termination":
@@ -224,9 +207,7 @@ class AssemblyAIStreamingPipeline(Pipeline):
 
         audio_chunk_bytes = []
         for audio_chunk_tensor in audio_chunk_tensors:
-            audio_chunk_bytes.append(
-                (audio_chunk_tensor * 32768.0).to(torch.int16).numpy().tobytes()
-            )
+            audio_chunk_bytes.append((audio_chunk_tensor * 32768.0).to(torch.int16).numpy().tobytes())
 
         return audio_chunk_bytes
 
@@ -242,13 +223,21 @@ class AssemblyAIStreamingPipeline(Pipeline):
         # Filter to only include start and end timestamps, removing text/word fields
         if model_timestamps_hypothesis is not None:
             model_timestamps_hypothesis = [
-                [{"start": word["start"], "end": word["end"]} for word in interim_result_words if "start" in word and "end" in word]
+                [
+                    {"start": word["start"], "end": word["end"]}
+                    for word in interim_result_words
+                    if "start" in word and "end" in word
+                ]
                 for interim_result_words in model_timestamps_hypothesis
             ]
 
         if model_timestamps_confirmed is not None:
             model_timestamps_confirmed = [
-                [{"start": word["start"], "end": word["end"]} for word in interim_result_words if "start" in word and "end" in word]
+                [
+                    {"start": word["start"], "end": word["end"]}
+                    for word in interim_result_words
+                    if "start" in word and "end" in word
+                ]
                 for interim_result_words in model_timestamps_confirmed
             ]
 

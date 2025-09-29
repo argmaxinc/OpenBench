@@ -1,4 +1,3 @@
-
 """
 NeMo Context Biasing Pipeline for OpenBench
 
@@ -11,23 +10,23 @@ import tempfile
 from pathlib import Path
 from typing import Callable
 
+import librosa
+import nemo.collections.asr as nemo_asr
 import numpy as np
 import torch
-import librosa
-from pydantic import Field
-
-import nemo.collections.asr as nemo_asr
+from argmaxtools.utils import get_logger
 from nemo.collections.asr.models import (
     EncDecCTCModelBPE,
     EncDecHybridRNNTCTCModel,
 )
 from nemo.collections.asr.parts import context_biasing
-from argmaxtools.utils import get_logger
+from pydantic import Field
 
 from ...pipeline import Pipeline, register_pipeline
 from ...pipeline_prediction import Transcript
 from ...types import PipelineType
 from .common import TranscriptionConfig, TranscriptionOutput
+
 
 logger = get_logger(__name__)
 
@@ -37,24 +36,12 @@ TEMP_AUDIO_DIR = Path("temp_audio_dir")
 class NeMoTranscriptionPipelineConfig(TranscriptionConfig):
     """Configuration for NeMo Context Biasing Pipeline."""
 
-    nemo_model_file: str = Field(
-        description="Path to the .nemo file or name of pretrained model"
-    )
-    decoder_type: str = Field(
-        default="ctc", description="Decoder type: 'ctc' or 'rnnt'"
-    )
-    device: str = Field(
-        default="cpu", description="Device to load the model onto"
-    )
-    acoustic_batch_size: int = Field(
-        default=32, description="Batch size for acoustic model inference"
-    )
-    beam_threshold: float = Field(
-        default=5.0, description="Beam pruning threshold for CTC-WS decoding"
-    )
-    context_score: float = Field(
-        default=3.0, description="Per token weight for context biasing words"
-    )
+    nemo_model_file: str = Field(description="Path to the .nemo file or name of pretrained model")
+    decoder_type: str = Field(default="ctc", description="Decoder type: 'ctc' or 'rnnt'")
+    device: str = Field(default="cpu", description="Device to load the model onto")
+    acoustic_batch_size: int = Field(default=32, description="Batch size for acoustic model inference")
+    beam_threshold: float = Field(default=5.0, description="Beam pruning threshold for CTC-WS decoding")
+    context_score: float = Field(default=3.0, description="Per token weight for context biasing words")
     ctc_ali_token_weight: float = Field(
         default=0.6,
         description="Weight of CTC tokens to prevent false accept errors",
@@ -85,21 +72,14 @@ class NeMoTranscriptionPipeline(Pipeline):
                 map_location=torch.device(self.config.device),
             )
         else:
-            logger.warning(
-                "nemo_model_file does not end with .nemo, "
-                "trying to load pretrained model."
-            )
+            logger.warning("nemo_model_file does not end with .nemo, trying to load pretrained model.")
             self.asr_model = nemo_asr.models.ASRModel.from_pretrained(
                 self.config.nemo_model_file,
                 map_location=torch.device(self.config.device),
             )
 
-        if not isinstance(
-            self.asr_model, (EncDecCTCModelBPE, EncDecHybridRNNTCTCModel)
-        ):
-            raise ValueError(
-                "ASR model must be CTC BPE or Hybrid Transducer-CTC"
-            )
+        if not isinstance(self.asr_model, (EncDecCTCModelBPE, EncDecHybridRNNTCTCModel)):
+            raise ValueError("ASR model must be CTC BPE or Hybrid Transducer-CTC")
 
         # Set model to eval mode
         self.asr_model.eval()
@@ -111,12 +91,8 @@ class NeMoTranscriptionPipeline(Pipeline):
         )
 
         def transcribe(audio_path: Path) -> TranscriptionOutput:
-
             # Apply context biasing if keywords are available
-            if (
-                hasattr(self, "context_graph")
-                and self.context_graph is not None
-            ):
+            if hasattr(self, "context_graph") and self.context_graph is not None:
                 pred_text = self._transcribe_with_context_biasing(audio_path)
             else:
                 # No context biasing, use regular transcription
@@ -145,7 +121,7 @@ class NeMoTranscriptionPipeline(Pipeline):
         if transcripts and len(transcripts) > 0:
             # Handle both string and Hypothesis object returns
             transcript = transcripts[0]
-            if hasattr(transcript, 'text'):
+            if hasattr(transcript, "text"):
                 return transcript.text
             else:
                 return str(transcript)
@@ -222,16 +198,10 @@ class NeMoTranscriptionPipeline(Pipeline):
                 for test_batch in datalayer:
                     encoded, encoded_len = self.asr_model.forward(
                         input_signal=test_batch[0].to(self.asr_model.device),
-                        input_signal_length=test_batch[1].to(
-                            self.asr_model.device
-                        ),
+                        input_signal_length=test_batch[1].to(self.asr_model.device),
                     )
-                    ctc_dec_outputs = self.asr_model.ctc_decoder(
-                        encoder_output=encoded
-                    ).cpu()
-                    return ctc_dec_outputs[
-                        0, : encoded_len[0]
-                    ].detach().cpu().numpy()
+                    ctc_dec_outputs = self.asr_model.ctc_decoder(encoder_output=encoded).cpu()
+                    return ctc_dec_outputs[0, : encoded_len[0]].detach().cpu().numpy()
 
     def parse_input(self, input_sample) -> Path:
         """Override to extract keywords from sample before processing."""
@@ -242,17 +212,11 @@ class NeMoTranscriptionPipeline(Pipeline):
             if keywords:
                 context_transcripts = []
                 for keyword in keywords:
-                    word_tokenization = [
-                        self.asr_model.tokenizer.text_to_ids(keyword.lower())
-                    ]
-                    context_transcripts.append(
-                        [keyword.lower(), word_tokenization]
-                    )
+                    word_tokenization = [self.asr_model.tokenizer.text_to_ids(keyword.lower())]
+                    context_transcripts.append([keyword.lower(), word_tokenization])
 
                 if context_transcripts:
-                    self.context_graph = context_biasing.ContextGraphCTC(
-                        blank_id=self.blank_idx
-                    )
+                    self.context_graph = context_biasing.ContextGraphCTC(blank_id=self.blank_idx)
                     self.context_graph.add_to_graph(context_transcripts)
 
         return input_sample.save_audio(TEMP_AUDIO_DIR)

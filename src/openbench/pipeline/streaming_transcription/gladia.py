@@ -69,31 +69,22 @@ class GladiaApi:
             # https://docs.gladia.io/api-reference/v2/live/init
             encoding: Literal["wav/pcm", "wav/alaw", "wav/ulaw"]
             bit_depth: Literal[8, 16, 24, 32]
-            sample_rate: Literal[
-                8_000, 16_000, 32_000, 44_100, 48_000
-            ]
+            sample_rate: Literal[8_000, 16_000, 32_000, 44_100, 48_000]
             channels: int
             language_config: LanguageConfiguration | None
 
         def init_live_session(config: StreamingConfiguration) -> InitiateResponse:
             response = requests.post(
                 self.api_endpoint_base_url,
-                headers={
-                    "Content-Type": "application/json",
-                    "X-Gladia-Key": self.api_key
-                },
+                headers={"Content-Type": "application/json", "X-Gladia-Key": self.api_key},
                 json=config,
                 timeout=10,
             )
             if not response.ok:
                 error_text = response.text or response.reason
                 error_message = f"{response.status_code}: {error_text}"
-                logger.error(
-                    f"Failed to initialize Gladia live session: {error_message}"
-                )
-                raise RuntimeError(
-                    f"Gladia API initialization failed: {error_message}"
-                )
+                logger.error(f"Failed to initialize Gladia live session: {error_message}")
+                raise RuntimeError(f"Gladia API initialization failed: {error_message}")
             return response.json()
 
         def format_duration(seconds: float) -> str:
@@ -132,57 +123,39 @@ class GladiaApi:
                             if text:
                                 if not is_final:
                                     # Only track interim transcripts with valid timestamps
-                                    if (words and len(words) > 0 and 
-                                        all("start" in word and "end" in word 
-                                            for word in words)):
+                                    if (
+                                        words
+                                        and len(words) > 0
+                                        and all("start" in word and "end" in word for word in words)
+                                    ):
                                         cumulative_with_new = (
-                                            cumulative_transcript + " " + text
-                                            if cumulative_transcript else text
+                                            cumulative_transcript + " " + text if cumulative_transcript else text
                                         ).strip()
-                                        interim_transcripts_list.append(
-                                            cumulative_with_new
-                                        )
+                                        interim_transcripts_list.append(cumulative_with_new)
                                         audio_cursor_l.append(audio_cursor)
                                         model_timestamps_hypothesis.append(words)
                                         predicted_transcript_hypot = text
                                         logger.debug(f"Interim transcript: {text}")
                                 else:
-                                    confirmed_audio_cursor_l.append(
-                                        audio_cursor
-                                    )
+                                    confirmed_audio_cursor_l.append(audio_cursor)
                                     # Update cumulative transcript
                                     cumulative_transcript = (
-                                        cumulative_transcript + " " + text
-                                        if cumulative_transcript else text
+                                        cumulative_transcript + " " + text if cumulative_transcript else text
                                     ).strip()
-                                    confirmed_interim_transcripts.append(
-                                        cumulative_transcript
-                                    )
+                                    confirmed_interim_transcripts.append(cumulative_transcript)
                                     model_timestamps_confirmed.append(words)
                                     logger.debug(f"Final transcript: {text}")
                         elif message_type == "post_final_transcript":
-                            logger.debug(
-                                "\n#### End of Gladia v2 session ####\n"
-                            )
-                            transcription_data = content.get(
-                                "data", {}
-                            ).get("transcription", {})
-                            final_transcript = transcription_data.get(
-                                "full_transcript", ""
-                            )
+                            logger.debug("\n#### End of Gladia v2 session ####\n")
+                            transcription_data = content.get("data", {}).get("transcription", {})
+                            final_transcript = transcription_data.get("full_transcript", "")
                         else:
-                            logger.debug(
-                                f"Received message type: {message_type}"
-                            )
+                            logger.debug(f"Received message type: {message_type}")
                     except (json.JSONDecodeError, KeyError) as e:
-                        logger.warning(
-                            f"Failed to parse message from Gladia: {e}"
-                        )
+                        logger.warning(f"Failed to parse message from Gladia: {e}")
                         continue
             except Exception as e:
-                logger.error(
-                    f"Error reading messages from Gladia websocket: {e}"
-                )
+                logger.error(f"Error reading messages from Gladia websocket: {e}")
                 raise
 
         async def stop_recording(websocket: ClientConnection) -> None:
@@ -199,15 +172,15 @@ class GladiaApi:
                 "code_switching": True,
             },
             "messages_config": {
-                                "receive_partial_transcripts": True,
-                                "receive_final_transcripts": True,
-                                "receive_speech_events": True,
-                                "receive_pre_processing_events": False,
-                                "receive_realtime_processing_events": True,
-                                "receive_post_processing_events": False,
-                                "receive_acknowledgments": False,
-                                "receive_lifecycle_events": False                    
-                                }
+                "receive_partial_transcripts": True,
+                "receive_final_transcripts": True,
+                "receive_speech_events": True,
+                "receive_pre_processing_events": False,
+                "receive_realtime_processing_events": True,
+                "receive_post_processing_events": False,
+                "receive_acknowledgments": False,
+                "receive_lifecycle_events": False,
+            },
         }
 
         async def send_audio(socket: ClientConnection, data) -> None:
@@ -224,7 +197,7 @@ class GladiaApi:
             while offset < len(data):
                 try:
                     actual_chunk_size = min(chunk_size, len(data) - offset)
-                    await socket.send(data[offset: offset + actual_chunk_size])
+                    await socket.send(data[offset : offset + actual_chunk_size])
                     offset += actual_chunk_size
                     actual_audio_duration = actual_chunk_size / (
                         STREAMING_CONFIGURATION["sample_rate"]
@@ -248,18 +221,10 @@ class GladiaApi:
                 raise
             async with connect(websocket_url) as websocket:
                 try:
-                    logger.debug(
-                        "\n#### Begin Gladia session ####\n"
-                    )
+                    logger.debug("\n#### Begin Gladia session ####\n")
                     tasks = []
-                    tasks.append(
-                        asyncio.create_task(send_audio(websocket, data))
-                    )
-                    tasks.append(
-                        asyncio.create_task(
-                            print_messages_from_socket(websocket)
-                        )
-                    )
+                    tasks.append(asyncio.create_task(send_audio(websocket, data)))
+                    tasks.append(asyncio.create_task(print_messages_from_socket(websocket)))
 
                     await asyncio.wait(tasks)
                 except asyncio.exceptions.CancelledError:
@@ -269,23 +234,18 @@ class GladiaApi:
                     await stop_recording(websocket)
                     await print_messages_from_socket(websocket)
                 except Exception as e:
-                    logger.error(
-                        f"Error during websocket communication: {e}"
-                    )
+                    logger.error(f"Error during websocket communication: {e}")
                     raise
 
         asyncio.run(main(data))
 
         return (
             final_transcript if final_transcript else cumulative_transcript,
-            (interim_transcripts_list
-             if interim_transcripts_list else None),
-            (audio_cursor_l
-             if audio_cursor_l else None),
+            (interim_transcripts_list if interim_transcripts_list else None),
+            (audio_cursor_l if audio_cursor_l else None),
             confirmed_interim_transcripts,
             confirmed_audio_cursor_l,
-            (model_timestamps_hypothesis
-             if model_timestamps_hypothesis else None),
+            (model_timestamps_hypothesis if model_timestamps_hypothesis else None),
             model_timestamps_confirmed,
         )
 
