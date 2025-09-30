@@ -106,7 +106,7 @@ def register_pipeline_aliases() -> None:
             "cli_path": os.getenv("SPEAKERKIT_CLI_PATH"),
             "clusterer_version": "pyannote4",
         },
-        description="SpeakerKit speaker diarization pipeline running with pyannote 3.1 pipeline. Requires CLI installation and API key. Set `SPEAKERKIT_CLI_PATH` and `SPEAKERKIT_API_KEY` env vars. For access to the CLI binary contact speakerkitpro@argmaxinc.com",
+        description="SpeakerKit speaker diarization pipeline. Requires CLI installation and API key. Set `SPEAKERKIT_CLI_PATH` and `SPEAKERKIT_API_KEY` env vars. For access to the CLI binary contact speakerkitpro@argmaxinc.com",
     )
 
     PipelineRegistry.register_alias(
