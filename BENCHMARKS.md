@@ -13,6 +13,12 @@
   - [Word Error Rate (WER)](#word-error-rate-wer)
   - [Streaming Latency](#streaming-latency)
   - [Confirmed Streaming Latency](#confirmed-streaming-latency)
+- [Speaker-Attributed Transcription](#speaker-attributed-transcription)
+  - [Benchmarked Systems](#benchmarked-systems-3)
+  - [Benchmarked Datasets](#benchmarked-datasets-2)
+  - [Word Error Rate (WER)](#word-error-rate-wer-2)
+  - [Word Diarization Error Rate (WDER)](#word-diarization-error-rate-wder)
+  - [Speed Factor (SF)](#speed-factor-sf-2)
 
 <br/>
 
@@ -334,3 +340,119 @@
 ---
 
 ¹ **Note:** Argmax's default configuration includes a 0.3-second system sleep to allow the accumulation of new audio frames. Developers can reconfigure to remove this sleep to achieve lower latency.
+
+
+
+# Speaker-Attributed Transcription
+
+## Benchmarked Systems
+
+<details>
+<summary>Click to expand</summary>
+
+### Deepgram
+- **Latest Run:** `2025-09-05`
+- **Model Version:** `nova-3`
+- **Configuration:** Deepgram's Python SDK for file transcription with `diarize` and `detect_language` enabled. See [deepgram-python-sdk](https://github.com/deepgram/deepgram-python-sdk) for more details.
+- **Code Reference:** [openbench/pipeline/orchestration/orchestration_deepgram.py](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/orchestration/orchestration_deepgram.py)
+- **Hardware**: Unknown (Cloud API)
+
+### Argmax (Whisper Large V3 Turbo)
+- **Latest Run:** `2025-09-29`
+- **Model Version:** `whisper-large-v3-turbo`
+- **Configuration:** Argmax WhisperKit Pro with compressed Whisper Large V3 Turbo model (i.e. `large-v3-v20240930_626MB`) for speaker-attributed transcription and SpeakerKit Pro with `pyannote-v3-pro`.
+- **Code Reference:** [openbench/pipeline/orchestration/orchestration_whisperkitpro.py](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/orchestration/orchestration_whisperkitpro.py)
+- **Hardware**: M2 Ultra Mac Studio
+
+
+### Argmax (Parakeet V3)
+- **Latest Run:** `2025-09-29`
+- **Model Version:** `parakeet-v3`
+- **Configuration:** Argmax WhisperKit Pro with compressed Parakeet V3 model (i.e. `parakeet-v3_494MB`) for speaker-attributed transcription and SpeakerKit Pro with `pyannote-v3-pro`.
+- **Code Reference:** [openbench/pipeline/orchestration/orchestration_whisperkitpro.py](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/orchestration/orchestration_whisperkitpro.py)
+- **Hardware**: M2 Ultra Mac Studio
+
+</details>
+
+<br/>
+
+## Benchmarked Datasets
+
+<details>
+<summary>Click to expand</summary>
+
+### CallHome English (callhome-english)
+- **Language:** English
+- **Domain:** Phone Call
+- **Description:** [LDC97S42](https://catalog.ldc.upenn.edu/LDC97S42) English subset of the CallHome dataset containing speaker labeled transcripts of telephone conversations with natural speech patterns and the audio quality challenges typical of phone calls.
+
+### Earnings21
+- **Language:** English
+- **Domain:** Meeting
+- **Description:** A dataset of corporate earnings call recordings featuring financial presentations and Q&A sessions with executives, analysts, and investors.
+
+</details>
+
+<br/>
+
+## Word Error Rate (WER)
+
+<details>
+<summary>Click to expand</summary>
+
+
+**What it measures:** WER measures speech-to-text accuracy by counting the word-level edits - substitutions, deletions, and insertions — needed to turn a transcript into the reference, then dividing by the reference length to give a percentage.
+
+**How to interpret:** Lower values are better. A WER of 0.0% would be perfect (no errors), while 100% means complete error and values may exceeed 100%.
+
+**Example:** In a 100-word reference transcript, a WER of 15% means there are 15 total word-level mistakes — some mix of substitutions (confusion), deletions (omission), and insertions (hallucination).
+
+</details>
+
+| Dataset          | Deepgram<br/>(nova-3) | Argmax<br/>(Whisper Large V3 Turbo) | Argmax<br/>(Parakeet V3) |
+|------------------|-----------------------|:-----------------------------------:|:------------------------:|
+| callhome-english | 10.22                 |               10.67                 |          9.78            |
+| earnings21       | 7.38                  |                7.99                 |          6.97            |
+
+<br/><br/>
+
+## Word Diarization Error Rate (WDER)
+
+<details>
+<summary>Click to expand</summary>
+
+
+**What it measures:** WDER measures the accuracy of speaker-attributed transcription by counting word-level errors in both transcription accuracy and speaker attribution. It combines word error rate with speaker diarization errors at the word level.
+
+**How to interpret:** Lower values are better. A WDER of 0.0% would be perfect (no errors in both transcription and speaker attribution), while 100% means complete error.
+
+**Example:** In a 100-word reference transcript with speaker labels, a WDER of 20% means there are 20 total word-level mistakes in either transcription accuracy or speaker attribution.
+
+</details>
+
+| Dataset          | Deepgram<br/>(nova-3) | Argmax<br/>(Whisper Large V3 Turbo) | Argmax<br/>(Parakeet V3) |
+|------------------|-----------------------|:-----------------------------------:|:------------------------:|
+| callhome-english | 5.01                  |                5.72                 |           5.99           |
+| earnings21       | 6.18                  |                4.94                 |           5.16           |
+
+<br/><br/>
+
+## Speed Factor (SF)
+
+<details>
+<summary>Click to expand</summary>
+
+
+**What it measures:** Speed Factor compares how much faster (or slower) a system processes audio compared to real-time. It's calculated as $SF = \dfrac{Duration_{audio}}{Duration_{prediction}}$.
+
+**How to interpret:** Values above 1x mean the system is faster than real-time. Values below 1x mean slower than real-time. Higher values indicate faster processing.
+
+**Example:** An SF of 10x means the system processes 10 seconds of audio in 1 second. An SF of 0.5x means it takes 2 seconds to process 1 second of audio.
+
+</details>
+
+| Dataset          | Deepgram<br/>(nova-3) | Argmax<br/>(Whisper Large V3 Turbo) | Argmax<br/>(Parakeet V3) |
+|------------------|:---------------------:|:-----------------------------------:|:------------------------:|
+| callhome-english |   102                 |                 15                  |           130            |
+| earnings21       |   213                 |                 30                  |           261            |
+
