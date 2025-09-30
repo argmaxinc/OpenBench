@@ -449,6 +449,6 @@
 
 | Dataset          | Deepgram<br/>(nova-3) | Argmax<br/>(Whisper Large V3 Turbo) | Argmax<br/>(Parakeet V3) |
 |------------------|:---------------------:|:-----------------------------------:|:------------------------:|
-| callhome-english |   102                 |                 15                  |           130            |
-| earnings21       |   213                 |                 30                  |           261            |
+| callhome-english |   102                 |                 13                  |           98             |
+| earnings21       |   213                 |                 21                  |           232            |
 
