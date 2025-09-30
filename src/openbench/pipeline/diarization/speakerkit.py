@@ -5,7 +5,7 @@ import os
 import re
 import subprocess
 from pathlib import Path
-from typing import Callable, TypedDict
+from typing import Callable, Literal, TypedDict
 
 from argmaxtools.utils import get_logger
 from pydantic import Field
@@ -25,6 +25,9 @@ TEMP_AUDIO_DIR = Path("audio_temp")
 
 class SpeakerKitPipelineConfig(DiarizationPipelineConfig):
     cli_path: str = Field(..., description="The absolute path to the SpeakerKit CLI")
+    clusterer_version: Literal["pyannote3", "pyannote4"] = Field(
+        "pyannote4", description="The version of the clusterer to use"
+    )
     model_path: str | None = Field(None, description="The absolute path to the SpeakerKit model")
 
 
@@ -35,9 +38,10 @@ class SpeakerKitInput(TypedDict):
 
 
 class SpeakerKitCli:
-    def __init__(self, cli_path: str, model_path: str | None = None):
-        self.cli_path = cli_path
-        self.model_path = model_path
+    def __init__(self, config: SpeakerKitPipelineConfig):
+        self.cli_path = config.cli_path
+        self.model_path = config.model_path
+        self.clusterer_version = config.clusterer_version
 
     def __call__(self, speakerkit_input: SpeakerKitInput) -> tuple[Path, float]:
         cmd = [
@@ -47,6 +51,8 @@ class SpeakerKitCli:
             str(speakerkit_input["audio_path"]),
             "--rttm-path",
             str(speakerkit_input["output_path"]),
+            "--clusterer-version",
+            self.clusterer_version,
             "--verbose",
         ]
 

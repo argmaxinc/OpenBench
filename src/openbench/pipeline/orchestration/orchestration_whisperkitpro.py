@@ -49,6 +49,10 @@ class WhisperKitProOrchestrationConfig(PipelineConfig):
         "segment",
         description="The orchestration strategy to use either `word` or `segment`",
     )
+    clusterer_version_string: Literal["pyannote3", "pyannote4"] = Field(
+        "pyannote4",
+        description="The version of the clusterer to use",
+    )
 
 
 @register_pipeline
@@ -68,6 +72,7 @@ class WhisperKitProOrchestrationPipeline(Pipeline):
             chunking_strategy="vad",
             diarization=True,
             orchestration_strategy=self.config.orchestration_strategy,
+            clusterer_version_string=self.config.clusterer_version_string,
         )
         # Create WhisperKit engine
         engine = WhisperKitPro(
