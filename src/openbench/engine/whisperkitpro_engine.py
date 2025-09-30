@@ -77,6 +77,14 @@ class WhisperKitProConfig(BaseModel):
         None,
         description="The path to the speaker models directory",
     )
+    clusterer_version: Literal["pyannote3", "pyannote4"] = Field(
+        "pyannote4",
+        description="The version of the clusterer to use",
+    )
+    use_exclusive_reconciliation: bool = Field(
+        False,
+        description="Whether to use exclusive reconciliation",
+    )
 
     @property
     def rttm_path(self) -> str | None:
@@ -122,9 +130,12 @@ class WhisperKitProConfig(BaseModel):
             args.extend(["--orchestration-strategy", self.orchestration_strategy])
             # Add rttm path
             args.extend(["--rttm-path", self.rttm_path])
+            args.extend(["--clusterer-version", self.clusterer_version])
             # If speaker models path is provided use it
             if self.speaker_models_path:
                 args.extend(["--speaker-models-path", self.speaker_models_path])
+            if self.use_exclusive_reconciliation:
+                args.extend(["--use-exclusive-reconciliation"])
 
         logger.info(f"Generating CLI args for Transcription: {args}")
         return args
