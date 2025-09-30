@@ -13,6 +13,12 @@
   - [Word Error Rate (WER)](#word-error-rate-wer)
   - [Streaming Latency](#streaming-latency)
   - [Confirmed Streaming Latency](#confirmed-streaming-latency)
+- [Speaker-Attributed Transcription](#speaker-attributed-transcription)
+  - [Benchmarked Systems](#benchmarked-systems-3)
+  - [Benchmarked Datasets](#benchmarked-datasets-2)
+  - [Word Error Rate (WER)](#word-error-rate-wer-2)
+  - [Word Diarization Error Rate (WDER)](#word-diarization-error-rate-wder)
+  - [Speed Factor (SF)](#speed-factor-sf-2)
 
 <br/>
 
@@ -39,13 +45,6 @@
 - **Code Reference:** [openbench/pipeline/diarization/diarization_deepgram](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/diarization/diarization_deepgram.py)
 - **Hardware**: Unknown (Cloud API)
 
-### Picovoice
-- **Latest Run:** `2025-06-27`
-- **Model Version:** `falcon`
-- **Configuration:** Picovoice SDK does not allow configuration. See [Picovoice's Documentation](https://picovoice.ai/docs/quick-start/falcon-python/) for more details.
-- **Code Reference:** [openbench/pipeline/diarization/picovoice](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/diarization/picovoice.py)
-- **Hardware**: M2 Ultra Mac Studio
-
 ### pyannote
 - **Latest Run:** `2025-02-17`
 - **Model Version:** `speaker-diarization-3.1`
@@ -55,15 +54,15 @@
 
 ### pyannoteAI
 - **Latest Run:** `2025-02-17`
-- **Model Version:** `pyannote-flagship (default)`
+- **Model Version:** `pyannote/precision-1`
 - **Configuration:** Job polling based on `X-RateLimit-Remaining` and `X-RateLimit-Reset` headers which leads to sub-second polling checks. See [pyannoteAI Documentation](https://docs.pyannote.ai/api-reference/diarize) for more details.
 - **Code Reference:** [openbench/pipeline/diarization/pyannote-api](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/diarization/pyannote_api.py)
 - **Hardware**: Unknown (Cloud API)
 
 ### Argmax
-- **Latest Run:** `2025-05-29`
-- **Model Version:** `pyannote-v3`
-- **Configuration:** Argmax SDK `SpeakerKit` CLI with default settings. See [Interspeech 2025 Paper](https://www.isca-archive.org/interspeech_2025/durmus25_interspeech.html) for more details.
+- **Latest Run:** `2025-09-29`
+- **Model Version:** `pyannote/community-1` (`pyannote-v4`)
+- **Configuration:** Argmax SDK 1.8.2 `SpeakerKit` CLI with default settings. See [Interspeech 2025 Paper](https://www.isca-archive.org/interspeech_2025/durmus25_interspeech.html) for more details.
 - **Code Reference:** [openbench/pipeline/diarization/speakerkit](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/diarization/speakerkit.py)
 - **Hardware**: M2 Ultra Mac Studio
 
@@ -100,11 +99,6 @@
 - **Language:** Chinese
 - **Domain:** In-Person Meeting
 - **Description:** A Chinese meeting dataset featuring real-world business meetings with multiple speakers, overlapping speech, and natural conversation patterns.
-
-### American-Life-Podcast
-- **Language:** English
-- **Domain:** Podcast
-- **Description:** A collection of podcast episodes from "This American Life" featuring interviews, storytelling, and conversational content with varying audio quality and speaker dynamics.
 
 ### CALLHOME
 - **Language:** Multilingual
@@ -159,21 +153,20 @@
 
 </details>
 
-| Dataset                | AWS Transcribe            | Deepgram             | Picovoice | pyannote | pyannoteAI              | Argmax     |
-|------------------------|---------------------------|----------------------|-----------|----------|-------------------------|------------|
-| AISHELL-4              | 0.22                      | 0.72                 | -         | 0.12     | 0.11                    | 0.13       |
-| AMI-IHM                | 0.29                      | 0.35                 | 0.35      | 0.19     | 0.16                    | 0.21       |
-| AMI-SDM                | 0.37                      | 0.42                 | -         | 0.23     | 0.18                    | 0.24       |
-| AVA-AVD                | 0.61                      | 0.68                 | -         | 0.48     | 0.47                    | 0.52       |
-| AliMeeting             | 0.42                      | 0.81                 | -         | 0.25     | 0.19                    | 0.26       |
-| American-Life-Podcast  | 0.23                      | 0.29                 | -         | 0.29     | 0.29                    | 0.37       |
-| CallHome               | 0.37                      | 0.64                 | 0.54      | 0.29     | 0.20                    | 0.31       |
-| DIHARD-III             | 0.36                      | 0.37                 | -         | 0.24     | 0.17                    | 0.24       |
-| EGO4D                  | 0.61                      | 0.71                 | -         | 0.52     | 0.46                    | 0.54       |
-| Earnings-21            | 0.18                      | -                    | -         | 0.10     | 0.09                    | 0.09       |
-| ICSI                   | 0.46                      | -                    | -         | 0.34     | 0.31                    | 0.35       |
-| MSDWILD                | 0.40                      | 0.64                 | -         | 0.32     | 0.26                    | 0.35       |
-| VoxConverse            | 0.13                      | 0.36                 | -         | 0.11     | 0.10                    | 0.12       |
+| Dataset                | AWS Transcribe            | Deepgram             | pyannote | pyannoteAI              | Argmax     |
+|------------------------|---------------------------|----------------------|----------|-------------------------|------------|
+| AISHELL-4              | 0.22                      | 0.72                 | 0.12     | 0.11                    | 0.12       |
+| AMI-IHM                | 0.29                      | 0.35                 | 0.19     | 0.16                    | 0.18       |
+| AMI-SDM                | 0.37                      | 0.42                 | 0.23     | 0.18                    | 0.21       |
+| AVA-AVD                | 0.61                      | 0.68                 | 0.48     | 0.47                    | 0.48       |
+| AliMeeting             | 0.42                      | 0.81                 | 0.25     | 0.19                    | 0.23       |
+| CallHome               | 0.37                      | 0.64                 | 0.29     | 0.20                    | 0.30       |
+| DIHARD-III             | 0.36                      | 0.37                 | 0.24     | 0.17                    | 0.22       |
+| EGO4D                  | 0.61                      | 0.71                 | 0.52     | 0.46                    | 0.48       |
+| Earnings-21            | 0.18                      | -                    | 0.10     | 0.09                    | 0.10       |
+| ICSI                   | 0.46                      | -                    | 0.34     | 0.31                    | 0.35       |
+| MSDWILD                | 0.40                      | 0.64                 | 0.32     | 0.26                    | 0.33       |
+| VoxConverse            | 0.13                      | 0.36                 | 0.11     | 0.10                    | 0.11       |
 
 <br/><br/>
 
@@ -191,7 +184,7 @@
 
 </details>
 
-| Dataset                 | AWS Transcribe | Deepgram | Picovoice | pyannote | pyannoteAI | SpeakerKit |
+| Dataset                 | AWS Transcribe | Deepgram | Picovoice | pyannote | pyannoteAI | Argmax |
 |-------------------------|---------------------------|----------------------|-----------|----------|-------------------------|------------|
 | AISHELL-4               | 10                       | 130                  | -         | 55       | 62                     | 476        |
 | AMI-IHM                 | 11                       | 216                  | 59        | 53       | 45                     | 463        |
@@ -223,21 +216,21 @@
 
 </details>
 
-| Dataset                 | AWS Transcribe | Deepgram | Picovoice | pyannote | pyannoteAI | SpeakerKit |
-|-------------------------|---------------------------|----------------------|-----------|----------|-------------------------|------------|
-| AISHELL-4               | 75                       | 30                  | -         | 5       | 15                     | 5         |
-| AMI-IHM                 | 94                       | 56                  | 12       | 0        | 12                     | 0         |
-| AMI-SDM                 | 56                       | 88                  | -         | 6        | 12                     | 0         |
-| AVA-AVD                 | 13                       | 6                  | -         | 13       | 9                      | 11        |
-| AliMeeting              | 90                       | 5                  | -         | 40       | 55                     | 10        |
-| American-Life-Podcast   | 11                       | 14                  | -         | 8        | 8                      | 8         |
-| CallHome                | 60                       | 33                  | 15       | 74       | 48                     | 48         |
-| DIHARD-III              | 72                       | 60                  | -         | 60       | 58                     | 25         |
-| EGO4D                   | 34                       | 16                  | -         | 24       | 24                     | 32         |
-| Earnings-21             | 50                       | -                    | -         | 50       | 64                     | 9          |
-| ICSI                    | 43                       | -                    | -         | 7        | 13                     | 7         |
-| MSDWILD                 | 39                       | 15                  | -         | 34       | 35                     | 26        |
-| VoxConverse             | 46                       | 39                  | -         | 42       | 38                     | 23        |
+| Dataset                 | AWS Transcribe | Deepgram |  pyannote | pyannoteAI | Argmax |
+|-------------------------|----------------|----------|-----------|------------|--------|
+| AISHELL-4               | 75             | 30       | 5         | 15         | 60     |
+| AMI-IHM                 | 94             | 56       | 0         | 12         | 75     |
+| AMI-SDM                 | 56             | 88       | 6         | 12         | 69     |
+| AVA-AVD                 | 13             | 6        | 13        | 9          | 13     |
+| AliMeeting              | 90             | 5        | 40        | 55         | 65     |
+| American-Life-Podcast   | 11             | 14       | 8         | 8          | 8      |
+| CallHome                | 60             | 33       | 74        | 48         | 42     |
+| DIHARD-III              | 72             | 60       | 60        | 58         | 45     |
+| EGO4D                   | 34             | 16       | 24        | 24         | 48     |
+| Earnings-21             | 50             | -        | 50        | 64         | 55     |
+| ICSI                    | 43             | -        | 7         | 13         | 7      |
+| MSDWILD                 | 39             | 15       | 34        | 35         | 28     |
+| VoxConverse             | 46             | 39       | 42        | 38         | 45     |
 
 </br><br/>
 # Real-time Transcription 
@@ -264,12 +257,6 @@
 - **Configuration:** [Code](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/streaming_transcription/gladia.py#L112)
 - **Code Reference:** [openbench/pipeline/streaming_transcription/gladia](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/streaming_transcription/gladia.py)
 - **Hardware**: Unknown (Cloud API)
-
-### Argmax (Parakeet V2)¹
-- **Latest Run:** `09-12-2025`
-- **Configuration:** Reuses the Deepgram pipeline with `DEEPGRAM_HOST_URL=ws://localhost:port` while [Argmax Local Server](https://www.argmaxinc.com/blog/argmax-local-server) is running with our compressed optimized model `--model parakeet-v2_476MB` at `ws://localhost:port`
-- **Code Reference:** [openbench/pipeline/streaming_transcription/deepgram](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/streaming_transcription/deepgram.py)
-- **Hardware**: M2 Ultra Mac Studio
 
 ### Argmax (Parakeet V3)¹
 - **Latest Run:** `09-12-2025`
@@ -300,9 +287,9 @@
 
 </details>
 
-| Dataset        | Deepgram<br/>(nova-3) | OpenAI <br/>(GPT-4o) | Gladia |  Argmax <br/>(Parakeet V2) | Argmax <br/>(Parakeet V3) |  Argmax <br/>(Whisper Large V3 Turbo) |
-|----------------|----------|-----------------|----------------------------|---------------------------------------|---------------------------------------|---------------------------------------|
-| Long-form <br/>(timit-stitched) | 2.36                | 2.47           | 2.1                 | 2.12             | 2.08         | 2.17                             |
+| Dataset        | Deepgram<br/>(nova-3) | OpenAI <br/>(GPT-4o) | Gladia |  Argmax <br/>(Parakeet V3) |  Argmax <br/>(Whisper Large V3 Turbo) |
+|----------------|-----------------------|----------------------|--------|----------------------------|---------------------------------------|
+| timit-stitched | 2.36                  | 2.47                 | 2.1    |        2.08                | 2.17                                  |
 
 <br/><br/>
 ## Streaming Latency
@@ -319,10 +306,10 @@
 
 </details>
 
+| Dataset        | Deepgram<br/>(nova-3) | OpenAI <br/>(GPT-4o) | Gladia |  Argmax <br/>(Parakeet V3) |  Argmax <br/>(Whisper Large V3 Turbo) |
+|----------------|-----------------------|----------------------|--------|----------------------------|---------------------------------------|
+| timit-stitched | 1.03                  | N/A                  | 0.64   |        0.54                | 0.94                                  |
 
-| Dataset        | Deepgram<br/>(nova-3) | OpenAI <br/>(GPT-4o) | Gladia |  Argmax¹ <br/>(Parakeet V2) |  Argmax¹ <br/>(Parakeet V3) | Argmax¹ <br/>(Whisper Large V3 Turbo) |
-|----------------|----------|-----------------|----------------------------|---------------------------------------|---------------------------------------|---------------------------------------|
-| Long-form <br/>(timit-stitched) | 1.03 | N/A | 0.64  | 0.54 | 0.55 | 0.94  |
 
 </br></br>
 
@@ -340,10 +327,128 @@
 
 </details>
 
-| Dataset        | Deepgram<br/>(nova-3) | OpenAI <br/>(GPT-4o) | Gladia |  Argmax¹ <br/>(Parakeet V2) |  Argmax¹ <br/>(Parakeet V3) | Argmax¹ <br/>(Whisper Large V3 Turbo) |
-|----------------|----------|-----------------|----------------------------|---------------------------------------|---------------------------------------|---------------------------------------|
-| Long-form <br/>(timit-stitched) | 2.37 | 56.95 | 2.72  | 5.51 | 5.96 | 2.51  |
+| Dataset        | Deepgram<br/>(nova-3) | OpenAI <br/>(GPT-4o) | Gladia |  Argmax <br/>(Parakeet V3) |  Argmax <br/>(Whisper Large V3 Turbo) |
+|----------------|-----------------------|----------------------|--------|----------------------------|---------------------------------------|
+| timit-stitched | 2.37                  | 56.95                | 2.72   |        5.51                | 2.51                                  |
+
+
 
 ---
 
-¹ **Note:** This is not the fastest configuration for Argmax streaming transcription. The system sleeps for 0.3s to get enough audio and can be configured to be faster by another 0.3s.
+¹ **Note:** Argmax's default configuration includes a 0.3-second system sleep to allow the accumulation of new audio frames. Developers can reconfigure to remove this sleep to achieve lower latency.
+
+
+
+# Speaker-Attributed Transcription
+
+## Benchmarked Systems
+
+<details>
+<summary>Click to expand</summary>
+
+### Deepgram
+- **Latest Run:** `2025-09-05`
+- **Model Version:** `nova-3`
+- **Configuration:** Deepgram's Python SDK for file transcription with `diarize` and `detect_language` enabled. See [deepgram-python-sdk](https://github.com/deepgram/deepgram-python-sdk) for more details.
+- **Code Reference:** [openbench/pipeline/orchestration/orchestration_deepgram.py](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/orchestration/orchestration_deepgram.py)
+- **Hardware**: Unknown (Cloud API)
+
+### Argmax (Whisper Large V3 Turbo)
+- **Latest Run:** `2025-09-29`
+- **Model Version:** `whisper-large-v3-turbo`
+- **Configuration:** Argmax WhisperKit Pro with compressed Whisper Large V3 Turbo model (i.e. `large-v3-v20240930_626MB`) for speaker-attributed transcription and SpeakerKit Pro with `pyannote-v3-pro`.
+- **Code Reference:** [openbench/pipeline/orchestration/orchestration_whisperkitpro.py](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/orchestration/orchestration_whisperkitpro.py)
+- **Hardware**: M2 Ultra Mac Studio
+
+
+### Argmax (Parakeet V3)
+- **Latest Run:** `2025-09-29`
+- **Model Version:** `parakeet-v3`
+- **Configuration:** Argmax WhisperKit Pro with compressed Parakeet V3 model (i.e. `parakeet-v3_494MB`) for speaker-attributed transcription and SpeakerKit Pro with `pyannote-v3-pro`.
+- **Code Reference:** [openbench/pipeline/orchestration/orchestration_whisperkitpro.py](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/orchestration/orchestration_whisperkitpro.py)
+- **Hardware**: M2 Ultra Mac Studio
+
+</details>
+
+<br/>
+
+## Benchmarked Datasets
+
+<details>
+<summary>Click to expand</summary>
+
+### CallHome English (callhome-english)
+- **Language:** English
+- **Domain:** Phone Call
+- **Description:** [LDC97S42](https://catalog.ldc.upenn.edu/LDC97S42) English subset of the CallHome dataset containing speaker labeled transcripts of telephone conversations with natural speech patterns and the audio quality challenges typical of phone calls.
+
+### Earnings21
+- **Language:** English
+- **Domain:** Meeting
+- **Description:** A dataset of corporate earnings call recordings featuring financial presentations and Q&A sessions with executives, analysts, and investors.
+
+</details>
+
+<br/>
+
+## Word Error Rate (WER)
+
+<details>
+<summary>Click to expand</summary>
+
+
+**What it measures:** WER measures speech-to-text accuracy by counting the word-level edits - substitutions, deletions, and insertions — needed to turn a transcript into the reference, then dividing by the reference length to give a percentage.
+
+**How to interpret:** Lower values are better. A WER of 0.0% would be perfect (no errors), while 100% means complete error and values may exceeed 100%.
+
+**Example:** In a 100-word reference transcript, a WER of 15% means there are 15 total word-level mistakes — some mix of substitutions (confusion), deletions (omission), and insertions (hallucination).
+
+</details>
+
+| Dataset          | Deepgram<br/>(nova-3) | Argmax<br/>(Whisper Large V3 Turbo) | Argmax<br/>(Parakeet V3) |
+|------------------|-----------------------|:-----------------------------------:|:------------------------:|
+| callhome-english | 10.22                 |               10.67                 |          9.78            |
+| earnings21       | 7.38                  |                7.99                 |          6.97            |
+
+<br/><br/>
+
+## Word Diarization Error Rate (WDER)
+
+<details>
+<summary>Click to expand</summary>
+
+
+**What it measures:** WDER measures the accuracy of speaker-attributed transcription by counting word-level errors in both transcription accuracy and speaker attribution. It combines word error rate with speaker diarization errors at the word level.
+
+**How to interpret:** Lower values are better. A WDER of 0.0% would be perfect (no errors in both transcription and speaker attribution), while 100% means complete error.
+
+**Example:** In a 100-word reference transcript with speaker labels, a WDER of 20% means there are 20 total word-level mistakes in either transcription accuracy or speaker attribution.
+
+</details>
+
+| Dataset          | Deepgram<br/>(nova-3) | Argmax<br/>(Whisper Large V3 Turbo) | Argmax<br/>(Parakeet V3) |
+|------------------|-----------------------|:-----------------------------------:|:------------------------:|
+| callhome-english | 5.01                  |                5.72                 |           5.99           |
+| earnings21       | 6.18                  |                4.94                 |           5.16           |
+
+<br/><br/>
+
+## Speed Factor (SF)
+
+<details>
+<summary>Click to expand</summary>
+
+
+**What it measures:** Speed Factor compares how much faster (or slower) a system processes audio compared to real-time. It's calculated as $SF = \dfrac{Duration_{audio}}{Duration_{prediction}}$.
+
+**How to interpret:** Values above 1x mean the system is faster than real-time. Values below 1x mean slower than real-time. Higher values indicate faster processing.
+
+**Example:** An SF of 10x means the system processes 10 seconds of audio in 1 second. An SF of 0.5x means it takes 2 seconds to process 1 second of audio.
+
+</details>
+
+| Dataset          | Deepgram<br/>(nova-3) | Argmax<br/>(Whisper Large V3 Turbo) | Argmax<br/>(Parakeet V3) |
+|------------------|:---------------------:|:-----------------------------------:|:------------------------:|
+| callhome-english |   102                 |                 13                  |           98             |
+| earnings21       |   213                 |                 21                  |           232            |
+
