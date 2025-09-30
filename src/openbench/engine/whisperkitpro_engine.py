@@ -77,7 +77,7 @@ class WhisperKitProConfig(BaseModel):
         None,
         description="The path to the speaker models directory",
     )
-    clusterer_version_string: Literal["pyannote3", "pyannote4"] = Field(
+    clusterer_version: Literal["pyannote3", "pyannote4"] = Field(
         "pyannote4",
         description="The version of the clusterer to use",
     )
@@ -130,7 +130,7 @@ class WhisperKitProConfig(BaseModel):
             args.extend(["--orchestration-strategy", self.orchestration_strategy])
             # Add rttm path
             args.extend(["--rttm-path", self.rttm_path])
-            args.extend(["--clusterer-version-string", self.clusterer_version_string])
+            args.extend(["--clusterer-version-string", self.clusterer_version])
             # If speaker models path is provided use it
             if self.speaker_models_path:
                 args.extend(["--speaker-models-path", self.speaker_models_path])
