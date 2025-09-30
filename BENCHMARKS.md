@@ -39,13 +39,6 @@
 - **Code Reference:** [openbench/pipeline/diarization/diarization_deepgram](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/diarization/diarization_deepgram.py)
 - **Hardware**: Unknown (Cloud API)
 
-### Picovoice
-- **Latest Run:** `2025-06-27`
-- **Model Version:** `falcon`
-- **Configuration:** Picovoice SDK does not allow configuration. See [Picovoice's Documentation](https://picovoice.ai/docs/quick-start/falcon-python/) for more details.
-- **Code Reference:** [openbench/pipeline/diarization/picovoice](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/diarization/picovoice.py)
-- **Hardware**: M2 Ultra Mac Studio
-
 ### pyannote
 - **Latest Run:** `2025-02-17`
 - **Model Version:** `speaker-diarization-3.1`
@@ -55,15 +48,15 @@
 
 ### pyannoteAI
 - **Latest Run:** `2025-02-17`
-- **Model Version:** `pyannote-flagship (default)`
+- **Model Version:** `pyannote/precision-1`
 - **Configuration:** Job polling based on `X-RateLimit-Remaining` and `X-RateLimit-Reset` headers which leads to sub-second polling checks. See [pyannoteAI Documentation](https://docs.pyannote.ai/api-reference/diarize) for more details.
 - **Code Reference:** [openbench/pipeline/diarization/pyannote-api](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/diarization/pyannote_api.py)
 - **Hardware**: Unknown (Cloud API)
 
 ### Argmax
-- **Latest Run:** `2025-05-29`
-- **Model Version:** `pyannote-v3`
-- **Configuration:** Argmax SDK `SpeakerKit` CLI with default settings. See [Interspeech 2025 Paper](https://www.isca-archive.org/interspeech_2025/durmus25_interspeech.html) for more details.
+- **Latest Run:** `2025-09-29`
+- **Model Version:** `pyannote/community-1` (`pyannote-v4`)
+- **Configuration:** Argmax SDK 1.8.2 `SpeakerKit` CLI with default settings. See [Interspeech 2025 Paper](https://www.isca-archive.org/interspeech_2025/durmus25_interspeech.html) for more details.
 - **Code Reference:** [openbench/pipeline/diarization/speakerkit](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/diarization/speakerkit.py)
 - **Hardware**: M2 Ultra Mac Studio
 
@@ -100,11 +93,6 @@
 - **Language:** Chinese
 - **Domain:** In-Person Meeting
 - **Description:** A Chinese meeting dataset featuring real-world business meetings with multiple speakers, overlapping speech, and natural conversation patterns.
-
-### American-Life-Podcast
-- **Language:** English
-- **Domain:** Podcast
-- **Description:** A collection of podcast episodes from "This American Life" featuring interviews, storytelling, and conversational content with varying audio quality and speaker dynamics.
 
 ### CALLHOME
 - **Language:** Multilingual
@@ -159,21 +147,20 @@
 
 </details>
 
-| Dataset                | AWS Transcribe            | Deepgram             | Picovoice | pyannote | pyannoteAI              | Argmax     |
-|------------------------|---------------------------|----------------------|-----------|----------|-------------------------|------------|
-| AISHELL-4              | 0.22                      | 0.72                 | -         | 0.12     | 0.11                    | 0.13       |
-| AMI-IHM                | 0.29                      | 0.35                 | 0.35      | 0.19     | 0.16                    | 0.21       |
-| AMI-SDM                | 0.37                      | 0.42                 | -         | 0.23     | 0.18                    | 0.24       |
-| AVA-AVD                | 0.61                      | 0.68                 | -         | 0.48     | 0.47                    | 0.52       |
-| AliMeeting             | 0.42                      | 0.81                 | -         | 0.25     | 0.19                    | 0.26       |
-| American-Life-Podcast  | 0.23                      | 0.29                 | -         | 0.29     | 0.29                    | 0.37       |
-| CallHome               | 0.37                      | 0.64                 | 0.54      | 0.29     | 0.20                    | 0.31       |
-| DIHARD-III             | 0.36                      | 0.37                 | -         | 0.24     | 0.17                    | 0.24       |
-| EGO4D                  | 0.61                      | 0.71                 | -         | 0.52     | 0.46                    | 0.54       |
-| Earnings-21            | 0.18                      | -                    | -         | 0.10     | 0.09                    | 0.09       |
-| ICSI                   | 0.46                      | -                    | -         | 0.34     | 0.31                    | 0.35       |
-| MSDWILD                | 0.40                      | 0.64                 | -         | 0.32     | 0.26                    | 0.35       |
-| VoxConverse            | 0.13                      | 0.36                 | -         | 0.11     | 0.10                    | 0.12       |
+| Dataset                | AWS Transcribe            | Deepgram             | pyannote | pyannoteAI              | Argmax     |
+|------------------------|---------------------------|----------------------|----------|-------------------------|------------|
+| AISHELL-4              | 0.22                      | 0.72                 | 0.12     | 0.11                    | 0.12       |
+| AMI-IHM                | 0.29                      | 0.35                 | 0.19     | 0.16                    | 0.18       |
+| AMI-SDM                | 0.37                      | 0.42                 | 0.23     | 0.18                    | 0.21       |
+| AVA-AVD                | 0.61                      | 0.68                 | 0.48     | 0.47                    | 0.48       |
+| AliMeeting             | 0.42                      | 0.81                 | 0.25     | 0.19                    | 0.23       |
+| CallHome               | 0.37                      | 0.64                 | 0.29     | 0.20                    | 0.30       |
+| DIHARD-III             | 0.36                      | 0.37                 | 0.24     | 0.17                    | 0.22       |
+| EGO4D                  | 0.61                      | 0.71                 | 0.52     | 0.46                    | 0.48       |
+| Earnings-21            | 0.18                      | -                    | 0.10     | 0.09                    | 0.10       |
+| ICSI                   | 0.46                      | -                    | 0.34     | 0.31                    | 0.35       |
+| MSDWILD                | 0.40                      | 0.64                 | 0.32     | 0.26                    | 0.33       |
+| VoxConverse            | 0.13                      | 0.36                 | 0.11     | 0.10                    | 0.11       |
 
 <br/><br/>
 
@@ -191,7 +178,7 @@
 
 </details>
 
-| Dataset                 | AWS Transcribe | Deepgram | Picovoice | pyannote | pyannoteAI | SpeakerKit |
+| Dataset                 | AWS Transcribe | Deepgram | Picovoice | pyannote | pyannoteAI | Argmax |
 |-------------------------|---------------------------|----------------------|-----------|----------|-------------------------|------------|
 | AISHELL-4               | 10                       | 130                  | -         | 55       | 62                     | 476        |
 | AMI-IHM                 | 11                       | 216                  | 59        | 53       | 45                     | 463        |
@@ -223,21 +210,21 @@
 
 </details>
 
-| Dataset                 | AWS Transcribe | Deepgram | Picovoice | pyannote | pyannoteAI | SpeakerKit |
-|-------------------------|---------------------------|----------------------|-----------|----------|-------------------------|------------|
-| AISHELL-4               | 75                       | 30                  | -         | 5       | 15                     | 5         |
-| AMI-IHM                 | 94                       | 56                  | 12       | 0        | 12                     | 0         |
-| AMI-SDM                 | 56                       | 88                  | -         | 6        | 12                     | 0         |
-| AVA-AVD                 | 13                       | 6                  | -         | 13       | 9                      | 11        |
-| AliMeeting              | 90                       | 5                  | -         | 40       | 55                     | 10        |
-| American-Life-Podcast   | 11                       | 14                  | -         | 8        | 8                      | 8         |
-| CallHome                | 60                       | 33                  | 15       | 74       | 48                     | 48         |
-| DIHARD-III              | 72                       | 60                  | -         | 60       | 58                     | 25         |
-| EGO4D                   | 34                       | 16                  | -         | 24       | 24                     | 32         |
-| Earnings-21             | 50                       | -                    | -         | 50       | 64                     | 9          |
-| ICSI                    | 43                       | -                    | -         | 7        | 13                     | 7         |
-| MSDWILD                 | 39                       | 15                  | -         | 34       | 35                     | 26        |
-| VoxConverse             | 46                       | 39                  | -         | 42       | 38                     | 23        |
+| Dataset                 | AWS Transcribe | Deepgram |  pyannote | pyannoteAI | Argmax |
+|-------------------------|----------------|----------|-----------|------------|--------|
+| AISHELL-4               | 75             | 30       | 5         | 15         | 60     |
+| AMI-IHM                 | 94             | 56       | 0         | 12         | 75     |
+| AMI-SDM                 | 56             | 88       | 6         | 12         | 69     |
+| AVA-AVD                 | 13             | 6        | 13        | 9          | 13     |
+| AliMeeting              | 90             | 5        | 40        | 55         | 65     |
+| American-Life-Podcast   | 11             | 14       | 8         | 8          | 8      |
+| CallHome                | 60             | 33       | 74        | 48         | 42     |
+| DIHARD-III              | 72             | 60       | 60        | 58         | 45     |
+| EGO4D                   | 34             | 16       | 24        | 24         | 48     |
+| Earnings-21             | 50             | -        | 50        | 64         | 55     |
+| ICSI                    | 43             | -        | 7         | 13         | 7      |
+| MSDWILD                 | 39             | 15       | 34        | 35         | 28     |
+| VoxConverse             | 46             | 39       | 42        | 38         | 45     |
 
 </br><br/>
 # Real-time Transcription 
@@ -346,4 +333,4 @@
 
 ---
 
-¹ **Note:** This is not the fastest configuration for Argmax streaming transcription. The system sleeps for 0.3s to get enough audio and can be configured to be faster by another 0.3s.
+¹ **Note:** Argmax's default configuration includes a 0.3-second system sleep to allow the accumulation of new audio frames. Developers can reconfigure to remove this sleep to achieve lower latency.
