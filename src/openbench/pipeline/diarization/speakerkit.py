@@ -67,7 +67,7 @@ class SpeakerKitCli:
 
         try:
             result = subprocess.run(cmd, check=True, capture_output=True, text=True)
-            logger.info(f"Diarization CLI stdout:\n{result.stdout}")
+            logger.debug(f"Diarization CLI stdout:\n{result.stdout}")
         except subprocess.CalledProcessError as e:
             # Strip api-key from stderr if ``SPEAKERKIT_API_KEY`` is set
             if "SPEAKERKIT_API_KEY" in os.environ:
@@ -94,7 +94,7 @@ class SpeakerKitPipeline(Pipeline):
     pipeline_type = PipelineType.DIARIZATION
 
     def build_pipeline(self) -> Callable[[SpeakerKitInput], tuple[Path, float]]:
-        return SpeakerKitCli(cli_path=self.config.cli_path, model_path=self.config.model_path)
+        return SpeakerKitCli(self.config)
 
     def parse_input(self, input_sample: DiarizationSample) -> SpeakerKitInput:
         inputs: SpeakerKitInput = {
