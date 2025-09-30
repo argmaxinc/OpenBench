@@ -53,6 +53,10 @@ class WhisperKitProOrchestrationConfig(PipelineConfig):
         "pyannote4",
         description="The version of the clusterer to use",
     )
+    use_exclusive_reconciliation: bool = Field(
+        False,
+        description="Whether to use exclusive reconciliation",
+    )
 
 
 @register_pipeline
@@ -73,6 +77,7 @@ class WhisperKitProOrchestrationPipeline(Pipeline):
             diarization=True,
             orchestration_strategy=self.config.orchestration_strategy,
             clusterer_version_string=self.config.clusterer_version_string,
+            use_exclusive_reconciliation=self.config.use_exclusive_reconciliation,
         )
         # Create WhisperKit engine
         engine = WhisperKitPro(
