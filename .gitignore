@@ -43,3 +43,6 @@ inference_outputs/
 
 # Miscellaneous
 miscellaneous/
+
+# Default openbench-cli output directory
+downloaded_datasets/
