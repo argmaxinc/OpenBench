@@ -1,15 +1,14 @@
 # For licensing see accompanying LICENSE.md file.
 # Copyright (C) 2025 Argmax, Inc. All Rights Reserved.
 
-"""Download command for dataset CLI."""
-
+import json
 from pathlib import Path
 
 import typer
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
-from openbench.dataset import DatasetRegistry
+from openbench.dataset import BaseDataset, BaseSample, DatasetRegistry
 from openbench.types import PipelineType
 
 
@@ -135,7 +134,7 @@ def download(
         raise typer.Exit(1)
 
 
-def _download_full_dataset(dataset, output_path: Path) -> None:
+def _download_full_dataset(dataset: type[BaseDataset], output_path: Path) -> None:
     """Download the entire dataset."""
     console.print(f"[blue]Downloading full dataset to {output_path}[/blue]")
 
@@ -153,7 +152,7 @@ def _download_full_dataset(dataset, output_path: Path) -> None:
         _save_sample(sample, audio_dir, metadata_dir, reference_dir, i)
 
 
-def _download_sample_by_id(dataset, sample_id: int, output_path: Path) -> None:
+def _download_sample_by_id(dataset: type[BaseDataset], sample_id: int, output_path: Path) -> None:
     """Download a specific sample by sample ID."""
     if sample_id >= len(dataset):
         console.print(f"[red]Error: Sample ID {sample_id} is out of range (0-{len(dataset) - 1})[/red]")
@@ -173,7 +172,7 @@ def _download_sample_by_id(dataset, sample_id: int, output_path: Path) -> None:
     _save_sample(sample, audio_dir, metadata_dir, reference_dir, sample_id)
 
 
-def _download_sample_by_audio_name(dataset, audio_name: str, output_path: Path) -> None:
+def _download_sample_by_audio_name(dataset: type[BaseDataset], audio_name: str, output_path: Path) -> None:
     """Download a specific sample by audio name."""
     console.print(f"[blue]Searching for audio file '{audio_name}'...[/blue]")
 
@@ -202,16 +201,11 @@ def _download_sample_by_audio_name(dataset, audio_name: str, output_path: Path) 
     _save_sample(sample, audio_dir, metadata_dir, reference_dir, found_idx)
 
 
-def _save_sample(sample, audio_dir: Path, metadata_dir: Path, reference_dir: Path, idx: int) -> None:
+def _save_sample(sample: type[BaseSample], audio_dir: Path, metadata_dir: Path, reference_dir: Path, idx: int) -> None:
     """Save a sample to disk."""
-    import json
-
-    import soundfile as sf
 
     # Save audio file
-    audio_filename = f"{sample.audio_name}.wav"
-    audio_path = audio_dir / audio_filename
-    sf.write(audio_path, sample.waveform, sample.sample_rate)
+    _ = sample.save_audio(audio_dir)
 
     # Save reference file
     sample.reference.to_annotation_file(str(reference_dir), sample.audio_name)
@@ -221,14 +215,11 @@ def _save_sample(sample, audio_dir: Path, metadata_dir: Path, reference_dir: Pat
         "sample_index": idx,
         "audio_name": sample.audio_name,
         "sample_rate": sample.sample_rate,
-        "duration": len(sample.waveform) / sample.sample_rate,
-        "reference": sample.reference.model_dump()
-        if hasattr(sample.reference, "model_dump")
-        else str(sample.reference),
+        "duration": sample.get_audio_duration(),
         "extra_info": sample.extra_info,
     }
 
     metadata_filename = f"{sample.audio_name}_metadata.json"
     metadata_path = metadata_dir / metadata_filename
     with open(metadata_path, "w") as f:
-        json.dump(metadata, f, indent=2, default=str)
+        json.dump(metadata, f, indent=4, default=str)

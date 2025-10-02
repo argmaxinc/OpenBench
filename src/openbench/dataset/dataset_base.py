@@ -3,7 +3,7 @@
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Generic, TypeVar
+from typing import Any, Callable, Generic, Mapping, TypeVar
 
 import numpy as np
 import soundfile as sf
@@ -32,12 +32,31 @@ class DatasetConfig(BaseModel):
     num_samples: int | None = Field(
         None, description="Number of samples to take from the dataset. If None, take all samples."
     )
+    column_mapping: Mapping[str, str] | None = Field(
+        None, description="Mapping of the column names in the dataset to the expected column names in the sample class"
+    )
+    column_transforms: Mapping[str, Callable[[dict[str, Any]], dict[str, Any]]] | None = Field(
+        None,
+        description=(
+            "Transformations to apply to the columns in the dataset. The key in here are post column mapping names therefore, the expected column names are used."
+            "The function should take a row as input and return a row with the transformed column."
+            "The function signature should be `def transform(row: dict[str, Any]) -> dict[str, Any]` where the key is the post column mapping name and the value is the transformed column."
+        ),
+    )
 
     def load(self) -> HfDataset:
         # TODO: Add support for streaming datasets
         ds = load_dataset(self.dataset_id, self.subset, split=self.split)
         if self.num_samples is not None:
             ds = ds.take(self.num_samples)
+
+        if self.column_mapping is not None:
+            ds = ds.rename_columns(self.column_mapping)
+
+        if self.column_transforms is not None:
+            for col, transform in self.column_transforms.items():
+                ds = ds.map(transform)
+
         return ds
 
 
@@ -102,6 +121,7 @@ class BaseDataset(ABC, Generic[SampleType]):
         """Get a sample by index - concrete implementation using prepare_sample."""
         row = self.ds[idx]
         row["idx"] = idx
+
         audio_name, waveform, sample_rate = self._extract_audio_info(row)
         reference, extra_info = self.prepare_sample(row)
 

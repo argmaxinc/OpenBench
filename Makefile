@@ -25,8 +25,8 @@ install-pre-commit:
 format:
 	@pre-commit run --all-files
 	@echo "Just to be sure, we're running ruff again..."
-	@uvx ruff check --fix .
-	@uvx ruff format .
+	@uvx ruff check --fix src/
+	@uvx ruff format src/
 
 display-config:
 	@uv run python evaluation.py -h
