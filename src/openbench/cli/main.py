@@ -5,7 +5,7 @@
 
 import typer
 
-from openbench.cli.commands import evaluate, inference, summary
+from openbench.cli.commands import dataset, evaluate, inference, summary
 
 
 app = typer.Typer(
@@ -15,6 +15,7 @@ app = typer.Typer(
 )
 
 # Add commands to the app
+app.add_typer(dataset.app, name="dataset")
 app.command()(evaluate)
 app.command()(inference)
 app.command()(summary)
