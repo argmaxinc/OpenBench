@@ -51,6 +51,33 @@ class DatasetRegistry:
         return dataset_class.from_config(config)
 
     @classmethod
+    def get_dataset_from_alias(cls, alias: str, pipeline_type: PipelineType | None = None) -> BaseDataset:
+        """Get a dataset instance from an alias."""
+        # check if alias is a registered alias
+        if alias not in cls._aliases:
+            raise ValueError(f"Unknown dataset alias: {alias}. Available: {list(cls._aliases.keys())}")
+
+        # Check the compatible pipeline types for the alias
+        pipeline_types = cls.get_alias_supported_pipeline_types(alias)
+
+        if len(pipeline_types) > 1 and pipeline_type is None:
+            raise ValueError(
+                f"Dataset alias {alias} has multiple compatible pipeline types: {pipeline_types}. Please specify a pipeline type."
+            )
+
+        if len(pipeline_types) > 1 and pipeline_type not in pipeline_types:
+            raise ValueError(
+                f"Dataset alias {alias} does not support pipeline type {pipeline_type}. Supported types: {pipeline_types}"
+            )
+
+        if pipeline_type is None:
+            pipeline_type = next(iter(pipeline_types))
+
+        ds_config = cls.get_alias_config(alias)
+
+        return cls.get_dataset_for_pipeline(pipeline_type=pipeline_type, config=ds_config)
+
+    @classmethod
     def get_expected_columns(cls, pipeline_type: PipelineType) -> list[str]:
         """Get the expected columns for a specific pipeline type."""
         if pipeline_type not in cls._datasets:

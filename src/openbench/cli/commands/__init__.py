@@ -3,9 +3,10 @@
 
 """CLI commands module."""
 
+from . import dataset
 from .evaluate import evaluate
 from .inference import inference
 from .summary import summary
 
 
-__all__ = ["evaluate", "inference", "summary"]
+__all__ = ["dataset", "evaluate", "inference", "summary"]

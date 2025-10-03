@@ -3,15 +3,15 @@
 
 """Shared types used across the openbench package."""
 
-from enum import Enum, auto
+from enum import Enum
 from typing import Protocol, runtime_checkable
 
 
 class PipelineType(Enum):
-    DIARIZATION = auto()
-    TRANSCRIPTION = auto()
-    ORCHESTRATION = auto()
-    STREAMING_TRANSCRIPTION = auto()
+    DIARIZATION = "diarization"
+    TRANSCRIPTION = "transcription"
+    ORCHESTRATION = "orchestration"
+    STREAMING_TRANSCRIPTION = "streaming_transcription"
 
 
 # All prediction classes that we output should conform to this
