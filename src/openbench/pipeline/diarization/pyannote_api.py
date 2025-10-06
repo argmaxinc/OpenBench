@@ -151,14 +151,14 @@ class PyannoteApi:
         data = diarization_response.json()
         headers = diarization_response.headers
         job_id = data["jobId"]
-        logger.info(f"Starting to poll results for job {job_id}")
+        logger.debug(f"Starting to poll results for job {job_id}")
 
         # Get rate limit info from headers with fallback defaults
         remaining_requests = int(headers.get("X-RateLimit-Remaining", 30))
         rate_limit = int(headers.get("X-RateLimit-Limit", 30))
         reset_time = int(headers.get("X-RateLimit-Reset", 0))
 
-        logger.info(
+        logger.debug(
             f"Initial rate limits - Remaining: {remaining_requests}, Limit: {rate_limit}, Reset: {reset_time}s"
         )
 
@@ -168,13 +168,13 @@ class PyannoteApi:
             try:
                 # Check if we need to wait for rate limit reset
                 if remaining_requests <= self.request_buffer:
-                    logger.info(
+                    logger.debug(
                         f"Running low on requests ({remaining_requests} remaining). Waiting {reset_time}s for reset"
                     )
                     time.sleep(reset_time)
                     remaining_requests = rate_limit
 
-                logger.info(f"Polling job {job_id}")
+                logger.debug(f"Polling job {job_id}")
                 response = requests.get(
                     url=f"{self.jobs_url}/{job_id}",
                     headers={"Authorization": f"Bearer {os.environ['PYANNOTE_TOKEN']}"},
@@ -187,17 +187,17 @@ class PyannoteApi:
                 # Add a small buffer to avoid hitting rate limits
                 safe_remaining = max(1, remaining_requests - self.request_buffer)
                 delay = reset_time / safe_remaining
-                logger.info(
+                logger.debug(
                     f"Rate limit info - Remaining: {remaining_requests}, Reset: {reset_time}s, Delay: {delay * 1000:.0f}ms"
                 )
 
                 job_data = response.json()
                 job_status = job_data["status"]
-                logger.info(f"Job {job_id} status: {job_status}")
+                logger.debug(f"Job {job_id} status: {job_status}")
 
                 if job_status == "succeeded":
                     elapsed_time = time.time() - start_time
-                    logger.info(f"Job {job_id} completed successfully after {elapsed_time:.1f}s")
+                    logger.debug(f"Job {job_id} completed successfully after {elapsed_time:.1f}s")
                     job_data["jobPollingElapsedTime"] = elapsed_time
                     return PyannoteApiOutput.model_validate(job_data)
                 elif job_status == "failed":
@@ -209,7 +209,7 @@ class PyannoteApi:
                     raise Exception("Job was canceled")
 
                 elapsed_time = time.time() - start_time
-                logger.info(f"Waiting {delay * 1000:.0f}ms before next request")
+                logger.debug(f"Waiting {delay * 1000:.0f}ms before next request")
                 time.sleep(delay)
 
             except requests.exceptions.RequestException as e:
