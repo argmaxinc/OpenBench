@@ -45,6 +45,10 @@ class WhisperKitProTranscriptionConfig(TranscriptionConfig):
         ComputeUnit.CPU_AND_NE,
         description="The compute units to use for the text decoder. Default is CPU_AND_NE.",
     )
+    fast_load: bool = Field(
+        False,
+        description="Whether to use fast load",
+    )
 
 
 @register_pipeline
@@ -63,6 +67,7 @@ class WhisperKitProTranscriptionPipeline(Pipeline):
             word_timestamps=True,
             chunking_strategy="vad",
             diarization=False,
+            fast_load=self.config.fast_load,
         )
         # Create WhisperKit engine
         engine = WhisperKitPro(

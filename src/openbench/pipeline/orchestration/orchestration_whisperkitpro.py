@@ -57,6 +57,10 @@ class WhisperKitProOrchestrationConfig(PipelineConfig):
         False,
         description="Whether to use exclusive reconciliation",
     )
+    fast_load: bool = Field(
+        False,
+        description="Whether to use fast load",
+    )
 
 
 @register_pipeline
@@ -78,6 +82,7 @@ class WhisperKitProOrchestrationPipeline(Pipeline):
             orchestration_strategy=self.config.orchestration_strategy,
             clusterer_version_string=self.config.clusterer_version,
             use_exclusive_reconciliation=self.config.use_exclusive_reconciliation,
+            fast_load=self.config.fast_load,
         )
         # Create WhisperKit engine
         engine = WhisperKitPro(
