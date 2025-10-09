@@ -85,6 +85,10 @@ class WhisperKitProConfig(BaseModel):
         False,
         description="Whether to use exclusive reconciliation",
     )
+    fast_load: bool = Field(
+        False,
+        description="Whether to use fast load",
+    )
 
     @property
     def rttm_path(self) -> str | None:
@@ -116,6 +120,8 @@ class WhisperKitProConfig(BaseModel):
             COMPUTE_UNITS_MAPPER[self.audio_encoder_compute_units],
             "--text-decoder-compute-units",
             COMPUTE_UNITS_MAPPER[self.text_decoder_compute_units],
+            "--fast-load",
+            str(self.fast_load).lower(),
         ]
 
         # Add optional args
