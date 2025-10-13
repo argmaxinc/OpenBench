@@ -63,6 +63,11 @@ class MetricOptions(Enum):
     # Ref: https://en.wikipedia.org/wiki/Word_error_rate
     WER = "wer"
 
+    # Concatenated minimum-Permutation Word Error Rate
+    # Evaluates multi-speaker transcription by finding the optimal speaker permutation
+    # Ref: https://arxiv.org/abs/2004.09249
+    CPWER = "cpwer"
+
     # Streaming Transcription Latency Based on Hypothesis(Unconfirmed) Transcript
     # Evaluates the Latency of Realtime Transcription
     # Time passed after an audio chunk is sent until its corresponding transcription is received.
