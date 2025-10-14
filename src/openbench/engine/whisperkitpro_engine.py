@@ -152,6 +152,10 @@ class WhisperKitProInput(BaseModel):
 
     audio_path: Path
     keep_audio: bool = False
+    prompt: str | None = Field(
+        None,
+        description="Optional prompt for keyword boosting/context"
+    )
 
 
 class WhisperKitProOutput(BaseModel):
@@ -196,6 +200,10 @@ class WhisperKitPro:
             "--disable-keychain",  # Always disable keychain for convenience
             *self.transcription_args,
         ]
+
+        # Add prompt for keyword boosting if provided
+        if input.prompt:
+            cmd.extend(["--prompt", input.prompt])
 
         if "WHISPERKITPRO_API_KEY" in os.environ:
             cmd.extend(["--api-key", os.environ["WHISPERKITPRO_API_KEY"]])

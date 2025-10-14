@@ -78,9 +78,20 @@ class WhisperKitProTranscriptionPipeline(Pipeline):
         return engine
 
     def parse_input(self, input_sample: TranscriptionSample) -> WhisperKitProInput:
+        """Override to extract keywords from sample before processing."""
+        # Extract keywords from sample's extra_info if flag is enabled
+        prompt = None
+        if self.config.use_keywords:
+            keywords = input_sample.extra_info.get("dictionary", [])
+            if keywords:
+                # Format keywords as comma-separated prompt for WhisperKit
+                prompt = ", ".join(keywords)
+                logger.debug(f"Using keywords prompt: {prompt}")
+
         return WhisperKitProInput(
             audio_path=input_sample.save_audio(TEMP_AUDIO_DIR),
             keep_audio=False,
+            prompt=prompt,
         )
 
     def parse_output(self, output: WhisperKitProOutput) -> TranscriptionOutput:
