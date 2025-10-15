@@ -156,6 +156,10 @@ class WhisperKitProInput(BaseModel):
         None,
         description="Optional prompt for keyword boosting/context"
     )
+    custom_vocabulary_path: str | None = Field(
+        None,
+        description="Optional path to custom vocabulary file"
+    )
 
 
 class WhisperKitProOutput(BaseModel):
@@ -204,6 +208,10 @@ class WhisperKitPro:
         # Add prompt for keyword boosting if provided
         if input.prompt:
             cmd.extend(["--prompt", input.prompt])
+
+        # Add custom vocabulary path if provided
+        if input.custom_vocabulary_path:
+            cmd.extend(["--custom-vocabulary-path", input.custom_vocabulary_path])
 
         if "WHISPERKITPRO_API_KEY" in os.environ:
             cmd.extend(["--api-key", os.environ["WHISPERKITPRO_API_KEY"]])

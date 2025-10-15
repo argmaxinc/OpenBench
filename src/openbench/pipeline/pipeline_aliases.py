@@ -387,7 +387,8 @@ def register_pipeline_aliases() -> None:
             "model_version": "parakeet-v2",
             "model_prefix": "nvidia",
             "model_repo_name": "argmaxinc/parakeetkit-pro",
-            "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
+            "cli_path": "/Users/berkin/Downloads/whisperkitpro-cli"
+                #os.getenv("WHISPERKITPRO_CLI_PATH"),
         },
         description="WhisperKitPro transcription pipeline using the parakeet-v2 version of the model. Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
     )
@@ -399,7 +400,10 @@ def register_pipeline_aliases() -> None:
             "model_version": "parakeet-v2_476MB",
             "model_prefix": "nvidia",
             "model_repo_name": "argmaxinc/parakeetkit-pro",
-            "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
+            "cli_path": "/Users/berkin/Downloads/whisperkitpro-cli",
+            "use_keywords": False
+                #os.getenv("WHISPERKITPRO_CLI_PATH"),
+            #"custom-vocabulary-path": "/Users/berkin/Desktop/tokenizer_files/keywords.txt"    
         },
         description="WhisperKitPro transcription pipeline using the parakeet-v2 version of the model compressed to 476MB. Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
     )
@@ -411,7 +415,8 @@ def register_pipeline_aliases() -> None:
             "model_version": "parakeet-v3",
             "model_prefix": "nvidia",
             "model_repo_name": "argmaxinc/parakeetkit-pro",
-            "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
+            "cli_path": "/Users/berkin/Downloads/whisperkitpro-cli"
+                #os.getenv("WHISPERKITPRO_CLI_PATH"),
         },
         description="WhisperKitPro transcription pipeline using the parakeet-v3 version of the model. Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
     )
@@ -423,7 +428,7 @@ def register_pipeline_aliases() -> None:
             "model_version": "parakeet-v3_494MB",
             "model_prefix": "nvidia",
             "model_repo_name": "argmaxinc/parakeetkit-pro",
-            "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
+            "cli_path": "/Users/berkin/Downloads/whisperkitpro-cli"
         },
         description="WhisperKitPro transcription pipeline using the parakeet-v3 version of the model compressed to 494MB. Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
     )
