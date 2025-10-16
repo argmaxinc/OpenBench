@@ -64,11 +64,14 @@ class WandbLogger(ABC, Generic[SampleResult]):
         """
         pass
 
-    def get_global_metrics(self, global_results: list[GlobalResult]) -> dict[str, float]:
+    def get_global_metrics(
+        self, global_results: list[GlobalResult], sample_results: list[SampleResult]
+    ) -> dict[str, float]:
         """Get global metrics from results.
 
         Args:
             global_results: List of GlobalResult objects
+            sample_results: List of SampleResult objects
 
         Returns:
             Dictionary mapping metric names to their values
@@ -79,6 +82,12 @@ class WandbLogger(ABC, Generic[SampleResult]):
         global_results_dict = {
             global_result.metric_name: global_result.global_result for global_result in global_results
         }
+        # Compute global Speed Factor
+        total_audio_duration = sum(sample_result.audio_duration for sample_result in sample_results)
+        total_prediction_time = sum(sample_result.prediction_time for sample_result in sample_results)
+        speed_factor = total_audio_duration / total_prediction_time
+        global_results_dict["speed_factor"] = speed_factor
+
         with open(self.results_dir / "global_results.json", "w") as f:
             json.dump(global_results_dict, f)
 
@@ -218,7 +227,7 @@ class WandbLogger(ABC, Generic[SampleResult]):
         log_dict = {}
 
         # Get global metrics
-        log_dict.update(self.get_global_metrics(global_results))
+        log_dict.update(self.get_global_metrics(global_results, sample_results))
 
         # Get task results table
         log_dict.update(self.get_task_results_table(task_results))
