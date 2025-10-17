@@ -92,7 +92,7 @@ class WhisperKitProTranscriptionPipeline(Pipeline):
                 # Create temp vocab directory if it doesn't exist
                 TEMP_VOCAB_DIR.mkdir(parents=True, exist_ok=True)
 
-                # Create a unique vocab file for this sample
+                # Create a vocab file for this sample
                 vocab_file = TEMP_VOCAB_DIR / "vocab.txt"
 
                 # Write keywords to file (one per line)
@@ -118,7 +118,6 @@ class WhisperKitProTranscriptionPipeline(Pipeline):
             start=[word["start"] for segment in data["segments"] for word in segment["words"] if "start" in word],
             end=[word["end"] for segment in data["segments"] for word in segment["words"] if "end" in word],
         )
-        print(f"Transcript: {transcript}")
 
         return TranscriptionOutput(
             prediction=transcript,
