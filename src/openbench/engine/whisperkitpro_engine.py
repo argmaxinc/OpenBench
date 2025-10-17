@@ -152,6 +152,10 @@ class WhisperKitProInput(BaseModel):
 
     audio_path: Path
     keep_audio: bool = False
+    custom_vocabulary_path: str | None = Field(
+        None,
+        description="Optional path to custom vocabulary file"
+    )
 
 
 class WhisperKitProOutput(BaseModel):
@@ -196,6 +200,10 @@ class WhisperKitPro:
             "--disable-keychain",  # Always disable keychain for convenience
             *self.transcription_args,
         ]
+
+        # Add custom vocabulary path if provided
+        if input.custom_vocabulary_path:
+            cmd.extend(["--custom-vocabulary-path", input.custom_vocabulary_path])
 
         if "WHISPERKITPRO_API_KEY" in os.environ:
             cmd.extend(["--api-key", os.environ["WHISPERKITPRO_API_KEY"]])
