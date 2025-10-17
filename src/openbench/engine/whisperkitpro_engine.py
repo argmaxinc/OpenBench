@@ -152,10 +152,6 @@ class WhisperKitProInput(BaseModel):
 
     audio_path: Path
     keep_audio: bool = False
-    prompt: str | None = Field(
-        None,
-        description="Optional prompt for keyword boosting/context"
-    )
     custom_vocabulary_path: str | None = Field(
         None,
         description="Optional path to custom vocabulary file"
@@ -204,10 +200,6 @@ class WhisperKitPro:
             "--disable-keychain",  # Always disable keychain for convenience
             *self.transcription_args,
         ]
-
-        # Add prompt for keyword boosting if provided
-        if input.prompt:
-            cmd.extend(["--prompt", input.prompt])
 
         # Add custom vocabulary path if provided
         if input.custom_vocabulary_path:
