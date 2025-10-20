@@ -18,6 +18,7 @@ from .common import TranscriptionConfig, TranscriptionOutput
 logger = get_logger(__name__)
 
 TEMP_AUDIO_DIR = Path("./temp_audio")
+TEMP_VOCAB_DIR = Path("./temp_vocab")
 
 
 class WhisperKitProTranscriptionConfig(TranscriptionConfig):
@@ -49,6 +50,10 @@ class WhisperKitProTranscriptionConfig(TranscriptionConfig):
         False,
         description="Whether to use fast load",
     )
+    custom_vocabulary_path: str | None = Field(
+        None,
+        description="Path to custom vocabulary file for keyword boosting",
+    )
 
 
 @register_pipeline
@@ -78,9 +83,29 @@ class WhisperKitProTranscriptionPipeline(Pipeline):
         return engine
 
     def parse_input(self, input_sample: TranscriptionSample) -> WhisperKitProInput:
+        """Override to extract keywords from sample before processing."""
+        # Extract keywords from sample's extra_info if flag is enabled
+        custom_vocab_path = None
+        if self.config.use_keywords:
+            keywords = input_sample.extra_info.get("dictionary", [])
+            if keywords:
+                # Create temp vocab directory if it doesn't exist
+                TEMP_VOCAB_DIR.mkdir(parents=True, exist_ok=True)
+
+                # Create a vocab file for this sample
+                vocab_file = TEMP_VOCAB_DIR / "vocab.txt"
+
+                # Write keywords to file (one per line)
+                with vocab_file.open("w") as f:
+                    f.write("\n".join(keywords))
+
+                custom_vocab_path = str(vocab_file)
+                logger.debug(f"Created custom vocabulary file: {custom_vocab_path} with {len(keywords)} keywords")
+
         return WhisperKitProInput(
             audio_path=input_sample.save_audio(TEMP_AUDIO_DIR),
             keep_audio=False,
+            custom_vocabulary_path=custom_vocab_path,
         )
 
     def parse_output(self, output: WhisperKitProOutput) -> TranscriptionOutput:
