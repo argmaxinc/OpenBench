@@ -35,6 +35,7 @@ dependencies = [
     "deepgram-sdk>=4.8.0,<5",
     "groq>=0.31.0",
     "openai==1.108.0",
+    "openai-whisper>=20240930",
     "texterrors==0.5.1",
     "nemo-toolkit[asr]>=2.5.0",
 ]

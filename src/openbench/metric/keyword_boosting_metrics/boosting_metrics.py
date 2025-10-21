@@ -153,7 +153,7 @@ class BaseKeywordMetric(BaseMetric):
             logger.debug(f"FP keywords: {fp_keywords} - FP rate: {fp}/{len(normalized_keywords)}")
 
         logger.debug("---")
-        logger.info(f"Keyword statistics computed: TP={tp}, FP={fp}, FN={gt - tp}, GT={gt}")
+        logger.debug(f"Keyword statistics computed: TP={tp}, FP={fp}, FN={gt - tp}, GT={gt}")
 
         return {"true_positives": tp, "ground_truth": gt, "false_positives": fp, "keyword_stats": key_words_stat}
 
