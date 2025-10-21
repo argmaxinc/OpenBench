@@ -7,6 +7,7 @@ from typing import Literal
 
 import coremltools as ct
 from argmaxtools.utils import get_logger
+from huggingface_hub import snapshot_download
 from pydantic import BaseModel, Field
 
 
@@ -23,19 +24,39 @@ COMPUTE_UNITS_MAPPER = {
 # NOTE: This is not an exhaustive list of all the possible options for
 # the CLI just the ones that are most commonly used
 class WhisperKitProConfig(BaseModel):
-    """Configuration for transcription operations."""
+    """Configuration for transcription operations.
+    
+    Supports two modes:
+    1. Legacy: model_version, model_prefix, model_repo_name
+    2. New: repo_id, model_variant (downloads models locally)
+    """
 
-    model_version: str = Field(
-        "tiny",
-        description="The version of the WhisperKit model to use",
+    # Legacy fields
+    model_version: str | None = Field(
+        None,
+        description="(Legacy) WhisperKit model version",
     )
-    model_prefix: str = Field(
-        "openai",
-        description="The prefix of the model to use.",
+    model_prefix: str | None = Field(
+        None,
+        description="(Legacy) Model prefix",
     )
     model_repo_name: str | None = Field(
-        "argmaxinc/whisperkit-pro",
-        description="The name of the Hugging Face model repo to use. Default is `argmaxinc/whisperkit-pro` which has Whisper checkpoints models.",
+        None,
+        description="(Legacy) HuggingFace model repo name",
+    )
+
+    # New fields for model download
+    repo_id: str | None = Field(
+        None,
+        description="HuggingFace repo ID",
+    )
+    model_variant: str | None = Field(
+        None,
+        description="Model variant folder name",
+    )
+    models_cache_dir: str | None = Field(
+        None,
+        description="Directory to cache downloaded models",
     )
     word_timestamps: bool = Field(
         True,
@@ -103,14 +124,30 @@ class WhisperKitProConfig(BaseModel):
         logger.info(f"Created report dir for WhisperKit at: {report_dir}")
         return report_dir
 
-    def generate_cli_args(self) -> list[str]:
-        args = [
-            "--model",
-            self.model_version,
-            "--model-prefix",
-            self.model_prefix,
-            "--model-repo-name",
-            self.model_repo_name,
+    def generate_cli_args(self, model_path: Path | None = None) -> list[str]:
+        # Use either --model-path (new) or legacy model args
+        if self.use_model_path:
+            if model_path is None:
+                raise ValueError(
+                    "model_path required when using repo_id/model_variant"
+                )
+            args = [
+                "--model-path",
+                str(model_path),
+            ]
+        else:
+            # Legacy mode
+            args = [
+                "--model",
+                self.model_version,
+                "--model-prefix",
+                self.model_prefix,
+                "--model-repo-name",
+                self.model_repo_name,
+            ]
+
+        # Common args
+        args.extend([
             "--report",  # Always generate the report files
             "--report-path",  # Report path should always be provided
             self.report_path,
@@ -122,7 +159,7 @@ class WhisperKitProConfig(BaseModel):
             COMPUTE_UNITS_MAPPER[self.text_decoder_compute_units],
             "--fast-load",
             str(self.fast_load).lower(),
-        ]
+        ])
 
         # Add optional args
         if self.word_timestamps:
@@ -145,6 +182,67 @@ class WhisperKitProConfig(BaseModel):
 
         logger.info(f"Generating CLI args for Transcription: {args}")
         return args
+
+    @property
+    def use_model_path(self) -> bool:
+        """Check if we should use --model-path vs legacy args."""
+        return (
+            self.repo_id is not None and self.model_variant is not None
+        )
+
+    def download_and_prepare_model(self) -> Path:
+        """Download model from HuggingFace and prepare folder.
+
+        Returns:
+            Path to model directory for --model-path
+        """
+        if not self.use_model_path:
+            raise ValueError(
+                "download_and_prepare_model requires "
+                "repo_id and model_variant"
+            )
+
+        cache_dir = Path(self.models_cache_dir or "./models_cache")
+        cache_dir.mkdir(parents=True, exist_ok=True)
+
+        # Model path: cache_dir / repo_id / model_variant
+        repo_dir = self.repo_id.replace("/", "_")
+        model_path = cache_dir / repo_dir / self.model_variant
+
+        # Check if model already exists
+        if model_path.exists():
+            logger.info(f"Model already exists at: {model_path}")
+            return model_path
+
+        logger.info(
+            f"Downloading model from {self.repo_id}, "
+            f"variant: {self.model_variant}"
+        )
+
+        # Download specific model variant folder from HuggingFace
+        try:
+            downloaded_path = snapshot_download(
+                repo_id=self.repo_id,
+                allow_patterns=f"{self.model_variant}/*",
+                local_dir=cache_dir / repo_dir,
+                local_dir_use_symlinks=False,
+            )
+
+            logger.info(f"Model downloaded to: {downloaded_path}")
+            logger.info(f"Model path for CLI: {model_path}")
+
+            if not model_path.exists():
+                raise RuntimeError(
+                    f"Model download succeeded but path doesn't exist: "
+                    f"{model_path}"
+                )
+
+            return model_path
+
+        except Exception as e:
+            raise RuntimeError(
+                f"Failed to download model from {self.repo_id}: {e}"
+            ) from e
 
 
 class WhisperKitProInput(BaseModel):
@@ -184,10 +282,26 @@ class WhisperKitPro:
         transcription_config: WhisperKitProConfig,
     ) -> None:
         self.cli_path = cli_path
-
         self.transcription_config = transcription_config
 
-        self.transcription_args = self.transcription_config.generate_cli_args()
+        # Download and prepare model if using new model management
+        self.model_path = None
+        if self.transcription_config.use_model_path:
+            logger.info(
+                "Using new model management with repo_id/model_variant"
+            )
+            self.model_path = (
+                self.transcription_config.download_and_prepare_model()
+            )
+        else:
+            logger.info("Using legacy model management")
+
+        # Generate CLI args (with model_path if available)
+        self.transcription_args = (
+            self.transcription_config.generate_cli_args(
+                model_path=self.model_path
+            )
+        )
         self.transcription_config.create_report_path()
 
     def __call__(self, input: WhisperKitProInput) -> WhisperKitProOutput:
