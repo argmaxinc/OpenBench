@@ -333,13 +333,29 @@ def register_pipeline_aliases() -> None:
         description="Speech Analyzer transcription pipeline (open-source version). Requires Swift and Xcode installed.",
     )
 
+    # Legacy mode without manual local model download
+    # PipelineRegistry.register_alias(
+    #     "whisperkitpro-tiny",
+    #     WhisperKitProTranscriptionPipeline,
+    #     default_config={
+    #         "model_version": "tiny",
+    #         "model_prefix": "openai",
+    #         "model_repo_name": "argmaxinc/whisperkit-pro",
+    #         "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
+    #         "use_keywords": False
+    #     },
+    #     description="WhisperKitPro transcription pipeline using the tiny version of the model. Requires Swift and Xcode installed. Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
+    # )
+
+    # New mode with manual local model download
+    # to avoid HF Download Rate Limiting
     PipelineRegistry.register_alias(
         "whisperkitpro-tiny",
         WhisperKitProTranscriptionPipeline,
         default_config={
-            "model_version": "tiny",
-            "model_prefix": "openai",
-            "model_repo_name": "argmaxinc/whisperkit-pro",
+            "repo_id": "argmaxinc/whisperkit-pro",
+            "model_variant": "openai_whisper-tiny",
+            "models_cache_dir": "./models_cache",
             "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
             "use_keywords": False
         },
@@ -350,9 +366,9 @@ def register_pipeline_aliases() -> None:
         "whisperkitpro-large-v3",
         WhisperKitProTranscriptionPipeline,
         default_config={
-            "model_version": "large-v3",
-            "model_prefix": "openai",
-            "model_repo_name": "argmaxinc/whisperkit-pro",
+            "repo_id": "argmaxinc/whisperkit-pro",
+            "model_variant": "openai_whisper-large-v3",
+            "models_cache_dir": "./models_cache",
             "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
             "use_keywords": False
         },
@@ -363,9 +379,9 @@ def register_pipeline_aliases() -> None:
         "whisperkitpro-large-v3-turbo",
         WhisperKitProTranscriptionPipeline,
         default_config={
-            "model_version": "large-v3-v20240930",
-            "model_prefix": "openai",
-            "model_repo_name": "argmaxinc/whisperkit-pro",
+            "repo_id": "argmaxinc/whisperkit-pro",
+            "model_variant": "openai_whisper-large-v3-v20240930",
+            "models_cache_dir": "./models_cache",
             "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
             "use_keywords": False
         },
@@ -376,9 +392,9 @@ def register_pipeline_aliases() -> None:
         "whisperkitpro-large-v3-turbo-compressed",
         WhisperKitProTranscriptionPipeline,
         default_config={
-            "model_version": "large-v3-v20240930_626MB",
-            "model_prefix": "openai",
-            "model_repo_name": "argmaxinc/whisperkit-pro",
+            "repo_id": "argmaxinc/whisperkit-pro",
+            "model_variant": "openai_whisper-large-v3-v20240930_626MB",
+            "models_cache_dir": "./models_cache",
             "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
             "use_keywords": False
         },
@@ -389,9 +405,9 @@ def register_pipeline_aliases() -> None:
         "whisperkitpro-parakeet-v2",
         WhisperKitProTranscriptionPipeline,
         default_config={
-            "model_version": "parakeet-v2",
-            "model_prefix": "nvidia",
-            "model_repo_name": "argmaxinc/parakeetkit-pro",
+            "repo_id": "argmaxinc/parakeetkit-pro",
+            "model_variant": "nvidia_parakeet-v2",
+            "models_cache_dir": "./models_cache",
             "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
             "use_keywords": False
         },
@@ -402,9 +418,9 @@ def register_pipeline_aliases() -> None:
         "whisperkitpro-parakeet-v2-compressed",
         WhisperKitProTranscriptionPipeline,
         default_config={
-            "model_version": "parakeet-v2_476MB",
-            "model_prefix": "nvidia",
-            "model_repo_name": "argmaxinc/parakeetkit-pro",
+            "repo_id": "argmaxinc/parakeetkit-pro",
+            "model_variant": "nvidia_parakeet-v2_476MB",
+            "models_cache_dir": "./models_cache",
             "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
             "use_keywords": False
         },
@@ -415,9 +431,9 @@ def register_pipeline_aliases() -> None:
         "whisperkitpro-parakeet-v3",
         WhisperKitProTranscriptionPipeline,
         default_config={
-            "model_version": "parakeet-v3",
-            "model_prefix": "nvidia",
-            "model_repo_name": "argmaxinc/parakeetkit-pro",
+            "repo_id": "argmaxinc/parakeetkit-pro",
+            "model_variant": "nvidia_parakeet-v3",
+            "models_cache_dir": "./models_cache",
             "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
             "use_keywords": False
         },
@@ -428,9 +444,9 @@ def register_pipeline_aliases() -> None:
         "whisperkitpro-parakeet-v3-compressed",
         WhisperKitProTranscriptionPipeline,
         default_config={
-            "model_version": "parakeet-v3_494MB",
-            "model_prefix": "nvidia",
-            "model_repo_name": "argmaxinc/parakeetkit-pro",
+            "repo_id": "argmaxinc/parakeetkit-pro",
+            "model_variant": "nvidia_parakeet-v3_494MB",
+            "models_cache_dir": "./models_cache",
             "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
             "use_keywords": False
         },
