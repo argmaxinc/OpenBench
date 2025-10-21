@@ -36,6 +36,7 @@ from .transcription import (
     SpeechAnalyzerPipeline,
     WhisperKitProTranscriptionPipeline,
     WhisperKitTranscriptionPipeline,
+    WhisperOSSTranscriptionPipeline,
 )
 
 
@@ -469,6 +470,66 @@ def register_pipeline_aliases() -> None:
             "use_keywords": False,
         },
         description="OpenAI Whisper transcription with keyword boosting. Requires `OPENAI_API_KEY` env var.",
+    )
+
+    PipelineRegistry.register_alias(
+        "whisper-tiny-oss-transcription",
+        WhisperOSSTranscriptionPipeline,
+        default_config={
+            "out_dir": "./whisper_oss_results",
+            "model_version": "tiny",
+            "device": None,
+            "use_keywords": False,
+        },
+        description="Open-source OpenAI Whisper transcription (local)",
+    )
+
+    PipelineRegistry.register_alias(
+        "whisper-base-oss-transcription",
+        WhisperOSSTranscriptionPipeline,
+        default_config={
+            "out_dir": "./whisper_oss_results",
+            "model_version": "base",
+            "device": None,
+            "use_keywords": False,
+        },
+        description="Open-source OpenAI Whisper transcription (local)",
+    )
+    
+    PipelineRegistry.register_alias(
+        "whisper-large-v2-oss-transcription",
+        WhisperOSSTranscriptionPipeline,
+        default_config={
+            "out_dir": "./whisper_oss_results",
+            "model_version": "large-v2",
+            "device": None,
+            "use_keywords": False,
+        },
+        description="Open-source OpenAI Whisper transcription (local)",
+    )
+
+    PipelineRegistry.register_alias(
+        "whisper-large-v3-oss-transcription",
+        WhisperOSSTranscriptionPipeline,
+        default_config={
+            "out_dir": "./whisper_oss_results",
+            "model_version": "large-v3",
+            "device": None,
+            "use_keywords": False,
+        },
+        description="Open-source OpenAI Whisper transcription (local)",
+    )
+
+    PipelineRegistry.register_alias(
+        "whisper-turbo-oss-transcription",
+        WhisperOSSTranscriptionPipeline,
+        default_config={
+            "out_dir": "./whisper_oss_results",
+            "model_version": "large-v3-turbo",
+            "device": None,
+            "use_keywords": False,
+        },
+        description="Open-source OpenAI Whisper transcription (local)",
     )
 
     PipelineRegistry.register_alias(

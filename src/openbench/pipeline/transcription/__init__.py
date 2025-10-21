@@ -10,6 +10,7 @@ from .transcription_nemo import NeMoTranscriptionPipeline, NeMoTranscriptionPipe
 from .transcription_openai import OpenAITranscriptionPipeline, OpenAITranscriptionPipelineConfig
 from .transcription_whisperkitpro import WhisperKitProTranscriptionConfig, WhisperKitProTranscriptionPipeline
 from .whisperkit import WhisperKitTranscriptionConfig, WhisperKitTranscriptionPipeline
+from .transcription_oss_whisper import WhisperOSSTranscriptionPipeline, WhisperOSSTranscriptionPipelineConfig
 
 
 __all__ = [
@@ -24,6 +25,8 @@ __all__ = [
     "WhisperKitProTranscriptionConfig",
     "OpenAITranscriptionPipeline",
     "OpenAITranscriptionPipelineConfig",
+    "WhisperOSSTranscriptionPipeline",
+    "WhisperOSSTranscriptionPipelineConfig",
     "DeepgramTranscriptionPipeline",
     "DeepgramTranscriptionPipelineConfig",
     "NeMoTranscriptionPipeline",
