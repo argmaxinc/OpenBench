@@ -545,7 +545,7 @@
 
 | Dataset              | Deepgram<br/>(nova-3) | OpenAI<br/>(whisper-1) | AssemblyAI | Whisper OSS<br/>(base) | Argmax<br/>(Parakeet V2) | Argmax<br/>(Parakeet V3) |
 |----------------------|:---------------------:|:----------------------:|:----------:|:----------------------:|:------------------------:|:------------------------:|
-| earnings22-keywords  | [9.32]               | [9.74]                | [9.68]    | [VALUE]                | [9.9]                  | [9.46]                  |
+| earnings22-keywords  | 9.32               | 9.74                | 9.68    | 10               | 9.9                 | 9.46                  |
 
 <br/><br/>
 
@@ -570,7 +570,7 @@ If the model predicts 20 keywords and 15 of them match the ground truth, precisi
 
 | Dataset              | Deepgram<br/>(nova-3) | OpenAI<br/>(whisper-1) | AssemblyAI | Whisper OSS<br/>(large-v3-turbo) | Argmax<br/>(Parakeet V2) | Argmax<br/>(Parakeet V3) |
 |----------------------|:---------------------:|:----------------------:|:----------:|:----------------------:|:------------------------:|:------------------------:|
-| earnings22-keywords  | [0.98]               | [0.98]                | [0.98]    | [VALUE]                | [0.97]                  | [0.97]                  |
+| earnings22-keywords  | 0.98               | 0.98                | 0.98    | 0.97                | 0.97                  | 0.97                  |
 
 <br/><br/>
 
@@ -595,7 +595,7 @@ If the ground-truth transcript has 25 keywords and the model correctly finds 15,
 
 | Dataset              | Deepgram<br/>(nova-3) | OpenAI<br/>(whisper-1) | AssemblyAI | Whisper OSS<br/>(large-v3-turbo) | Argmax<br/>(Parakeet V2) | Argmax<br/>(Parakeet V3) |
 |----------------------|:---------------------:|:----------------------:|:----------:|:----------------------:|:------------------------:|:------------------------:|
-| earnings22-keywords  | [0.89]               | [0.69]                | [0.7]    | [VALUE]                | [0.81]                  | [0.8]                  |
+| earnings22-keywords  | 0.89               | 0.69                | 0.7    | 0.76                | 0.81                  | 0.8                  |
 
 <br/><br/>
 
@@ -621,7 +621,7 @@ F1 = 2 × (0.75 × 0.6) / (0.75 + 0.6) = **66.7%**, reflecting the model's overa
 
 | Dataset              | Deepgram<br/>(nova-3) | OpenAI<br/>(whisper-1) | AssemblyAI | Whisper OSS<br/>(large-v3-turbo) | Argmax<br/>(Parakeet V2) | Argmax<br/>(Parakeet V3) |
 |----------------------|:---------------------:|:----------------------:|:----------:|:----------------------:|:------------------------:|:------------------------:|
-| earnings22-keywords  | [0.93]               | [0.81]                | [0.82]    | [VALUE]                | [0.88]                  | [0.88]                  |
+| earnings22-keywords  | 0.93              | 0.81                | 0.82    | 0.85                | 0.88                  | 0.88                  |
 
 <br/><br/>
 
