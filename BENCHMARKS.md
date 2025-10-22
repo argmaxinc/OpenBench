@@ -19,6 +19,13 @@
   - [Word Error Rate (WER)](#word-error-rate-wer-2)
   - [Word Diarization Error Rate (WDER)](#word-diarization-error-rate-wder)
   - [Speed Factor (SF)](#speed-factor-sf-2)
+- [Custom Vocabulary](#custom-vocabulary)
+  - [Benchmarked Systems](#benchmarked-systems-4)
+  - [Benchmarked Datasets](#benchmarked-datasets-3)
+  - [Word Error Rate (WER)](#word-error-rate-wer-3)
+  - [Precision](#precision)
+  - [Recall](#recall)
+  - [F-score](#f-score)
 
 <br/>
 
@@ -281,7 +288,7 @@
 
 **What it measures:** WER measures speech-to-text accuracy by counting the word-level edits - substitutions, deletions, and insertions — needed to turn a transcript into the reference, then dividing by the reference length to give a percentage.
 
-**How to interpret:** Lower values are better. A WER of 0.0% would be perfect (no errors), while 100% means complete error and values may exceeed 100%.
+**How to interpret:** Lower values indicate better performance. A WER of 0.0% means perfect accuracy (no errors), while 100% represents total error. In some cases, values may exceed 100%.
 
 **Example:** In a 100-word reference transcript, a WER of 15% means there are 15 total word-level mistakes — some mix of substitutions (confusion), deletions (omission), and insertions (hallucination).
 
@@ -399,7 +406,7 @@
 
 **What it measures:** WER measures speech-to-text accuracy by counting the word-level edits - substitutions, deletions, and insertions — needed to turn a transcript into the reference, then dividing by the reference length to give a percentage.
 
-**How to interpret:** Lower values are better. A WER of 0.0% would be perfect (no errors), while 100% means complete error and values may exceeed 100%.
+**How to interpret:** Lower values indicate better performance. A WER of 0.0% means perfect accuracy (no errors), while 100% represents total error. In some cases, values may exceed 100%.
 
 **Example:** In a 100-word reference transcript, a WER of 15% means there are 15 total word-level mistakes — some mix of substitutions (confusion), deletions (omission), and insertions (hallucination).
 
@@ -451,4 +458,170 @@
 |------------------|:---------------------:|:-----------------------------------:|:------------------------:|
 | callhome-english |   102                 |                 13                  |           98             |
 | earnings21       |   213                 |                 21                  |           232            |
+
+<br/><br/>
+
+---
+
+# Custom Vocabulary
+
+## Benchmarked Systems
+
+<details>
+<summary>Click to expand</summary>
+
+### Deepgram
+- **Latest Run:** `2025-10-22`
+- **Model Version:** `nova-3`
+- **Configuration:** Deepgram's Python SDK for transcription with custom vocabulary/keyword boosting enabled. See [deepgram-python-sdk](https://github.com/deepgram/deepgram-python-sdk) for more details.
+- **Code Reference:** [openbench/pipeline/transcription/transcription_deepgram.py](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/transcription/transcription_deepgram.py)
+- **Hardware**: Unknown (Cloud API)
+
+### OpenAI
+- **Latest Run:** `2025-10-22`
+- **Model Version:** `whisper-1`
+- **Configuration:** OpenAI's Whisper API for transcription with prompt-based keyword boosting. See [OpenAI Whisper API](https://platform.openai.com/docs/guides/speech-to-text) for more details.
+- **Code Reference:** [openbench/pipeline/transcription/transcription_openai.py](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/transcription/transcription_openai.py)
+- **Hardware**: Unknown (Cloud API)
+
+### AssemblyAI
+- **Latest Run:** `2025-10-22`
+- **Model Version:** `default`
+- **Configuration:** AssemblyAI's Python SDK for transcription with word boost feature enabled. See [AssemblyAI Python SDK](https://github.com/AssemblyAI/assemblyai-python-sdk) for more details.
+- **Code Reference:** [openbench/pipeline/transcription/transcription_assemblyai.py](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/transcription/transcription_assemblyai.py)
+- **Hardware**: Unknown (Cloud API)
+
+### Whisper OSS
+- **Latest Run:** `2025-10-22`
+- **Model Version:** `large-v3-turbo`
+- **Configuration:** Open-source Whisper implementation with custom vocabulary prompting. See [openai-whisper](https://github.com/openai/whisper) for more details.
+- **Code Reference:** [openbench/pipeline/transcription/transcription_oss_whisper.py](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/transcription/transcription_oss_whisper.py)
+- **Hardware**: M2 Ultra Mac Studio
+
+### Argmax (Parakeet V2)
+- **Latest Run:** `2025-10-22`
+- **Model Version:** `parakeet-v2`
+- **Configuration:** Argmax WhisperKit Pro with compressed Parakeet V2 model (i.e. `parakeet-v2_476MB`) with custom vocabulary support.
+- **Code Reference:** [openbench/pipeline/transcription/transcription_whisperkitpro.py](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/transcription/transcription_whisperkitpro.py)
+- **Hardware**: M2 Ultra Mac Studio
+
+### Argmax (Parakeet V3)
+- **Latest Run:** `2025-10-22`
+- **Model Version:** `parakeet-v3`
+- **Configuration:** Argmax WhisperKit Pro with compressed Parakeet V3 model (i.e. `parakeet-v3_494MB`) with custom vocabulary support.
+- **Code Reference:** [openbench/pipeline/transcription/transcription_whisperkitpro.py](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/transcription/transcription_whisperkitpro.py)
+- **Hardware**: M2 Ultra Mac Studio
+
+</details>
+
+<br/>
+
+## Benchmarked Datasets
+
+<details>
+<summary>Click to expand</summary>
+
+### Earnings22 Keywords (earnings22-keywords)
+- **Language:** English
+- **Domain:** Corporate Earnings Calls
+- **Description:** A specialized subset of corporate earnings call recordings designed to evaluate custom vocabulary and keyword boosting capabilities. Contains financial terminology, company names, and domain-specific jargon that benefits from vocabulary customization.
+
+</details>
+
+<br/>
+
+## Word Error Rate (WER)
+
+<details>
+<summary>Click to expand</summary>
+
+**What it measures:** WER measures speech-to-text accuracy by counting the word-level edits - substitutions, deletions, and insertions — needed to turn a transcript into the reference, then dividing by the reference length to give a percentage.
+
+**How to interpret:** Lower values indicate better performance. A WER of 0.0% means perfect accuracy (no errors), while 100% represents total error. In some cases, values may exceed 100%.
+
+**Example:** In a 100-word reference transcript, a WER of 15% means there are 15 total word-level mistakes — some mix of substitutions (confusion), deletions (omission), and insertions (hallucination).
+
+</details>
+
+| Dataset              | Deepgram<br/>(nova-3) | OpenAI<br/>(whisper-1) | AssemblyAI | Whisper OSS<br/>(large-v3-turbo) | Argmax<br/>(Parakeet V2) | Argmax<br/>(Parakeet V3) |
+|----------------------|:---------------------:|:----------------------:|:----------:|:----------------------:|:------------------------:|:------------------------:|
+| earnings22-keywords  | 9.32               | 9.74                | 9.68    | 10               | 9.9                 | 9.46                  |
+
+<br/><br/>
+
+## Precision
+
+<details>
+<summary>Click to expand</summary>
+
+**What it measures:**  
+Precision measures how *reliable* the predicted keywords are — i.e., the proportion of keywords predicted by the model that are actually correct. It focuses on avoiding *false positives* (incorrectly predicted keywords).
+
+**How to interpret:**  
+Higher values are better. A precision of 100% means every predicted keyword was indeed a correct one, while lower values indicate the model is predicting irrelevant or spurious keywords.
+
+$\text{Precision} = \dfrac{\text{True Positives}}{\text{True Positives} + \text{False Positives}}$
+
+**Example:**  
+If the model predicts 20 keywords and 15 of them match the ground truth, precision = 15 / 20 = **75%** — meaning 1 in 4 predicted keywords were incorrect.
+
+
+</details>
+
+| Dataset              | Deepgram<br/>(nova-3) | OpenAI<br/>(whisper-1) | AssemblyAI | Whisper OSS<br/>(large-v3-turbo) | Argmax<br/>(Parakeet V2) | Argmax<br/>(Parakeet V3) |
+|----------------------|:---------------------:|:----------------------:|:----------:|:----------------------:|:------------------------:|:------------------------:|
+| earnings22-keywords  | 0.98               | 0.98                | 0.98    | 0.97                | 0.97                  | 0.97                  |
+
+<br/><br/>
+
+## Recall
+
+<details>
+<summary>Click to expand</summary>
+
+**What it measures:**  
+Recall measures how *complete* the model's keyword predictions are — i.e., the proportion of ground-truth keywords that the model successfully found. It focuses on avoiding *false negatives* (missed keywords).
+
+**How to interpret:**  
+Higher values are better. A recall of 100% means the model caught all the correct keywords, while lower recall indicates it missed some.
+
+$\text{Recall} = \dfrac{\text{True Positives}}{\text{True Positives} + \text{False Negatives}}$
+
+**Example:**  
+If the ground-truth transcript has 25 keywords and the model correctly finds 15, recall = 15 / 25 = **60%** — meaning the model missed 40% of the true keywords.
+
+
+</details>
+
+| Dataset              | Deepgram<br/>(nova-3) | OpenAI<br/>(whisper-1) | AssemblyAI | Whisper OSS<br/>(large-v3-turbo) | Argmax<br/>(Parakeet V2) | Argmax<br/>(Parakeet V3) |
+|----------------------|:---------------------:|:----------------------:|:----------:|:----------------------:|:------------------------:|:------------------------:|
+| earnings22-keywords  | 0.89               | 0.69                | 0.7    | 0.76                | 0.81                  | 0.8                  |
+
+<br/><br/>
+
+## F-score
+
+<details>
+<summary>Click to expand</summary>
+
+**What it measures:**  
+The F-Score (or F1-Score) combines **precision** and **recall** into a single metric that balances both correctness and completeness. It's the harmonic mean of precision and recall, so it penalizes models that do well on one but poorly on the other.
+
+**How to interpret:**  
+Higher values are better. A perfect F1 of 100% means the model predicted all and only the correct keywords.
+
+$\text{F1} = 2 \times \dfrac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}$
+
+**Example:**  
+If precision = 75% and recall = 60%,  
+F1 = 2 × (0.75 × 0.6) / (0.75 + 0.6) = **66.7%**, reflecting the model's overall balance between accuracy and coverage.
+
+
+</details>
+
+| Dataset              | Deepgram<br/>(nova-3) | OpenAI<br/>(whisper-1) | AssemblyAI | Whisper OSS<br/>(large-v3-turbo) | Argmax<br/>(Parakeet V2) | Argmax<br/>(Parakeet V3) |
+|----------------------|:---------------------:|:----------------------:|:----------:|:----------------------:|:------------------------:|:------------------------:|
+| earnings22-keywords  | 0.93              | 0.81                | 0.82    | 0.85                | 0.88                  | 0.88                  |
+
+<br/><br/>
 
