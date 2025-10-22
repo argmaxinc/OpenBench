@@ -471,42 +471,42 @@
 <summary>Click to expand</summary>
 
 ### Deepgram
-- **Latest Run:** `YYYY-MM-DD`
+- **Latest Run:** `2025-10-22`
 - **Model Version:** `nova-3`
 - **Configuration:** Deepgram's Python SDK for transcription with custom vocabulary/keyword boosting enabled. See [deepgram-python-sdk](https://github.com/deepgram/deepgram-python-sdk) for more details.
 - **Code Reference:** [openbench/pipeline/transcription/transcription_deepgram.py](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/transcription/transcription_deepgram.py)
 - **Hardware**: Unknown (Cloud API)
 
 ### OpenAI
-- **Latest Run:** `YYYY-MM-DD`
+- **Latest Run:** `2025-10-22`
 - **Model Version:** `whisper-1`
 - **Configuration:** OpenAI's Whisper API for transcription with prompt-based keyword boosting. See [OpenAI Whisper API](https://platform.openai.com/docs/guides/speech-to-text) for more details.
 - **Code Reference:** [openbench/pipeline/transcription/transcription_openai.py](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/transcription/transcription_openai.py)
 - **Hardware**: Unknown (Cloud API)
 
 ### AssemblyAI
-- **Latest Run:** `YYYY-MM-DD`
+- **Latest Run:** `2025-10-22`
 - **Model Version:** `default`
 - **Configuration:** AssemblyAI's Python SDK for transcription with word boost feature enabled. See [AssemblyAI Python SDK](https://github.com/AssemblyAI/assemblyai-python-sdk) for more details.
 - **Code Reference:** [openbench/pipeline/transcription/transcription_assemblyai.py](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/transcription/transcription_assemblyai.py)
 - **Hardware**: Unknown (Cloud API)
 
 ### Whisper OSS
-- **Latest Run:** `YYYY-MM-DD`
-- **Model Version:** `base`
+- **Latest Run:** `2025-10-22`
+- **Model Version:** `large-v3-turbo`
 - **Configuration:** Open-source Whisper implementation with custom vocabulary prompting. See [openai-whisper](https://github.com/openai/whisper) for more details.
 - **Code Reference:** [openbench/pipeline/transcription/transcription_oss_whisper.py](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/transcription/transcription_oss_whisper.py)
 - **Hardware**: M2 Ultra Mac Studio
 
 ### Argmax (Parakeet V2)
-- **Latest Run:** `YYYY-MM-DD`
+- **Latest Run:** `2025-10-22`
 - **Model Version:** `parakeet-v2`
 - **Configuration:** Argmax WhisperKit Pro with compressed Parakeet V2 model (i.e. `parakeet-v2_476MB`) with custom vocabulary support.
 - **Code Reference:** [openbench/pipeline/transcription/transcription_whisperkitpro.py](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/transcription/transcription_whisperkitpro.py)
 - **Hardware**: M2 Ultra Mac Studio
 
 ### Argmax (Parakeet V3)
-- **Latest Run:** `YYYY-MM-DD`
+- **Latest Run:** `2025-10-22`
 - **Model Version:** `parakeet-v3`
 - **Configuration:** Argmax WhisperKit Pro with compressed Parakeet V3 model (i.e. `parakeet-v3_494MB`) with custom vocabulary support.
 - **Code Reference:** [openbench/pipeline/transcription/transcription_whisperkitpro.py](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/transcription/transcription_whisperkitpro.py)
