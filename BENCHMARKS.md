@@ -560,10 +560,7 @@ Precision measures how *reliable* the predicted keywords are — i.e., the propo
 **How to interpret:**  
 Higher values are better. A precision of 100% means every predicted keyword was indeed a correct one, while lower values indicate the model is predicting irrelevant or spurious keywords.
 
-**Formula:**  
-\[
-\text{Precision} = \frac{\text{True Positives}}{\text{True Positives} + \text{False Positives}}
-\]
+**Formula:** $\text{Precision} = \dfrac{\text{True Positives}}{\text{True Positives} + \text{False Positives}}$
 
 **Example:**  
 If the model predicts 20 keywords and 15 of them match the ground truth, precision = 15 / 20 = **75%** — meaning 1 in 4 predicted keywords were incorrect.
@@ -583,15 +580,12 @@ If the model predicts 20 keywords and 15 of them match the ground truth, precisi
 <summary>Click to expand</summary>
 
 **What it measures:**  
-Recall measures how *complete* the model’s keyword predictions are — i.e., the proportion of ground-truth keywords that the model successfully found. It focuses on avoiding *false negatives* (missed keywords).
+Recall measures how *complete* the model's keyword predictions are — i.e., the proportion of ground-truth keywords that the model successfully found. It focuses on avoiding *false negatives* (missed keywords).
 
 **How to interpret:**  
 Higher values are better. A recall of 100% means the model caught all the correct keywords, while lower recall indicates it missed some.
 
-**Formula:**  
-\[
-\text{Recall} = \frac{\text{True Positives}}{\text{True Positives} + \text{False Negatives}}
-\]
+**Formula:** $\text{Recall} = \dfrac{\text{True Positives}}{\text{True Positives} + \text{False Negatives}}$
 
 **Example:**  
 If the ground-truth transcript has 25 keywords and the model correctly finds 15, recall = 15 / 25 = **60%** — meaning the model missed 40% of the true keywords.
@@ -611,19 +605,16 @@ If the ground-truth transcript has 25 keywords and the model correctly finds 15,
 <summary>Click to expand</summary>
 
 **What it measures:**  
-The F-Score (or F1-Score) combines **precision** and **recall** into a single metric that balances both correctness and completeness. It’s the harmonic mean of precision and recall, so it penalizes models that do well on one but poorly on the other.
+The F-Score (or F1-Score) combines **precision** and **recall** into a single metric that balances both correctness and completeness. It's the harmonic mean of precision and recall, so it penalizes models that do well on one but poorly on the other.
 
 **How to interpret:**  
 Higher values are better. A perfect F1 of 100% means the model predicted all and only the correct keywords.
 
-**Formula:**  
-\[
-\text{F1} = 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}
-\]
+**Formula:** $\text{F1} = 2 \times \dfrac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}$
 
 **Example:**  
 If precision = 75% and recall = 60%,  
-F1 = 2 × (0.75 × 0.6) / (0.75 + 0.6) = **66.7%**, reflecting the model’s overall balance between accuracy and coverage.
+F1 = 2 × (0.75 × 0.6) / (0.75 + 0.6) = **66.7%**, reflecting the model's overall balance between accuracy and coverage.
 
 
 </details>
