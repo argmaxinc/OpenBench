@@ -543,7 +543,7 @@
 
 </details>
 
-| Dataset              | Deepgram<br/>(nova-3) | OpenAI<br/>(whisper-1) | AssemblyAI | Whisper OSS<br/>(base) | Argmax<br/>(Parakeet V2) | Argmax<br/>(Parakeet V3) |
+| Dataset              | Deepgram<br/>(nova-3) | OpenAI<br/>(whisper-1) | AssemblyAI | Whisper OSS<br/>(large-v3-turbo) | Argmax<br/>(Parakeet V2) | Argmax<br/>(Parakeet V3) |
 |----------------------|:---------------------:|:----------------------:|:----------:|:----------------------:|:------------------------:|:------------------------:|
 | earnings22-keywords  | 9.32               | 9.74                | 9.68    | 10               | 9.9                 | 9.46                  |
 
