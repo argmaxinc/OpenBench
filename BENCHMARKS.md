@@ -288,7 +288,7 @@
 
 **What it measures:** WER measures speech-to-text accuracy by counting the word-level edits - substitutions, deletions, and insertions — needed to turn a transcript into the reference, then dividing by the reference length to give a percentage.
 
-**How to interpret:** Lower values are better. A WER of 0.0% would be perfect (no errors), while 100% means complete error and values may exceeed 100%.
+**How to interpret:** Lower values indicate better performance. A WER of 0.0% means perfect accuracy (no errors), while 100% represents total error. In some cases, values may exceed 100%.
 
 **Example:** In a 100-word reference transcript, a WER of 15% means there are 15 total word-level mistakes — some mix of substitutions (confusion), deletions (omission), and insertions (hallucination).
 
@@ -406,7 +406,7 @@
 
 **What it measures:** WER measures speech-to-text accuracy by counting the word-level edits - substitutions, deletions, and insertions — needed to turn a transcript into the reference, then dividing by the reference length to give a percentage.
 
-**How to interpret:** Lower values are better. A WER of 0.0% would be perfect (no errors), while 100% means complete error and values may exceeed 100%.
+**How to interpret:** Lower values indicate better performance. A WER of 0.0% means perfect accuracy (no errors), while 100% represents total error. In some cases, values may exceed 100%.
 
 **Example:** In a 100-word reference transcript, a WER of 15% means there are 15 total word-level mistakes — some mix of substitutions (confusion), deletions (omission), and insertions (hallucination).
 
@@ -537,7 +537,7 @@
 
 **What it measures:** WER measures speech-to-text accuracy by counting the word-level edits - substitutions, deletions, and insertions — needed to turn a transcript into the reference, then dividing by the reference length to give a percentage.
 
-**How to interpret:** Lower values are better. A WER of 0.0% would be perfect (no errors), while 100% means complete error and values may exceed 100%.
+**How to interpret:** Lower values indicate better performance. A WER of 0.0% means perfect accuracy (no errors), while 100% represents total error. In some cases, values may exceed 100%.
 
 **Example:** In a 100-word reference transcript, a WER of 15% means there are 15 total word-level mistakes — some mix of substitutions (confusion), deletions (omission), and insertions (hallucination).
 
