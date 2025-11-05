@@ -1,11 +1,12 @@
 from pathlib import Path
 from typing import Callable
 
+from openai.types.audio import TranscriptionVerbose
 from pydantic import Field
 
-from ...engine import OpenAIApi, OpenAIApiResponse
+from ...engine import OpenAIApi
 from ...pipeline import Pipeline, register_pipeline
-from ...pipeline_prediction import Transcript
+from ...pipeline_prediction import Transcript, Word
 from ...types import PipelineType
 from .common import TranscriptionConfig, TranscriptionOutput
 
@@ -25,10 +26,10 @@ class OpenAITranscriptionPipeline(Pipeline):
     _config_class = OpenAITranscriptionPipelineConfig
     pipeline_type = PipelineType.TRANSCRIPTION
 
-    def build_pipeline(self) -> Callable[[Path], OpenAIApiResponse]:
+    def build_pipeline(self) -> Callable[[Path], TranscriptionVerbose]:
         openai_api = OpenAIApi(model=self.config.model_version)
 
-        def transcribe(audio_path: Path) -> OpenAIApiResponse:
+        def transcribe(audio_path: Path) -> TranscriptionVerbose:
             response = openai_api.transcribe(
                 audio_path,
                 prompt=self.current_keywords_prompt,
@@ -51,11 +52,10 @@ class OpenAITranscriptionPipeline(Pipeline):
 
         return input_sample.save_audio(TEMP_AUDIO_DIR)
 
-    def parse_output(self, output: OpenAIApiResponse) -> TranscriptionOutput:
-        return TranscriptionOutput(
-            prediction=Transcript.from_words_info(
-                words=output.words,
-                start=output.start,
-                end=output.end,
-            )
-        )
+    def parse_output(self, output: TranscriptionVerbose) -> TranscriptionOutput:
+        words = [Word(word=word.word, start=word.start, end=word.end) for word in output.words]
+        # If no words is predicted add empty words
+        if len(words) == 0:
+            words = [Word(word="", start=0.0, end=0.0)]
+
+        return TranscriptionOutput(prediction=Transcript(words=words))
