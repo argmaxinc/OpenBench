@@ -2,6 +2,7 @@
 # Copyright (C) 2025 Argmax, Inc. All Rights Reserved.
 
 from .orchestration_deepgram import DeepgramOrchestrationPipeline, DeepgramOrchestrationPipelineConfig
+from .orchestration_openai import OpenAIOrchestrationPipeline, OpenAIOrchestrationPipelineConfig
 from .orchestration_whisperkitpro import WhisperKitProOrchestrationConfig, WhisperKitProOrchestrationPipeline
 from .whisperx import WhisperXPipeline, WhisperXPipelineConfig
 
@@ -13,4 +14,6 @@ __all__ = [
     "WhisperXPipelineConfig",
     "WhisperKitProOrchestrationPipeline",
     "WhisperKitProOrchestrationConfig",
+    "OpenAIOrchestrationPipeline",
+    "OpenAIOrchestrationPipelineConfig",
 ]

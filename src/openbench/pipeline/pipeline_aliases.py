@@ -16,6 +16,7 @@ from .diarization import (
 )
 from .orchestration import (
     DeepgramOrchestrationPipeline,
+    OpenAIOrchestrationPipeline,
     WhisperKitProOrchestrationPipeline,
     WhisperXPipeline,
 )
@@ -289,6 +290,15 @@ def register_pipeline_aliases() -> None:
         description="WhisperKitPro orchestration pipeline using the parakeet-v3 version of the model compressed to 494MB. Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
     )
 
+    PipelineRegistry.register_alias(
+        "openai-orchestration",
+        OpenAIOrchestrationPipeline,
+        default_config={
+            "model_version": "gpt-4o-transcribe-diarize",
+        },
+        description="OpenAI orchestration pipeline using the `gpt-4o-transcribe-diarize` version of the model. Requires `OPENAI_API_KEY` env var.",
+    )
+
     ################# TRANSCRIPTION PIPELINES #################
 
     PipelineRegistry.register_alias(
@@ -357,7 +367,7 @@ def register_pipeline_aliases() -> None:
             "model_variant": "openai_whisper-tiny",
             "models_cache_dir": "./models_cache",
             "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
-            "use_keywords": False
+            "use_keywords": False,
         },
         description="WhisperKitPro transcription pipeline using the tiny version of the model. Requires Swift and Xcode installed. Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
     )
@@ -370,7 +380,7 @@ def register_pipeline_aliases() -> None:
             "model_variant": "openai_whisper-large-v3",
             "models_cache_dir": "./models_cache",
             "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
-            "use_keywords": False
+            "use_keywords": False,
         },
         description="WhisperKitPro transcription pipeline using the large-v3 version of the model. Requires Swift and Xcode installed. Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
     )
@@ -383,7 +393,7 @@ def register_pipeline_aliases() -> None:
             "model_variant": "openai_whisper-large-v3-v20240930",
             "models_cache_dir": "./models_cache",
             "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
-            "use_keywords": False
+            "use_keywords": False,
         },
         description="WhisperKitPro transcription pipeline using the large-v3-v20240930 version of the model (which is the same as large-v3-turbo from OpenAI). Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
     )
@@ -396,7 +406,7 @@ def register_pipeline_aliases() -> None:
             "model_variant": "openai_whisper-large-v3-v20240930_626MB",
             "models_cache_dir": "./models_cache",
             "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
-            "use_keywords": False
+            "use_keywords": False,
         },
         description="WhisperKitPro transcription pipeline using the large-v3-v20240930 version of the model compressed to 626MB (which is the same as large-v3-turbo from OpenAI). Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
     )
@@ -409,7 +419,7 @@ def register_pipeline_aliases() -> None:
             "model_variant": "nvidia_parakeet-v2",
             "models_cache_dir": "./models_cache",
             "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
-            "use_keywords": False
+            "use_keywords": False,
         },
         description="WhisperKitPro transcription pipeline using the parakeet-v2 version of the model. Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
     )
@@ -422,7 +432,7 @@ def register_pipeline_aliases() -> None:
             "model_variant": "nvidia_parakeet-v2_476MB",
             "models_cache_dir": "./models_cache",
             "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
-            "use_keywords": False
+            "use_keywords": False,
         },
         description="WhisperKitPro transcription pipeline using the parakeet-v2 version of the model compressed to 476MB. Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
     )
@@ -435,7 +445,7 @@ def register_pipeline_aliases() -> None:
             "model_variant": "nvidia_parakeet-v3",
             "models_cache_dir": "./models_cache",
             "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
-            "use_keywords": False
+            "use_keywords": False,
         },
         description="WhisperKitPro transcription pipeline using the parakeet-v3 version of the model. Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
     )
@@ -448,7 +458,7 @@ def register_pipeline_aliases() -> None:
             "model_variant": "nvidia_parakeet-v3_494MB",
             "models_cache_dir": "./models_cache",
             "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
-            "use_keywords": False
+            "use_keywords": False,
         },
         description="WhisperKitPro transcription pipeline using the parakeet-v3 version of the model compressed to 494MB. Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
     )
@@ -511,7 +521,7 @@ def register_pipeline_aliases() -> None:
         },
         description="Open-source OpenAI Whisper transcription (local)",
     )
-    
+
     PipelineRegistry.register_alias(
         "whisper-large-v2-oss-transcription",
         WhisperOSSTranscriptionPipeline,
