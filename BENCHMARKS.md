@@ -463,7 +463,7 @@
 
 ---
 
-# Custom Vocabulary
+# Keyword Recognition
 
 ## Benchmarked Systems
 
@@ -471,44 +471,37 @@
 <summary>Click to expand</summary>
 
 ### Deepgram
-- **Latest Run:** `2025-10-22`
+- **Latest Run:** `2025-11-06`
 - **Model Version:** `nova-3`
-- **Configuration:** Deepgram's Python SDK for transcription with custom vocabulary/keyword boosting enabled. See [deepgram-python-sdk](https://github.com/deepgram/deepgram-python-sdk) for more details.
+- **Configuration:** Deepgram's Python SDK for transcription with keyword boosting enabled. See [Deepgram Keywords](https://developers.deepgram.com/docs/keywords) for more details.
 - **Code Reference:** [openbench/pipeline/transcription/transcription_deepgram.py](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/transcription/transcription_deepgram.py)
 - **Hardware**: Unknown (Cloud API)
 
 ### OpenAI
-- **Latest Run:** `2025-10-22`
-- **Model Version:** `whisper-1`
-- **Configuration:** OpenAI's Whisper API for transcription with prompt-based keyword boosting. See [OpenAI Whisper API](https://platform.openai.com/docs/guides/speech-to-text) for more details.
+- **Latest Run:** `2025-11-06`
+- **Model Version:** `whisper-1` (also known as `large-v2`)
+- **Configuration:** OpenAI's Whisper API for transcription with keyword prompting. See [OpenAI Speech to Text: Prompting](https://platform.openai.com/docs/guides/speech-to-text#prompting) for more details.
 - **Code Reference:** [openbench/pipeline/transcription/transcription_openai.py](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/transcription/transcription_openai.py)
 - **Hardware**: Unknown (Cloud API)
 
 ### AssemblyAI
-- **Latest Run:** `2025-10-22`
+- **Latest Run:** `2025-11-06`
 - **Model Version:** `default`
-- **Configuration:** AssemblyAI's Python SDK for transcription with word boost feature enabled. See [AssemblyAI Python SDK](https://github.com/AssemblyAI/assemblyai-python-sdk) for more details.
+- **Configuration:** AssemblyAI's Python SDK for transcription with word boost feature enabled. See [AssemblyAI Keyterms Prompting](https://www.assemblyai.com/docs/voice-agent-best-practices#using-keyterms-prompting) for more details.
 - **Code Reference:** [openbench/pipeline/transcription/transcription_assemblyai.py](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/transcription/transcription_assemblyai.py)
 - **Hardware**: Unknown (Cloud API)
 
 ### Whisper OSS
-- **Latest Run:** `2025-10-22`
+- **Latest Run:** `2025-11-06`
 - **Model Version:** `large-v3-turbo`
-- **Configuration:** Open-source Whisper implementation with custom vocabulary prompting. See [openai-whisper](https://github.com/openai/whisper) for more details.
+- **Configuration:** Open-source OpenAI Whisper implementation with keyword prompting. See [openai-whisper](https://github.com/openai/whisper) on GitHub for more details.
 - **Code Reference:** [openbench/pipeline/transcription/transcription_oss_whisper.py](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/transcription/transcription_oss_whisper.py)
 - **Hardware**: M2 Ultra Mac Studio
 
-### Argmax (Parakeet V2)
-- **Latest Run:** `2025-10-22`
-- **Model Version:** `parakeet-v2`
-- **Configuration:** Argmax WhisperKit Pro with compressed Parakeet V2 model (i.e. `parakeet-v2_476MB`) with custom vocabulary support.
-- **Code Reference:** [openbench/pipeline/transcription/transcription_whisperkitpro.py](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/transcription/transcription_whisperkitpro.py)
-- **Hardware**: M2 Ultra Mac Studio
-
-### Argmax (Parakeet V3)
-- **Latest Run:** `2025-10-22`
+### Argmax
+- **Latest Run:** `2025-11-06`
 - **Model Version:** `parakeet-v3`
-- **Configuration:** Argmax WhisperKit Pro with compressed Parakeet V3 model (i.e. `parakeet-v3_494MB`) with custom vocabulary support.
+- **Configuration:** Argmax SDK WhisperKit Pro framework with compressed Parakeet V3 model (i.e. `parakeet-v3_494MB`) and Custom Vocabulary feature enabled. See [Argmax Custom Vocabulary](https://app.argmaxinc.com/docs/examples/custom-vocabulary) for more details.
 - **Code Reference:** [openbench/pipeline/transcription/transcription_whisperkitpro.py](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/transcription/transcription_whisperkitpro.py)
 - **Hardware**: M2 Ultra Mac Studio
 
@@ -521,11 +514,12 @@
 <details>
 <summary>Click to expand</summary>
 
-### Earnings22 Keywords (earnings22-keywords)
+### earnings22-keywords
 - **Language:** English
 - **Domain:** Corporate Earnings Calls
-- **Description:** A specialized subset of corporate earnings call recordings designed to evaluate custom vocabulary and keyword boosting capabilities. Contains financial terminology, company names, and domain-specific jargon that benefits from vocabulary customization.
-
+- **Description:** [earnings22](https://huggingface.co/datasets/argmaxinc/earnings22-kws-golden) is a dataset that consists of corporate earnings call recordings in English. The speakers, products and companies mentioned in this dataset have high geographical diversity across several continents. Argmax has further annotated the test split of this dataset by localizing the mentions of names (e.g. company, product or people) and marking them as keywords. Furthermore, we fixed the original annotations where challenging cases were either misannotated or marked as inaudible. The resulting dataset is named [earnings22-keywords](https://huggingface.co/datasets/argmaxinc/earnings22-kws-golden) and a conference paper will be submitted later in 2025 to describe the full dataset creation process. Each sample is a 15-second audio chunk from a conference call audio file (60 minutes+) where at least 1 keyword was annotated. There are two different conditions under which we evaluate the keyword recognition accuracy.
+  - **Chunk-keywords**: In this setting, the keyword list for each audio chunk consists of the keywords that actually appear in the audio chunk.
+  - **File-keywords**: In this setting, the keyword list for each audio chunk consists of the all the keywords that appear in the (60-minute+) audio file that includes the current (15-second) audio chunk. This setting is highly realistic given that commercial applications are able to anticipate the names (keywords) based on the registered participants in a conversational context. This setting is also more challenging given that the number of keywords that do not appear in the current chunk are high and may lead to increased false positive rates.
 </details>
 
 <br/>
@@ -543,9 +537,10 @@
 
 </details>
 
-| Dataset              | Deepgram<br/>(nova-3) | OpenAI<br/>(whisper-1) | AssemblyAI | Whisper OSS<br/>(large-v3-turbo) | Argmax<br/>(Parakeet V2) | Argmax<br/>(Parakeet V3) |
-|----------------------|:---------------------:|:----------------------:|:----------:|:----------------------:|:------------------------:|:------------------------:|
-| earnings22-keywords  | 9.32               | 9.74                | 9.68    | 10               | 9.9                 | 9.46                  |
+| Dataset              | Deepgram<br/>(nova-3) | OpenAI<br/>(whisper-1) | AssemblyAI | Whisper OSS<br/>(large-v3-turbo)  | Argmax<br/>(parakeet-v3) |
+|----------------------:|:---------------------:|:----------------------:|:----------:|:----------------------:|:------------------------:|
+| earnings22-keywords <br/>(chunk-keywords) | 9.32               | 9.74                | 9.68    | 10               | 9.21                  |
+| earnings22-keywords <br/>(file-keywords)  | 9.81               | 9.57                | 9.63    | 10.3             | 9.63                  |
 
 <br/><br/>
 
@@ -568,9 +563,10 @@ If the model predicts 20 keywords and 15 of them match the ground truth, precisi
 
 </details>
 
-| Dataset              | Deepgram<br/>(nova-3) | OpenAI<br/>(whisper-1) | AssemblyAI | Whisper OSS<br/>(large-v3-turbo) | Argmax<br/>(Parakeet V2) | Argmax<br/>(Parakeet V3) |
-|----------------------|:---------------------:|:----------------------:|:----------:|:----------------------:|:------------------------:|:------------------------:|
-| earnings22-keywords  | 0.98               | 0.98                | 0.98    | 0.97                | 0.97                  | 0.97                  |
+| Dataset              | Deepgram<br/>(nova-3) | OpenAI<br/>(whisper-1) | AssemblyAI | Whisper OSS<br/>(large-v3-turbo) | Argmax<br/>(parakeet-v3) |
+|----------------------|:---------------------:|:----------------------:|:----------:|:----------------------:|:------------------------:|
+| earnings22-keywords <br/>(chunk-keywords)   |0.98               | 0.98                | 0.98    | 0.96                | 0.96                  |
+| earnings22-keywords <br/>(file-keywords)   |0.94               | 0.9                 | 0.94    | 0.95                | 0.87                  |
 
 <br/><br/>
 
@@ -593,9 +589,10 @@ If the ground-truth transcript has 25 keywords and the model correctly finds 15,
 
 </details>
 
-| Dataset              | Deepgram<br/>(nova-3) | OpenAI<br/>(whisper-1) | AssemblyAI | Whisper OSS<br/>(large-v3-turbo) | Argmax<br/>(Parakeet V2) | Argmax<br/>(Parakeet V3) |
-|----------------------|:---------------------:|:----------------------:|:----------:|:----------------------:|:------------------------:|:------------------------:|
-| earnings22-keywords  | 0.89               | 0.69                | 0.7    | 0.76                | 0.81                  | 0.8                  |
+| Dataset              | Deepgram<br/>(nova-3) | OpenAI<br/>(whisper-1) | AssemblyAI | Whisper OSS<br/>(large-v3-turbo) |  Argmax<br/>(parakeet-v3) |
+|----------------------|:---------------------:|:----------------------:|:----------:|:----------------------:|:------------------------:|
+| earnings22-keywords <br/>(chunk-keywords)  | 0.89               | 0.69                | 0.7     | 0.81          | 0.88                 |
+| earnings22-keywords <br/>(file-keywords)  | 0.83               | 0.79                | 0.68    | 0.76                | 0.85                 |
 
 <br/><br/>
 
@@ -619,9 +616,10 @@ F1 = 2 × (0.75 × 0.6) / (0.75 + 0.6) = **66.7%**, reflecting the model's overa
 
 </details>
 
-| Dataset              | Deepgram<br/>(nova-3) | OpenAI<br/>(whisper-1) | AssemblyAI | Whisper OSS<br/>(large-v3-turbo) | Argmax<br/>(Parakeet V2) | Argmax<br/>(Parakeet V3) |
-|----------------------|:---------------------:|:----------------------:|:----------:|:----------------------:|:------------------------:|:------------------------:|
-| earnings22-keywords  | 0.93              | 0.81                | 0.82    | 0.85                | 0.88                  | 0.88                  |
+| Dataset           | Deepgram<br/>(nova-3) | OpenAI<br/>(whisper-1) | AssemblyAI | Whisper OSS<br/>(large-v3-turbo) | Argmax<br/>(parakeet-v3) |
+|----------------------:|:---------------------:|:----------------------:|:----------:|:----------------------:|:------------------------:|
+| earnings22-keywords <br/>(chunk-keywords) | 0.93              | 0.84                | 0.82    | 0.85                | 0.92                  | 0.92                  |
+| earnings22-keywords <br/>(file-keywords)  | 0.88              | 0.81                | 0.79    | 0.86                | 0.87                  | 0.86                  |
 
 <br/><br/>
 
