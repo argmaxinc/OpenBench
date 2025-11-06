@@ -19,7 +19,7 @@
   - [Word Error Rate (WER)](#word-error-rate-wer-2)
   - [Word Diarization Error Rate (WDER)](#word-diarization-error-rate-wder)
   - [Speed Factor (SF)](#speed-factor-sf-2)
-- [Custom Vocabulary](#custom-vocabulary)
+- [Keyword Recognition](#keyword-recognition)
   - [Benchmarked Systems](#benchmarked-systems-4)
   - [Benchmarked Datasets](#benchmarked-datasets-3)
   - [Word Error Rate (WER)](#word-error-rate-wer-3)
