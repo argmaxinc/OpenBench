@@ -538,9 +538,9 @@
 
 The dataset consists of trimmed audio samples extracted from 1-2 hour earnings call recordings. Custom vocabulary evaluation uses two keyword categories to assess system performance under different vocabulary conditions:
 
-**Chunk keywords** include only the keywords that actually appear in the trimmed audio chunk being evaluated. This represents a focused vocabulary set that matches the content of the specific audio sample.
+**Chunk keywords**: include only the keywords that actually appear in the trimmed audio chunk being evaluated. This represents a focused vocabulary set that matches the content of the specific audio sample.
 
-**File keywords** include all keywords from the entire source file (1-2 hours) that the audio chunk was trimmed from. This means the system is provided with a comprehensive vocabulary list that may contain keywords not present in the actual audio chunk being transcribed. This tests a system's ability to handle extensive custom vocabularies without introducing false positives from irrelevant keywords.
+**File keywords**:  include all keywords from the entire source file (1-2 hours) that the audio chunk was trimmed from. This means the system is provided with a comprehensive vocabulary list that may contain keywords not present in the actual audio chunk being transcribed. This tests a system's ability to handle extensive custom vocabularies without introducing false positives from irrelevant keywords.
 
 </details>
 
