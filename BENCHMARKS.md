@@ -559,10 +559,10 @@ The dataset consists of trimmed audio samples extracted from 1-2 hour earnings c
 
 </details>
 
-| Dataset              | Keywords | Deepgram<br/>(nova-3) | OpenAI<br/>(whisper-1) | AssemblyAI | Whisper OSS<br/>(large-v3-turbo) | Argmax<br/>(Parakeet V2) | Argmax<br/>(Parakeet V3) |
-|----------------------|:---------------------:|:---------------------:|:----------------------:|:----------:|:----------------------:|:------------------------:|:------------------------:|
-| earnings22-keywords  | Chunk | 9.32               | 9.74                | 9.68    | 10               | 9.5                 | 9.21                  |
-| earnings22-keywords  | File  | 9.81               | 9.57                | 9.63    | 10.3             | 10                  | 9.63                  |
+| Dataset              | Deepgram<br/>(nova-3) | OpenAI<br/>(whisper-1) | AssemblyAI | Whisper OSS<br/>(large-v3-turbo) | Argmax<br/>(Parakeet V2) | Argmax<br/>(Parakeet V3) |
+|----------------------|:---------------------:|:----------------------:|:----------:|:----------------------:|:------------------------:|:------------------------:|
+| earnings22-keywords (chunk-level)  | 9.32               | 9.74                | 9.68    | 10               | 9.5                 | 9.21                  |
+| earnings22-keywords (file-level) | 9.81               | 9.57                | 9.63    | 10.3             | 10                  | 9.63                  |
 
 <br/><br/>
 
@@ -585,10 +585,10 @@ If the model predicts 20 keywords and 15 of them match the ground truth, precisi
 
 </details>
 
-| Dataset              | Keywords | Deepgram<br/>(nova-3) | OpenAI<br/>(whisper-1) | AssemblyAI | Whisper OSS<br/>(large-v3-turbo) | Argmax<br/>(Parakeet V2) | Argmax<br/>(Parakeet V3) |
-|----------------------|:---------------------:|:---------------------:|:----------------------:|:----------:|:----------------------:|:------------------------:|:------------------------:|
-| earnings22-keywords  | Chunk |0.98               | 0.98                | 0.98    | 0.96                | 0.96                  | 0.96                  |
-| earnings22-keywords  | File  |0.94               | 0.9                 | 0.94    | 0.95                | 0.87                  | 0.87                  |
+| Dataset              | Deepgram<br/>(nova-3) | OpenAI<br/>(whisper-1) | AssemblyAI | Whisper OSS<br/>(large-v3-turbo) | Argmax<br/>(Parakeet V2) | Argmax<br/>(Parakeet V3) |
+|----------------------|:---------------------:|:----------------------:|:----------:|:----------------------:|:------------------------:|:------------------------:|
+| earnings22-keywords (chunk-level)  | 0.98               | 0.98                | 0.98    | 0.96                | 0.96                  | 0.96                  |
+| earnings22-keywords (file-level)  | 0.94               | 0.9                 | 0.94    | 0.95                | 0.87                  | 0.87                  |
 
 <br/><br/>
 
@@ -611,10 +611,10 @@ If the ground-truth transcript has 25 keywords and the model correctly finds 15,
 
 </details>
 
-| Dataset              | Keywords | Deepgram<br/>(nova-3) | OpenAI<br/>(whisper-1) | AssemblyAI | Whisper OSS<br/>(large-v3-turbo) | Argmax<br/>(Parakeet V2) | Argmax<br/>(Parakeet V3) |
-|----------------------|:---------------------:|:---------------------:|:----------------------:|:----------:|:----------------------:|:------------------------:|:------------------------:|
-| earnings22-keywords  | Chunk | 0.89               | 0.69                | 0.7     | 0.81               | 0.89                  | 0.88                 |
-| earnings22-keywords  | File  | 0.83               | 0.79                | 0.68    | 0.76               | 0.86                  | 0.85                 |
+| Dataset              | Deepgram<br/>(nova-3) | OpenAI<br/>(whisper-1) | AssemblyAI | Whisper OSS<br/>(large-v3-turbo) | Argmax<br/>(Parakeet V2) | Argmax<br/>(Parakeet V3) |
+|----------------------|:---------------------:|:----------------------:|:----------:|:----------------------:|:------------------------:|:------------------------:|
+| earnings22-keywords (chunk-level)  | 0.89               | 0.69                | 0.7     | 0.81               | 0.89                  | 0.88                 |
+| earnings22-keywords (file-level)  | 0.83               | 0.79                | 0.68    | 0.76               | 0.86                  | 0.85                 |
 
 <br/><br/>
 
@@ -638,10 +638,10 @@ F1 = 2 × (0.75 × 0.6) / (0.75 + 0.6) = **66.7%**, reflecting the model's overa
 
 </details>
 
-| Dataset              | Keywords | Deepgram<br/>(nova-3) | OpenAI<br/>(whisper-1) | AssemblyAI | Whisper OSS<br/>(large-v3-turbo) | Argmax<br/>(Parakeet V2) | Argmax<br/>(Parakeet V3) |
-|----------------------|:---------------------:|:---------------------:|:----------------------:|:----------:|:----------------------:|:------------------------:|:------------------------:|
-| earnings22-keywords  | Chunk | 0.93              | 0.84                | 0.82    | 0.85                | 0.92                  | 0.92                  |
-| earnings22-keywords  | File  | 0.88              | 0.81                | 0.79    | 0.86                | 0.87                  | 0.86                  |
+| Dataset              | Deepgram<br/>(nova-3) | OpenAI<br/>(whisper-1) | AssemblyAI | Whisper OSS<br/>(large-v3-turbo) | Argmax<br/>(Parakeet V2) | Argmax<br/>(Parakeet V3) |
+|----------------------|:---------------------:|:----------------------:|:----------:|:----------------------:|:------------------------:|:------------------------:|
+| earnings22-keywords (chunk-level)  | 0.93              | 0.84                | 0.82    | 0.85                | 0.92                  | 0.92                  |
+| earnings22-keywords (file-level) | 0.88              | 0.81                | 0.79    | 0.86                | 0.87                  | 0.86                  |
 
 <br/><br/>
 
