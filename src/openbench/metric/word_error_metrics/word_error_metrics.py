@@ -294,3 +294,222 @@ class WordErrorRate(BaseWordErrorMetric):
         N = detail["num_words"]
 
         return (S + D + I) / N if N > 0 else 0.0
+
+
+@MetricRegistry.register_metric(PipelineType.ORCHESTRATION, MetricOptions.CPWER)
+class ConcatenatedMinimumPermutationWER(BaseWordErrorMetric):
+    """Concatenated minimum-Permutation Word Error Rate (cpWER) implementation.
+
+    This metric evaluates multi-speaker transcription by:
+    1. Concatenating all words per speaker (grouping by speaker ID)
+    2. Finding the optimal permutation of hypothesis speakers that minimizes WER
+    3. Computing WER for the best speaker permutation
+
+    cpWER penalizes both transcription errors and speaker assignment errors, where
+    a correctly transcribed word assigned to the wrong speaker is counted as an error.
+
+    Reference:
+    Watanabe, Shinji, et al. "CHiME-6 Challenge: Tackling multispeaker speech
+    recognition for unsegmented recordings." arXiv preprint arXiv:2004.09249 (2020).
+    """
+
+    @classmethod
+    def metric_name(cls) -> str:
+        return "cpwer"
+
+    @classmethod
+    def metric_components(cls) -> MetricComponents:
+        return [
+            "num_substitutions",  # Number of word substitutions
+            "num_deletions",  # Number of word deletions
+            "num_insertions",  # Number of word insertions
+            "num_words",  # Total number of words in reference
+        ]
+
+    def compute_components(self, reference: Transcript, hypothesis: Transcript, **kwargs) -> dict[str, int]:
+        """Compute cpWER between reference and hypothesis.
+
+        Args:
+            reference: Reference transcript with speaker labels
+            hypothesis: Hypothesis transcript with speaker labels
+
+        Returns:
+            Dictionary containing error components for the best speaker permutation
+        """
+        ref_words, ref_speakers = parse_diarzed_words(reference)
+        hyp_words, hyp_speakers = parse_diarzed_words(hypothesis)
+
+        # Validate that we have speaker information
+        if ref_speakers is None or hyp_speakers is None:
+            raise ValueError("cpWER requires speaker labels for both reference and hypothesis")
+
+        if len(ref_words) != len(ref_speakers):
+            raise ValueError(
+                f"Reference words and speaker labels must have same length but got "
+                f"{len(ref_words)=} and {len(ref_speakers)=}"
+            )
+        if len(hyp_words) != len(hyp_speakers):
+            raise ValueError(
+                f"Hypothesis words and speaker labels must have same length but got "
+                f"{len(hyp_words)=} and {len(hyp_speakers)=}"
+            )
+
+        # Apply text normalization if enabled
+        if self.use_text_normalizer:
+            ref_words, ref_speakers = self.text_normalizer(
+                words=ref_words,
+                speakers=ref_speakers,
+            )
+            hyp_words, hyp_speakers = self.text_normalizer(
+                words=hyp_words,
+                speakers=hyp_speakers,
+            )
+
+        # Concatenate words by speaker for reference
+        unique_ref_speakers = sorted(set(ref_speakers))
+        ref_concatenated = {}
+        for speaker in unique_ref_speakers:
+            speaker_words = [word for word, spk in zip(ref_words, ref_speakers) if spk == speaker]
+            ref_concatenated[speaker] = speaker_words
+
+        # Concatenate words by speaker for hypothesis
+        unique_hyp_speakers = sorted(set(hyp_speakers))
+        hyp_concatenated = {}
+        for speaker in unique_hyp_speakers:
+            speaker_words = [word for word, spk in zip(hyp_words, hyp_speakers) if spk == speaker]
+            hyp_concatenated[speaker] = speaker_words
+
+        # Find the best permutation of hypothesis speakers
+        # We need to try all permutations and find the one with minimum WER
+        best_errors = None
+        best_wer = float("inf")
+
+        # If there are more hypothesis speakers than reference speakers, pad reference
+        # If there are more reference speakers than hypothesis speakers, pad hypothesis
+        max_speakers = max(len(unique_ref_speakers), len(unique_hyp_speakers))
+
+        # Generate all permutations of hypothesis speakers
+        from itertools import permutations
+
+        # For efficiency, if we have too many speakers, use Hungarian algorithm instead
+        if len(unique_hyp_speakers) <= 7:  # Permutations are feasible for small numbers
+            for hyp_perm in permutations(unique_hyp_speakers):
+                # Compute WER for this permutation
+                total_subs = 0
+                total_dels = 0
+                total_ins = 0
+                total_words = 0
+
+                for i, ref_speaker in enumerate(unique_ref_speakers):
+                    ref_text = " ".join(ref_concatenated[ref_speaker])
+                    total_words += len(ref_concatenated[ref_speaker])
+
+                    # Get corresponding hypothesis speaker (or empty if no match)
+                    if i < len(hyp_perm):
+                        hyp_text = " ".join(hyp_concatenated[hyp_perm[i]])
+                    else:
+                        hyp_text = ""
+
+                    # Compute WER for this speaker pair
+                    result = jiwer.compute_measures(truth=ref_text, hypothesis=hyp_text)
+                    total_subs += result["substitutions"]
+                    total_dels += result["deletions"]
+                    total_ins += result["insertions"]
+
+                # Handle extra hypothesis speakers (false alarms)
+                for i in range(len(unique_ref_speakers), len(hyp_perm)):
+                    hyp_text = " ".join(hyp_concatenated[hyp_perm[i]])
+                    # All words from extra speakers are insertions
+                    total_ins += len(hyp_concatenated[hyp_perm[i]])
+
+                # Calculate WER for this permutation
+                current_wer = (total_subs + total_dels + total_ins) / total_words if total_words > 0 else 0.0
+
+                if current_wer < best_wer:
+                    best_wer = current_wer
+                    best_errors = {
+                        "num_substitutions": total_subs,
+                        "num_deletions": total_dels,
+                        "num_insertions": total_ins,
+                        "num_words": total_words,
+                    }
+        else:
+            # Use Hungarian algorithm for large numbers of speakers
+            # Build cost matrix based on WER for each speaker pair
+            cost_matrix = np.zeros((max_speakers, max_speakers))
+
+            for i, ref_speaker in enumerate(unique_ref_speakers):
+                ref_text = " ".join(ref_concatenated[ref_speaker])
+                ref_word_count = len(ref_concatenated[ref_speaker])
+
+                for j, hyp_speaker in enumerate(unique_hyp_speakers):
+                    hyp_text = " ".join(hyp_concatenated[hyp_speaker])
+
+                    # Compute WER (substitutions + deletions + insertions)
+                    result = jiwer.compute_measures(truth=ref_text, hypothesis=hyp_text)
+                    errors = result["substitutions"] + result["deletions"] + result["insertions"]
+                    cost_matrix[i, j] = errors
+
+            # Handle missing speakers by adding high costs
+            for i in range(len(unique_ref_speakers), max_speakers):
+                cost_matrix[i, :] = 0  # Dummy rows
+            for j in range(len(unique_hyp_speakers), max_speakers):
+                cost_matrix[:, j] = cost_matrix[:, : len(unique_hyp_speakers)].max() * 2  # Dummy columns
+
+            # Find optimal assignment
+            row_ind, col_ind = optimize.linear_sum_assignment(cost_matrix)
+
+            # Compute errors for optimal assignment
+            total_subs = 0
+            total_dels = 0
+            total_ins = 0
+            total_words = 0
+
+            for i, j in zip(row_ind, col_ind):
+                if i < len(unique_ref_speakers):
+                    ref_speaker = unique_ref_speakers[i]
+                    ref_text = " ".join(ref_concatenated[ref_speaker])
+                    total_words += len(ref_concatenated[ref_speaker])
+
+                    if j < len(unique_hyp_speakers):
+                        hyp_speaker = unique_hyp_speakers[j]
+                        hyp_text = " ".join(hyp_concatenated[hyp_speaker])
+                    else:
+                        hyp_text = ""
+
+                    result = jiwer.compute_measures(truth=ref_text, hypothesis=hyp_text)
+                    total_subs += result["substitutions"]
+                    total_dels += result["deletions"]
+                    total_ins += result["insertions"]
+
+            # Handle unmatched hypothesis speakers
+            matched_hyp_speakers = set(col_ind[col_ind < len(unique_hyp_speakers)])
+            for j, hyp_speaker in enumerate(unique_hyp_speakers):
+                if j not in matched_hyp_speakers:
+                    total_ins += len(hyp_concatenated[hyp_speaker])
+
+            best_errors = {
+                "num_substitutions": total_subs,
+                "num_deletions": total_dels,
+                "num_insertions": total_ins,
+                "num_words": total_words,
+            }
+
+        return best_errors
+
+    def compute_metric(self, detail: Details) -> float:
+        """Compute the cpWER metric from the components.
+
+        cpWER = (S + D + I) / N
+        where:
+        - S is the number of substitutions (including speaker confusions)
+        - D is the number of deletions
+        - I is the number of insertions
+        - N is the total number of words in the reference
+        """
+        S = detail["num_substitutions"]
+        D = detail["num_deletions"]
+        I = detail["num_insertions"]
+        N = detail["num_words"]
+
+        return (S + D + I) / N if N > 0 else 0.0

@@ -22,4 +22,8 @@ from .streaming_latency_metrics import (
     NumSubstitutions,
     StreamingLatency,
 )
-from .word_error_metrics import WordDiarizationErrorRate, WordErrorRate
+from .word_error_metrics import (
+    ConcatenatedMinimumPermutationWER,
+    WordDiarizationErrorRate,
+    WordErrorRate,
+)
