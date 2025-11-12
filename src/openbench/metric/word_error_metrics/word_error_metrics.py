@@ -265,11 +265,11 @@ class WordErrorRate(BaseWordErrorMetric):
 
         for alignment in alignments:
             if alignment.type == "substitute":
-                num_substitutions += 1
+                num_substitutions += alignment.ref_end_idx - alignment.ref_start_idx
             elif alignment.type == "delete":
-                num_deletions += 1
+                num_deletions += alignment.ref_end_idx - alignment.ref_start_idx
             elif alignment.type == "insert":
-                num_insertions += 1
+                num_insertions += alignment.hyp_end_idx - alignment.hyp_start_idx
 
         return {
             "num_substitutions": num_substitutions,
@@ -440,7 +440,6 @@ class ConcatenatedMinimumPermutationWER(BaseWordErrorMetric):
 
             for i, ref_speaker in enumerate(unique_ref_speakers):
                 ref_text = " ".join(ref_concatenated[ref_speaker])
-                ref_word_count = len(ref_concatenated[ref_speaker])
 
                 for j, hyp_speaker in enumerate(unique_hyp_speakers):
                     hyp_text = " ".join(hyp_concatenated[hyp_speaker])
