@@ -1804,6 +1804,101 @@ class CallHomeEnglishTranscript(SpeakerDiarizationDataset):
         return data_dict
 
 
+class Chime6Dataset(SpeakerDiarizationDataset):
+    audio_eval_url = "https://openslr.trmal.net/resources/150/CHiME6_eval.tar.gz"
+    annotation_url = "https://openslr.trmal.net/resources/150/CHiME6_transcriptions.tar.gz"
+
+    @property
+    def dataset_name(self) -> str:
+        return "chime-6"
+
+    def download(self) -> None:
+        download_file(self.audio_eval_url, "CHiME6_eval.tar.gz")
+        download_file(self.annotation_url, "CHiME6_transcriptions.tar.gz")
+
+    def _extract_audio(self) -> None:
+        with tarfile.open("CHiME6_eval.tar.gz", "r") as tar:
+            tar.extractall()
+        with tarfile.open("CHiME6_transcriptions.tar.gz", "r") as tar:
+            tar.extractall()
+
+    def _save_rttm(
+        self, rttm_file: Path, speakers: list[str], start_times: list[float], end_times: list[float]
+    ) -> str:
+        annotation = Annotation(uri=rttm_file.stem)
+        offset = min(start_times)
+        for spk, start, end in zip(speakers, start_times, end_times):
+            segment = Segment(start - offset, end - offset)
+            annotation[segment] = spk
+        with rttm_file.open("w") as f:
+            annotation.write_rttm(f)
+        return str(rttm_file)
+
+    def _to_seconds(self, time: str) -> float:
+        # Format is HH:MM:SS.SSS
+        hours, minutes, seconds = time.split(":")
+        return float(hours) * 3600 + float(minutes) * 60 + float(seconds)
+
+    def create_dataset(self) -> dict[str, SpeakerDiarizationData]:
+        self._extract_audio()
+
+        annotation_dir = Path("transcriptions") / "transcriptions" / "eval"
+        audio_dir = Path("CHiME6_eval") / "CHiME6" / "audio" / "eval"
+
+        annotation_files = sorted((annotation_dir.glob("*.json")))
+
+        all_words: list[list[str]] = []
+        all_speakers: list[list[str]] = []
+        all_audio_files: list[str] = []
+        all_annotations: list[str] = []
+        for annotation_file in annotation_files:
+            annotation_data: list[dict[str, Any]] = load_json(annotation_file)
+
+            name = annotation_file.stem
+            audio_file = audio_dir / f"{name}_U02.CH1.wav"
+            if not audio_file.exists():
+                raise FileNotFoundError(f"Audio file {audio_file} not found")
+            all_audio_files.append(str(audio_file))
+
+            words: list[str] = []
+            speakers: list[str] = []
+            word_speakers: list[str] = []
+            start_times: list[float] = []
+            end_times: list[float] = []
+            for utterance in annotation_data:
+                _words = utterance["words"].split()
+                speaker = utterance["speaker"]
+
+                # For the transcript
+                words.extend(_words)
+                word_speakers.extend([speaker] * len(_words))
+
+                # For the rttm
+                speakers.append(speaker)
+                start_times.append(self._to_seconds(utterance["start_time"]))
+                end_times.append(self._to_seconds(utterance["end_time"]))
+
+            rttm_file = audio_file.with_suffix(".rttm")
+            self._save_rttm(rttm_file, speakers, start_times, end_times)
+            all_annotations.append(str(rttm_file))
+
+            all_words.append(words)
+            all_speakers.append(word_speakers)
+
+        return {
+            "test": SpeakerDiarizationData(
+                split="test",
+                audio_paths=all_audio_files,
+                annotation_paths=all_annotations,
+                transcript=all_words,
+                word_speakers=all_speakers,
+                uem_paths=None,
+                word_timestamps=None,
+                metadata=None,
+            )
+        }
+
+
 def main(dataset_name: str, generate_only: bool, hf_repo_owner: str) -> None:
     if dataset_name == "earnings21":
         ds = Earnings21Dataset(hf_repo_owner)
@@ -1827,6 +1922,8 @@ def main(dataset_name: str, generate_only: bool, hf_repo_owner: str) -> None:
         ds = Ego4dDataset(hf_repo_owner)
     elif dataset_name == "callhome-english":
         ds = CallHomeEnglishTranscript(hf_repo_owner)
+    elif dataset_name == "chime-6":
+        ds = Chime6Dataset(hf_repo_owner)
     else:
         raise ValueError(f"Unknown dataset name: {dataset_name}")
 
@@ -1854,6 +1951,7 @@ if __name__ == "__main__":
             "callhome",
             "ego4d",
             "callhome-english",
+            "chime-6",
         ],
     )
     parser.add_argument("--generate-only", action="store_true", help="Generate the dataset only,")
