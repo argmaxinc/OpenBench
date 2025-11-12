@@ -182,6 +182,17 @@ def register_dataset_aliases() -> None:
     )
 
     DatasetRegistry.register_alias(
+        "chime-6",
+        DatasetConfig(dataset_id="argmaxinc/chime-6", split="test"),
+        supported_pipeline_types={
+            PipelineType.TRANSCRIPTION,
+            PipelineType.ORCHESTRATION,
+            PipelineType.DIARIZATION,
+        },
+        description="CHiME-6 dataset for transcription and orchestration evaluation. The audio files are from microphone 2 first channel. For more information see https://www.chimechallenge.org/datasets/chime6",
+    )
+
+    DatasetRegistry.register_alias(
         "librispeech",
         DatasetConfig(dataset_id="argmaxinc/librispeech-openbench", split="test", subset="full"),
         supported_pipeline_types={
