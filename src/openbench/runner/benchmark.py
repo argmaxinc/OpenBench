@@ -33,6 +33,7 @@ PIPELINE_TYPE_TO_SAMPLE_RESULT = {
     PipelineType.TRANSCRIPTION: TranscriptionSampleResult,
     PipelineType.ORCHESTRATION: TranscriptionSampleResult,
     PipelineType.STREAMING_TRANSCRIPTION: TranscriptionSampleResult,
+    PipelineType.STREAMING_DIARIZATION: TranscriptionSampleResult,
 }
 
 
@@ -64,6 +65,7 @@ class BenchmarkRunner:
             PipelineType.TRANSCRIPTION: TranscriptionWandbLogger,
             PipelineType.ORCHESTRATION: TranscriptionWandbLogger,
             PipelineType.STREAMING_TRANSCRIPTION: TranscriptionWandbLogger,
+            PipelineType.STREAMING_DIARIZATION: TranscriptionWandbLogger,
         }
 
     def _get_metrics(self, pipeline: Pipeline) -> dict[str, BaseMetric]:
@@ -107,8 +109,12 @@ class BenchmarkRunner:
         )
 
         if pipeline.pipeline_type == PipelineType.DIARIZATION:
-            sample_results_attributes["num_speakers_predicted"] = output.prediction.num_speakers
-            sample_results_attributes["num_speakers_reference"] = sample.reference.num_speakers
+            sample_results_attributes["num_speakers_predicted"] = (
+                output.prediction.num_speakers
+            )
+            sample_results_attributes["num_speakers_reference"] = (
+                sample.reference.num_speakers
+            )
 
         sample_result = sample_result_class(**sample_results_attributes)
 

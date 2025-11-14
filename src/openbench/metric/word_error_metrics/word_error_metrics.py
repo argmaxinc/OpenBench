@@ -90,7 +90,9 @@ class BaseWordErrorMetric(BaseMetric):
         return result.ops[0], (ref_words, hyp_words), (ref_speakers, hyp_speakers)
 
 
-@MetricRegistry.register_metric(PipelineType.ORCHESTRATION, MetricOptions.WDER)
+@MetricRegistry.register_metric(
+    (PipelineType.ORCHESTRATION, PipelineType.STREAMING_DIARIZATION), MetricOptions.WDER
+)
 class WordDiarizationErrorRate(BaseWordErrorMetric):
     """Word Diarization Error Rate (WDER) implementation.
 
@@ -222,6 +224,7 @@ class WordDiarizationErrorRate(BaseWordErrorMetric):
         PipelineType.TRANSCRIPTION,
         PipelineType.ORCHESTRATION,
         PipelineType.STREAMING_TRANSCRIPTION,
+        PipelineType.STREAMING_DIARIZATION,
     ),
     MetricOptions.WER,
 )
@@ -296,7 +299,10 @@ class WordErrorRate(BaseWordErrorMetric):
         return (S + D + I) / N if N > 0 else 0.0
 
 
-@MetricRegistry.register_metric(PipelineType.ORCHESTRATION, MetricOptions.CPWER)
+@MetricRegistry.register_metric(
+    (PipelineType.ORCHESTRATION, PipelineType.STREAMING_DIARIZATION),
+    MetricOptions.CPWER,
+)
 class ConcatenatedMinimumPermutationWER(BaseWordErrorMetric):
     """Concatenated minimum-Permutation Word Error Rate (cpWER) implementation.
 

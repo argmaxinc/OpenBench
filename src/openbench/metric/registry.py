@@ -135,7 +135,11 @@ class MetricRegistry:
 
 # Register all existing and interesting metrics from pyannote.metrics
 # Custom metrics will be registered in their own files
-MetricRegistry.register(DiarizationErrorRate, PipelineType.DIARIZATION, MetricOptions.DER)
+MetricRegistry.register(
+    DiarizationErrorRate,
+    (PipelineType.DIARIZATION, PipelineType.STREAMING_DIARIZATION),
+    MetricOptions.DER,
+)
 MetricRegistry.register(JaccardErrorRate, PipelineType.DIARIZATION, MetricOptions.JER)
 MetricRegistry.register(DiarizationPurity, PipelineType.DIARIZATION, MetricOptions.DIARIZATION_PURITY)
 MetricRegistry.register(

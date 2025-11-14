@@ -12,6 +12,7 @@ class PipelineType(Enum):
     TRANSCRIPTION = "transcription"
     ORCHESTRATION = "orchestration"
     STREAMING_TRANSCRIPTION = "streaming_transcription"
+    STREAMING_DIARIZATION = "streaming_diarization"
 
 
 # All prediction classes that we output should conform to this
