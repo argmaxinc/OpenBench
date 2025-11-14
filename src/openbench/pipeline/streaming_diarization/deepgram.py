@@ -34,7 +34,7 @@ class DeepgramStreamingDiarizationApi:
     def __init__(self, cfg) -> None:
         self.realtime_resolution = 0.020
         self.model_version = "nova-3"
-        self.api_key = "38c68bfb62405f1ae17a840777ef531060018c3d"
+        self.api_key = os.getenv("DEEPGRAM_API_KEY")
         assert (
             self.api_key is not None
         ), "Please set DEEPGRAM_API_KEY in environment"
