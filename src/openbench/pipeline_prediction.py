@@ -262,6 +262,7 @@ class StreamingTranscript(BaseModel):
     def to_annotation_file(self, output_dir: str, filename: str) -> str:
         path = os.path.join(output_dir, f"{filename}.json")
         data = {
+            "transcript": self.transcript,
             "interim_results": self.interim_results,
             "audio_cursor": self.audio_cursor,
             "confirmed_audio_cursor": self.confirmed_audio_cursor,

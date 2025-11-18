@@ -1564,7 +1564,9 @@ class CallHomeEnglishTranscript(SpeakerDiarizationDataset):
         content = re.sub(r"&([^\s]+)", r"\1", content)
 
         # Remove partial words -text or text-
-        content = re.sub(r"-([^-]+)|([^-]+)-", "", content)
+        content = re.sub(r"(?<![A-Za-z-])-[A-Za-z]+\b|\b[A-Za-z]+-(?![A-Za-z-])", "", content)
+        # Remove multiple spaces
+        content = re.sub(r"\s{2,}", " ", content).strip()
 
         # Remove % for non-lexemes %text
         content = re.sub(r"%([^\s]+)", r"\1", content)
@@ -1586,27 +1588,88 @@ class CallHomeEnglishTranscript(SpeakerDiarizationDataset):
 
         return content
 
-    def _preprocess_transcript(self, transcript: str) -> tuple[list[str], list[str]]:
+    def parse_transcript_to_df(self, file: Path) -> pd.DataFrame:
+        """
+        Parse a transcript file with lines of the form:
+            <start_timestamp> <end_timestamp> <speaker_tag>: <text>
+        where:
+            - timestamps are ints or floats (e.g., 451.37)
+            - speaker_tag is a single uppercase letter
+            - text may be wrapped across multiple lines
+
+        Returns a DataFrame with columns: start, end, content, speaker.
+        """
+        # Matches: start, end, speaker, text
+        line_re = re.compile(
+            r"^\s*"  # optional leading spaces
+            r"(\d+(?:\.\d+)?)\s+"  # start timestamp
+            r"(\d+(?:\.\d+)?)\s+"  # end timestamp
+            r"([A-Z]):\s*"  # speaker tag + colon
+            r"(.*)$"  # text (may be empty)
+        )
+
+        lines = file.read_text().splitlines()
+
+        rows = []
+        current = None  # holds the current utterance we’re building
+
+        for raw_line in lines:
+            line = raw_line.rstrip("\n")
+
+            # Skip empty lines entirely
+            if not line.strip():
+                continue
+
+            # Skip comment / metadata lines starting with '#'
+            if line.lstrip().startswith("#"):
+                continue
+
+            m = line_re.match(line)
+            if m:
+                # Start of a new utterance: flush the previous one
+                if current is not None:
+                    # Normalize whitespace in accumulated content
+                    current["content"] = " ".join(current["content"].split())
+                    rows.append(current)
+
+                start_str, end_str, speaker, text = m.groups()
+                current = {
+                    "start": float(start_str),
+                    "end": float(end_str),
+                    "speaker": speaker,
+                    "content": text.strip(),
+                }
+            else:
+                # Continuation of the previous line’s content
+                if current is None:
+                    # Malformed file line before any utterance; ignore
+                    continue
+                # Append continuation with a space, then normalize later
+                current["content"] += " " + line.strip()
+
+        # Don’t forget the last utterance
+        if current is not None:
+            current["content"] = " ".join(current["content"].split())
+            rows.append(current)
+
+        # Ensure column order
+        return pd.DataFrame(rows, columns=["start", "end", "content", "speaker"])
+
+    def _preprocess_transcript(self, transcript: Path) -> tuple[list[str], list[str]]:
         """Process a CallHome English transcript file.
 
         Args:
-            transcript: The raw transcript text
+            transcript: The path to the transcript file
 
         Returns:
             A tuple containing:
             - List of words
             - List of speaker labels (A or B) corresponding to each word
         """
-        # Matches lines in the format:
-        # <start_timestamp> <end_timestamp> <speaker_tag>: <text>
-        # where timestamps are integers or decimals (e.g., 451.37), the speaker tag is a single uppercase letter,
-        # and the line contains at least one character and may contain breaks.
-        pattern = r"(\d+\.\d+)\s+(\d+\.\d+)\s+([A-Z]):\s+(.*?)(?=\n\d+\.\d+\s+\d+\.\d+\s+[A-Z]:|$)"
-        matches = re.findall(pattern, transcript, flags=re.DOTALL)
+        df = self.parse_transcript_to_df(transcript)
 
         df = (
-            pd.DataFrame(matches, columns=["start", "end", "speaker", "content"])
-            .astype({"start": "float", "end": "float"})
+            df
             # Clean the content column
             .assign(content=lambda df: df["content"].apply(self._clean_content))
             # Kepp only lines with content
@@ -1753,7 +1816,7 @@ class CallHomeEnglishTranscript(SpeakerDiarizationDataset):
                 speaker_speech_segments,
                 start_speech_segments,
                 end_speech_segments,
-            ) = self._preprocess_transcript(transcript_file.read_text())
+            ) = self._preprocess_transcript(transcript_file)
             dst_words.append(words)
             dst_speakers.append(word_speakers)
 
