@@ -1,8 +1,0 @@
-DeepgramStreamingDiarizationPipeline:
-  config:
-      endpoint_url: "wss://api.deepgram.com"
-      sample_rate: 16000
-      channels: 1
-      sample_width: 2
-      realtime_resolution: 0.020
-      model_version: "nova-3"

@@ -16,6 +16,7 @@ from .diarization import (
 )
 from .orchestration import (
     DeepgramOrchestrationPipeline,
+    DeepgramStreamingOrchestrationPipeline,
     OpenAIOrchestrationPipeline,
     WhisperKitProOrchestrationPipeline,
     WhisperXPipeline,
@@ -168,6 +169,22 @@ def register_pipeline_aliases() -> None:
             "model_version": "nova-3",
         },
         description="Deepgram orchestration pipeline. Requires API key from https://www.deepgram.com/. Set `DEEPGRAM_API_KEY` env var.",
+    )
+
+    PipelineRegistry.register_alias(
+        "deepgram-streaming-orchestration",
+        DeepgramStreamingOrchestrationPipeline,
+        default_config={
+            "sample_rate": 16000,
+            "channels": 1,
+            "sample_width": 2,
+            "realtime_resolution": 0.020,
+            "model_version": "nova-3",
+            "enable_diarization": True,
+        },
+        description=(
+            "Deepgram streaming orchestration pipeline with diarization enabled."
+        ),
     )
 
     PipelineRegistry.register_alias(
