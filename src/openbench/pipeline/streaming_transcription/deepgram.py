@@ -124,15 +124,9 @@ class DeepgramApi:
                                 "\n" + "Transcription: " + transcript + msg["channel"]["alternatives"][0]["transcript"]
                             )
 
-                        elif msg["is_final"] and (not msg["from_finalize"]):
+                        elif msg["is_final"]:
                             confirmed_audio_cursor_l.append(audio_cursor)
                             transcript = transcript + " " + msg["channel"]["alternatives"][0]["transcript"]
-                            confirmed_interim_transcripts.append(transcript)
-                            model_timestamps_confirmed.append(msg["channel"]["alternatives"][0]["words"])
-
-                        elif msg["is_final"] and msg["from_finalize"]:
-                            confirmed_audio_cursor_l.append(audio_cursor)
-                            transcript = msg["channel"]["alternatives"][0]["transcript"]
                             confirmed_interim_transcripts.append(transcript)
                             model_timestamps_confirmed.append(msg["channel"]["alternatives"][0]["words"])
 
