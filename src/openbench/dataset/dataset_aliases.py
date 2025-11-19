@@ -172,7 +172,6 @@ def register_dataset_aliases() -> None:
         supported_pipeline_types={
             PipelineType.TRANSCRIPTION,
             PipelineType.ORCHESTRATION,
-            PipelineType.STREAMING_DIARIZATION,
         },
         description=(
             "Callhome English dataset for transcription and orchestration evaluation. "

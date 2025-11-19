@@ -33,7 +33,6 @@ PIPELINE_TYPE_TO_SAMPLE_RESULT = {
     PipelineType.TRANSCRIPTION: TranscriptionSampleResult,
     PipelineType.ORCHESTRATION: TranscriptionSampleResult,
     PipelineType.STREAMING_TRANSCRIPTION: TranscriptionSampleResult,
-    PipelineType.STREAMING_DIARIZATION: TranscriptionSampleResult,
 }
 
 
@@ -65,7 +64,6 @@ class BenchmarkRunner:
             PipelineType.TRANSCRIPTION: TranscriptionWandbLogger,
             PipelineType.ORCHESTRATION: TranscriptionWandbLogger,
             PipelineType.STREAMING_TRANSCRIPTION: TranscriptionWandbLogger,
-            PipelineType.STREAMING_DIARIZATION: TranscriptionWandbLogger,
         }
 
     def _get_metrics(self, pipeline: Pipeline) -> dict[str, BaseMetric]:

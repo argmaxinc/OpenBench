@@ -137,10 +137,5 @@ class DatasetRegistry:
 # Register all datasets
 DatasetRegistry.register(PipelineType.DIARIZATION, DiarizationDataset)
 DatasetRegistry.register(PipelineType.ORCHESTRATION, OrchestrationDataset)
-DatasetRegistry.register(
-    PipelineType.STREAMING_TRANSCRIPTION, StreamingDataset
-)
-DatasetRegistry.register(
-    PipelineType.STREAMING_DIARIZATION, OrchestrationDataset
-)
+DatasetRegistry.register(PipelineType.STREAMING_TRANSCRIPTION, StreamingDataset)
 DatasetRegistry.register(PipelineType.TRANSCRIPTION, TranscriptionDataset)
