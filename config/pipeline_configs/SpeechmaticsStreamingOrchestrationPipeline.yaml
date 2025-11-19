@@ -1,0 +1,9 @@
+SpeechmaticsStreamingOrchestrationPipeline:
+  pipeline_config:
+    sample_rate: 16000
+    language: "en"
+    operating_point: "enhanced"
+    max_delay: 1
+    enable_partials: true
+    enable_diarization: true
+

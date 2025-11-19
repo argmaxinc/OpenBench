@@ -18,6 +18,7 @@ from .orchestration import (
     DeepgramOrchestrationPipeline,
     DeepgramStreamingOrchestrationPipeline,
     OpenAIOrchestrationPipeline,
+    SpeechmaticsStreamingOrchestrationPipeline,
     WhisperKitProOrchestrationPipeline,
     WhisperXPipeline,
 )
@@ -28,6 +29,7 @@ from .streaming_transcription import (
     FireworksStreamingPipeline,
     GladiaStreamingPipeline,
     OpenAIStreamingPipeline,
+    SpeechmaticsStreamingPipeline,
 )
 from .transcription import (
     AssemblyAITranscriptionPipeline,
@@ -184,6 +186,25 @@ def register_pipeline_aliases() -> None:
         },
         description=(
             "Deepgram streaming orchestration pipeline with diarization enabled."
+        ),
+    )
+    
+    PipelineRegistry.register_alias(
+        "speechmatics-streaming-orchestration",
+        SpeechmaticsStreamingOrchestrationPipeline,
+        default_config={
+            "sample_rate": 16000,
+            "language": "en",
+            "operating_point": "enhanced",
+            "max_delay": 1,
+            "enable_partials": True,
+            "enable_diarization": True,
+        },
+        description=(
+            "Speechmatics streaming orchestration pipeline with "
+            "diarization. Requires API key from "
+            "https://www.speechmatics.com/. Set "
+            "`SPEECHMATICS_API_KEY` env var."
         ),
     )
 
@@ -682,6 +703,24 @@ def register_pipeline_aliases() -> None:
             "endpoint_url": "wss://streaming.assemblyai.com/v3/ws",
         },
         description="AssemblyAI streaming transcription pipeline. Requires API key from https://www.assemblyai.com/. Set `ASSEMBLYAI_API_KEY` env var.",
+    )
+
+    PipelineRegistry.register_alias(
+        "speechmatics-streaming",
+        SpeechmaticsStreamingPipeline,
+        default_config={
+            "sample_rate": 16000,
+            "language": "en",
+            "operating_point": "enhanced",
+            "max_delay": 1,
+            "enable_partials": True,
+            "endpoint_url": "wss://eu2.rt.speechmatics.com/v2",
+        },
+        description=(
+            "Speechmatics streaming transcription pipeline. "
+            "Requires API key from https://www.speechmatics.com/. "
+            "Set `SPEECHMATICS_API_KEY` env var."
+        ),
     )
 
 
