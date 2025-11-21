@@ -1,10 +1,12 @@
 # For licensing see accompanying LICENSE.md file.
 # Copyright (C) 2025 Argmax, Inc. All Rights Reserved.
 
+import json
 import random
 import unittest
 
 from argmaxtools.utils import get_logger
+from huggingface_hub import hf_hub_download
 
 from openbench.metric import ConcatenatedMinimumPermutationWER
 from openbench.pipeline_prediction import Transcript
@@ -13,6 +15,7 @@ from openbench.pipeline_prediction import Transcript
 logger = get_logger(__name__)
 
 RANDOM_SEED = 42
+TEST_FIXTURES_REPO = "argmaxinc/test-fixtures"
 
 
 def create_transcript(text: str, speakers: str) -> Transcript:
@@ -38,11 +41,12 @@ class TestCPWER(unittest.TestCase):
         reference_speakers: str,
         hypothesis_text: str,
         hypothesis_speakers: str,
+        detailed: bool = False,
     ) -> float:
         reference = create_transcript(reference_text, reference_speakers)
         hypothesis = create_transcript(hypothesis_text, hypothesis_speakers)
 
-        result = self.cpwer(reference=reference, hypothesis=hypothesis)
+        result = self.cpwer(reference=reference, hypothesis=hypothesis, detailed=detailed)
         return result
 
     def test_cpwer_perfect_match(self) -> None:
@@ -359,6 +363,62 @@ class TestCPWER(unittest.TestCase):
             # Just verify it doesn't crash and returns a valid value
             self.assertGreaterEqual(result, 0.0, "cpWER should be >= 0.0")
             self.assertLessEqual(result, 2.0, "cpWER should be <= 2.0 in practice")
+
+    def test_cpwer_real_more_hyp_speakers(self) -> None:
+        """Test cpWER with a real example with more hypothesis speakers than reference."""
+        json_path = hf_hub_download(
+            repo_id=TEST_FIXTURES_REPO,
+            repo_type="dataset",
+            filename="more_hyp_speakers.json",
+            subfolder="tests/cpwer",
+        )
+        with open(json_path, "r") as f:
+            data = json.load(f)
+
+        expected_results = data["expected_results"]
+        result = self._compute_cpwer(
+            reference_text=data["reference"]["text"],
+            reference_speakers=data["reference"]["speakers"],
+            hypothesis_text=data["hypothesis"]["text"],
+            hypothesis_speakers=data["hypothesis"]["speakers"],
+            detailed=True,
+        )
+
+        for key, value in expected_results.items():
+            self.assertAlmostEqual(
+                result[key],
+                value,
+                places=4,
+                msg=f"{key} should be {value}, but got {result[key]}",
+            )
+
+    def test_cpwer_real_fewer_hyp_speakers(self) -> None:
+        """Test cpWER with a real example with fewer hypothesis speakers than reference."""
+        json_path = hf_hub_download(
+            repo_id=TEST_FIXTURES_REPO,
+            repo_type="dataset",
+            filename="fewer_hyp_speakers.json",
+            subfolder="tests/cpwer",
+        )
+        with open(json_path, "r") as f:
+            data = json.load(f)
+
+        expected_results = data["expected_results"]
+        result = self._compute_cpwer(
+            reference_text=data["reference"]["text"],
+            reference_speakers=data["reference"]["speakers"],
+            hypothesis_text=data["hypothesis"]["text"],
+            hypothesis_speakers=data["hypothesis"]["speakers"],
+            detailed=True,
+        )
+
+        for key, value in expected_results.items():
+            self.assertAlmostEqual(
+                result[key],
+                value,
+                places=3,
+                msg=f"{key} should be {value}, but got {result[key]}",
+            )
 
 
 if __name__ == "__main__":

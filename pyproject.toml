@@ -39,6 +39,7 @@ dependencies = [
     "nemo-toolkit[asr]>=2.5.0",
     "openai>=2.7.1",
     "speechmatics-python>=5.0.0",
+    "meeteval>=0.4.3",
 ]
 
 [project.scripts]
