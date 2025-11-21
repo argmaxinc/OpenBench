@@ -1,0 +1,9 @@
+SpeechmaticsStreamingPipeline:
+  pipeline_config:
+    sample_rate: 16000
+    language: "en"
+    operating_point: "enhanced"
+    max_delay: 1
+    enable_partials: true
+    endpoint_url: "wss://eu2.rt.speechmatics.com/v2"
+
