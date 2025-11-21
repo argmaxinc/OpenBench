@@ -13,30 +13,12 @@ from .common import OrchestrationOutput
 
 
 class SpeechmaticsStreamingOrchestrationPipelineConfig(PipelineConfig):
-    sample_rate: int = Field(
-        default=16000,
-        description="Sample rate of the audio"
-    )
-    language: str = Field(
-        default="en",
-        description="Language code for transcription"
-    )
-    operating_point: str = Field(
-        default="enhanced",
-        description="Operating point (standard or enhanced)"
-    )
-    max_delay: int = Field(
-        default=1,
-        description="Maximum delay in seconds"
-    )
-    enable_partials: bool = Field(
-        default=True,
-        description="Enable partial transcripts"
-    )
-    enable_diarization: bool = Field(
-        default=True,
-        description="Whether to enable speaker diarization"
-    )
+    sample_rate: int = Field(default=16000, description="Sample rate of the audio")
+    language: str = Field(default="en", description="Language code for transcription")
+    operating_point: str = Field(default="enhanced", description="Operating point (standard or enhanced)")
+    max_delay: int = Field(default=1, description="Maximum delay in seconds")
+    enable_partials: bool = Field(default=True, description="Enable partial transcripts")
+    enable_diarization: bool = Field(default=True, description="Whether to enable speaker diarization")
 
 
 @register_pipeline
@@ -73,22 +55,18 @@ class SpeechmaticsStreamingOrchestrationPipeline(Pipeline):
         # Extract words with speaker info if diarization enabled
         words = []
 
-        if (
-            "words_with_speakers" in output and
-            output["words_with_speakers"]
-        ):
+        if "words_with_speakers" in output and output["words_with_speakers"]:
             # This comes from diarization-enabled streaming
             for word_info in output["words_with_speakers"]:
-                words.append(Word(
-                    word=word_info.get("word", ""),
-                    start=word_info.get("start"),
-                    end=word_info.get("end"),
-                    speaker=word_info.get("speaker"),
-                ))
-        elif (
-            "model_timestamps_confirmed" in output and
-            output["model_timestamps_confirmed"]
-        ):
+                words.append(
+                    Word(
+                        word=word_info.get("word", ""),
+                        start=word_info.get("start"),
+                        end=word_info.get("end"),
+                        speaker=word_info.get("speaker"),
+                    )
+                )
+        elif "model_timestamps_confirmed" in output and output["model_timestamps_confirmed"]:
             # Fallback to regular transcription without speaker
             transcript_words = output.get("transcript", "").split()
             timestamp_idx = 0
@@ -96,12 +74,14 @@ class SpeechmaticsStreamingOrchestrationPipeline(Pipeline):
             for timestamp_group in output["model_timestamps_confirmed"]:
                 for word_info in timestamp_group:
                     if timestamp_idx < len(transcript_words):
-                        words.append(Word(
-                            word=transcript_words[timestamp_idx],
-                            start=word_info.get("start"),
-                            end=word_info.get("end"),
-                            speaker=None,
-                        ))
+                        words.append(
+                            Word(
+                                word=transcript_words[timestamp_idx],
+                                start=word_info.get("start"),
+                                end=word_info.get("end"),
+                                speaker=None,
+                            )
+                        )
                         timestamp_idx += 1
 
         # Create final transcript with speaker-attributed words
@@ -112,4 +92,3 @@ class SpeechmaticsStreamingOrchestrationPipeline(Pipeline):
             transcription_output=None,
             diarization_output=None,
         )
-

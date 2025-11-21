@@ -13,33 +13,14 @@ from .common import OrchestrationOutput
 
 
 class DeepgramStreamingOrchestrationPipelineConfig(PipelineConfig):
-    sample_rate: int = Field(
-        default=16000,
-        description="Sample rate of the audio"
-    )
-    channels: int = Field(
-        default=1,
-        description="Number of audio channels"
-    )
-    sample_width: int = Field(
-        default=2,
-        description="Sample width in bytes"
-    )
-    realtime_resolution: float = Field(
-        default=0.020,
-        description="Real-time resolution for streaming"
-    )
+    sample_rate: int = Field(default=16000, description="Sample rate of the audio")
+    channels: int = Field(default=1, description="Number of audio channels")
+    sample_width: int = Field(default=2, description="Sample width in bytes")
+    realtime_resolution: float = Field(default=0.020, description="Real-time resolution for streaming")
     model_version: str = Field(
-        default="nova-3",
-        description=(
-            "The model to use for real-time transcription "
-            "with diarization"
-        )
+        default="nova-3", description=("The model to use for real-time transcription with diarization")
     )
-    enable_diarization: bool = Field(
-        default=True,
-        description="Whether to enable speaker diarization"
-    )
+    enable_diarization: bool = Field(default=True, description="Whether to enable speaker diarization")
 
 
 @register_pipeline
@@ -76,32 +57,30 @@ class DeepgramStreamingOrchestrationPipeline(Pipeline):
         # Extract words with speaker info if diarization enabled
         words = []
 
-        if (
-            "words_with_speakers" in output and
-            output["words_with_speakers"]
-        ):
+        if "words_with_speakers" in output and output["words_with_speakers"]:
             # This comes from diarization-enabled streaming
             for word_info in output["words_with_speakers"]:
-                words.append(Word(
-                    word=word_info.get("word", ""),
-                    start=word_info.get("start"),
-                    end=word_info.get("end"),
-                    speaker=word_info.get("speaker"),
-                ))
-        elif (
-            "model_timestamps_confirmed" in output and
-            output["model_timestamps_confirmed"]
-        ):
+                words.append(
+                    Word(
+                        word=word_info.get("word", ""),
+                        start=word_info.get("start"),
+                        end=word_info.get("end"),
+                        speaker=word_info.get("speaker"),
+                    )
+                )
+        elif "model_timestamps_confirmed" in output and output["model_timestamps_confirmed"]:
             # Fallback to regular transcription without speaker
             for timestamp_group in output["model_timestamps_confirmed"]:
                 for word_info in timestamp_group:
                     if "word" in word_info:
-                        words.append(Word(
-                            word=word_info.get("word", ""),
-                            start=word_info.get("start"),
-                            end=word_info.get("end"),
-                            speaker=None,
-                        ))
+                        words.append(
+                            Word(
+                                word=word_info.get("word", ""),
+                                start=word_info.get("start"),
+                                end=word_info.get("end"),
+                                speaker=None,
+                            )
+                        )
 
         # Create final transcript with speaker-attributed words
         transcript = Transcript(words=words)
