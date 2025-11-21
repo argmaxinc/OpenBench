@@ -5,7 +5,7 @@ setup:
 	@make install-pre-commit
 
 test:
-	@uv run pytest tests/ -v
+	@uv run pytest tests/ -v -p no:warnings
 
 install-pre-commit:
 	@echo "Installing pre-commit..."
