@@ -37,5 +37,9 @@ jobs:
         enable-cache: true
 
     - name: Run tests
-      run: make test
+      env:
+        HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      run: |
+        uv run huggingface-cli login --token ${{ inputs.HF_TOKEN }} > /dev/null 2>&1
+        make test
       continue-on-error: false
