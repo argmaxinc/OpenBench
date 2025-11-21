@@ -17,8 +17,7 @@ jobs:
     - name: Run Ruff linter
       uses: astral-sh/ruff-action@v3
       with:
-        src: ".src/"
-        args: "check --output-format github"
+        args: "check --output-format github src/"
     
     - name: Run Ruff formatter
       run: ruff format --check --diff
