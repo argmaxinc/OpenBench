@@ -386,7 +386,7 @@ class ConcatenatedMinimumPermutationWER(BaseWordErrorMetric):
         )
 
         logger.debug(f"Missed Speaker: {error_rate.missed_speaker}")
-        logger.debug(f"False Alarm Speaker: {error_rate.false_alarm_speaker}")
+        logger.debug(f"False Alarm Speaker: {error_rate.falarm_speaker}")
         logger.debug(f"Scored Speaker: {error_rate.scored_speaker}")
         logger.debug(f"Assigned speakers: {error_rate.assignment}")
 
