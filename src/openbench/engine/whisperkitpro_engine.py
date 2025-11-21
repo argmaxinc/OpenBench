@@ -25,7 +25,7 @@ COMPUTE_UNITS_MAPPER = {
 # the CLI just the ones that are most commonly used
 class WhisperKitProConfig(BaseModel):
     """Configuration for transcription operations.
-    
+
     Supports two modes:
     1. Legacy: model_version, model_prefix, model_repo_name
     2. New: repo_id, model_variant (downloads models locally)
@@ -128,9 +128,7 @@ class WhisperKitProConfig(BaseModel):
         # Use either --model-path (new) or legacy model args
         if self.use_model_path:
             if model_path is None:
-                raise ValueError(
-                    "model_path required when using repo_id/model_variant"
-                )
+                raise ValueError("model_path required when using repo_id/model_variant")
             args = [
                 "--model-path",
                 str(model_path),
@@ -147,19 +145,21 @@ class WhisperKitProConfig(BaseModel):
             ]
 
         # Common args
-        args.extend([
-            "--report",  # Always generate the report files
-            "--report-path",  # Report path should always be provided
-            self.report_path,
-            "--chunking-strategy",
-            self.chunking_strategy,
-            "--audio-encoder-compute-units",
-            COMPUTE_UNITS_MAPPER[self.audio_encoder_compute_units],
-            "--text-decoder-compute-units",
-            COMPUTE_UNITS_MAPPER[self.text_decoder_compute_units],
-            "--fast-load",
-            str(self.fast_load).lower(),
-        ])
+        args.extend(
+            [
+                "--report",  # Always generate the report files
+                "--report-path",  # Report path should always be provided
+                self.report_path,
+                "--chunking-strategy",
+                self.chunking_strategy,
+                "--audio-encoder-compute-units",
+                COMPUTE_UNITS_MAPPER[self.audio_encoder_compute_units],
+                "--text-decoder-compute-units",
+                COMPUTE_UNITS_MAPPER[self.text_decoder_compute_units],
+                "--fast-load",
+                str(self.fast_load).lower(),
+            ]
+        )
 
         # Add optional args
         if self.word_timestamps:
@@ -186,9 +186,7 @@ class WhisperKitProConfig(BaseModel):
     @property
     def use_model_path(self) -> bool:
         """Check if we should use --model-path vs legacy args."""
-        return (
-            self.repo_id is not None and self.model_variant is not None
-        )
+        return self.repo_id is not None and self.model_variant is not None
 
     def download_and_prepare_model(self) -> Path:
         """Download model from HuggingFace and prepare folder.
@@ -197,10 +195,7 @@ class WhisperKitProConfig(BaseModel):
             Path to model directory for --model-path
         """
         if not self.use_model_path:
-            raise ValueError(
-                "download_and_prepare_model requires "
-                "repo_id and model_variant"
-            )
+            raise ValueError("download_and_prepare_model requires repo_id and model_variant")
 
         cache_dir = Path(self.models_cache_dir or "./models_cache")
         cache_dir.mkdir(parents=True, exist_ok=True)
@@ -214,10 +209,7 @@ class WhisperKitProConfig(BaseModel):
             logger.info(f"Model already exists at: {model_path}")
             return model_path
 
-        logger.info(
-            f"Downloading model from {self.repo_id}, "
-            f"variant: {self.model_variant}"
-        )
+        logger.info(f"Downloading model from {self.repo_id}, variant: {self.model_variant}")
 
         # Download specific model variant folder from HuggingFace
         try:
@@ -232,17 +224,12 @@ class WhisperKitProConfig(BaseModel):
             logger.info(f"Model path for CLI: {model_path}")
 
             if not model_path.exists():
-                raise RuntimeError(
-                    f"Model download succeeded but path doesn't exist: "
-                    f"{model_path}"
-                )
+                raise RuntimeError(f"Model download succeeded but path doesn't exist: {model_path}")
 
             return model_path
 
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to download model from {self.repo_id}: {e}"
-            ) from e
+            raise RuntimeError(f"Failed to download model from {self.repo_id}: {e}") from e
 
 
 class WhisperKitProInput(BaseModel):
@@ -250,10 +237,7 @@ class WhisperKitProInput(BaseModel):
 
     audio_path: Path
     keep_audio: bool = False
-    custom_vocabulary_path: str | None = Field(
-        None,
-        description="Optional path to custom vocabulary file"
-    )
+    custom_vocabulary_path: str | None = Field(None, description="Optional path to custom vocabulary file")
 
 
 class WhisperKitProOutput(BaseModel):
@@ -287,21 +271,13 @@ class WhisperKitPro:
         # Download and prepare model if using new model management
         self.model_path = None
         if self.transcription_config.use_model_path:
-            logger.info(
-                "Using new model management with repo_id/model_variant"
-            )
-            self.model_path = (
-                self.transcription_config.download_and_prepare_model()
-            )
+            logger.info("Using new model management with repo_id/model_variant")
+            self.model_path = self.transcription_config.download_and_prepare_model()
         else:
             logger.info("Using legacy model management")
 
         # Generate CLI args (with model_path if available)
-        self.transcription_args = (
-            self.transcription_config.generate_cli_args(
-                model_path=self.model_path
-            )
-        )
+        self.transcription_args = self.transcription_config.generate_cli_args(model_path=self.model_path)
         self.transcription_config.create_report_path()
 
     def __call__(self, input: WhisperKitProInput) -> WhisperKitProOutput:
