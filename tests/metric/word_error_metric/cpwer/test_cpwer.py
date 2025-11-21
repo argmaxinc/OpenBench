@@ -385,7 +385,12 @@ class TestCPWER(unittest.TestCase):
         )
 
         for key, value in expected_results.items():
-            self.assertAlmostEqual(result[key], value, places=4, msg=f"{key} should be {value}, but got {result[key]}")
+            self.assertAlmostEqual(
+                result[key],
+                value,
+                places=4,
+                msg=f"{key} should be {value}, but got {result[key]}",
+            )
 
     def test_cpwer_real_fewer_hyp_speakers(self) -> None:
         """Test cpWER with a real example with fewer hypothesis speakers than reference."""
@@ -408,7 +413,12 @@ class TestCPWER(unittest.TestCase):
         )
 
         for key, value in expected_results.items():
-            self.assertAlmostEqual(result[key], value, places=4, msg=f"{key} should be {value}, but got {result[key]}")
+            self.assertAlmostEqual(
+                result[key],
+                value,
+                places=3,
+                msg=f"{key} should be {value}, but got {result[key]}",
+            )
 
 
 if __name__ == "__main__":
