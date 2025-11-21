@@ -296,10 +296,8 @@ class WordErrorRate(BaseWordErrorMetric):
         return (S + D + I) / N if N > 0 else 0.0
 
 
-@MetricRegistry.register_metric(
-    (PipelineType.ORCHESTRATION, PipelineType.STREAMING_DIARIZATION),
-    MetricOptions.CPWER,
-)
+@MetricRegistry.register_metric(PipelineType.ORCHESTRATION,
+                                MetricOptions.CPWER)
 class ConcatenatedMinimumPermutationWER(BaseWordErrorMetric):
     """Concatenated minimum-Permutation Word Error Rate (cpWER) implementation.
 
