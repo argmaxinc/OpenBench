@@ -15,7 +15,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Run Ruff linter
-      uses: chartboost/ruff-action@v3
+      uses: astral-sh/ruff-action@v3
       with:
         src: ".src/"
         args: "check --output-format github"
