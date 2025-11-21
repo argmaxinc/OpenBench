@@ -68,6 +68,7 @@ build-backend = "uv_build"
 [tool.ruff]
 line-length = 119
 unsafe-fixes = false
+exclude = ["*.ipynb"]
 
 
 [tool.ruff.lint]

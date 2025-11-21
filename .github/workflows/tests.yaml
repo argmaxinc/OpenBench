@@ -1,0 +1,50 @@
+name: Tests and Formatting
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check-format:
+    name: Check Format
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run Ruff linter
+      uses: astral-sh/ruff-action@v3
+      with:
+        args: "check --output-format github src/"
+    
+    - name: Run Ruff formatter
+      run: ruff format --check --diff src/
+
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        version: "0.8.3"
+        enable-cache: true
+
+    - name: Login to Hugging Face
+      env:
+        HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      shell: bash -e {0}
+      run: |
+        uv run huggingface-cli login --token "$HF_TOKEN" > /dev/null 2>&1
+
+    - name: Run tests
+      shell: bash -e {0}
+      run: |
+        make test
+      continue-on-error: false
