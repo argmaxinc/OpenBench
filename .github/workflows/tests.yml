@@ -1,0 +1,42 @@
+name: Tests and Formatting
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check-format:
+    name: Check Format
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run Ruff linter
+      uses: chartboost/ruff-action@v3
+      with:
+        src: ".src/"
+        args: "check --output-format github"
+    
+    - name: Run Ruff formatter
+      run: ruff format --check --diff
+
+  tests:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        version: "0.8.3"
+        enable-cache: true
+
+    - name: Run tests
+      run: make test
+      continue-on-error: false
