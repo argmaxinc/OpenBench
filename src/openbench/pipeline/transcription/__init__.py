@@ -8,9 +8,9 @@ from .transcription_deepgram import DeepgramTranscriptionPipeline, DeepgramTrans
 from .transcription_groq import GroqTranscriptionConfig, GroqTranscriptionPipeline
 from .transcription_nemo import NeMoTranscriptionPipeline, NeMoTranscriptionPipelineConfig
 from .transcription_openai import OpenAITranscriptionPipeline, OpenAITranscriptionPipelineConfig
+from .transcription_oss_whisper import WhisperOSSTranscriptionPipeline, WhisperOSSTranscriptionPipelineConfig
 from .transcription_whisperkitpro import WhisperKitProTranscriptionConfig, WhisperKitProTranscriptionPipeline
 from .whisperkit import WhisperKitTranscriptionConfig, WhisperKitTranscriptionPipeline
-from .transcription_oss_whisper import WhisperOSSTranscriptionPipeline, WhisperOSSTranscriptionPipelineConfig
 
 
 __all__ = [

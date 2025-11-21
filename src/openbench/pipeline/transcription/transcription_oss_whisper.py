@@ -4,6 +4,7 @@
 from pathlib import Path
 from typing import Callable
 
+import whisper
 from argmaxtools.utils import get_logger
 from pydantic import Field
 
@@ -12,7 +13,6 @@ from ...pipeline import Pipeline, register_pipeline
 from ...pipeline_prediction import Transcript
 from ...types import PipelineType
 from .common import TranscriptionConfig, TranscriptionOutput
-import whisper
 
 
 logger = get_logger(__name__)
@@ -21,9 +21,7 @@ TEMP_AUDIO_DIR = Path("temp_audio_dir")
 
 
 class WhisperOSSApi:
-    def __init__(
-        self, model_version: str = "base", device: str | None = None
-    ):
+    def __init__(self, model_version: str = "base", device: str | None = None):
         """
         Initialize OpenAI Whisper (open-source) engine.
 
@@ -42,15 +40,10 @@ class WhisperOSSApi:
         else:
             self.device = device
 
-        logger.info(
-            f"Loading Whisper model '{model_version}' "
-            f"on device '{self.device}'"
-        )
+        logger.info(f"Loading Whisper model '{model_version}' on device '{self.device}'")
 
         # Load the model with download_root to suppress progress bars
-        self.model = whisper.load_model(
-            model_version, device=self.device, download_root=None
-        )
+        self.model = whisper.load_model(model_version, device=self.device, download_root=None)
 
     def transcribe(
         self,
@@ -86,9 +79,7 @@ class WhisperOSSApi:
             logger.debug(f"Using language: {language}")
 
         # Transcribe
-        result = self.model.transcribe(
-            str(audio_path), **transcribe_options
-        )
+        result = self.model.transcribe(str(audio_path), **transcribe_options)
 
         # Extract words and timestamps
         words = []
@@ -121,16 +112,11 @@ class WhisperOSSApi:
 class WhisperOSSTranscriptionPipelineConfig(TranscriptionConfig):
     model_version: str = Field(
         default="base",
-        description=(
-            "The version of the Whisper model to use "
-            "(tiny, base, small, medium, large, turbo)"
-        ),
+        description=("The version of the Whisper model to use (tiny, base, small, medium, large, turbo)"),
     )
     device: str | None = Field(
         default=None,
-        description=(
-            "Device to use for inference (cuda, cpu, mps). "
-        ),
+        description=("Device to use for inference (cuda, cpu, mps). "),
     )
 
 
@@ -140,9 +126,7 @@ class WhisperOSSTranscriptionPipeline(Pipeline):
     pipeline_type = PipelineType.TRANSCRIPTION
 
     def build_pipeline(self) -> Callable[[Path], dict]:
-        whisper_api = WhisperOSSApi(
-            model_version=self.config.model_version, device=self.config.device
-        )
+        whisper_api = WhisperOSSApi(model_version=self.config.model_version, device=self.config.device)
 
         def transcribe(audio_path: Path) -> dict:
             language = None
@@ -173,9 +157,7 @@ class WhisperOSSTranscriptionPipeline(Pipeline):
         # Extract language if force_language is enabled
         self.current_language = None
         if self.config.force_language:
-            self.current_language = input_sample.extra_info.get(
-                "language", None
-            )
+            self.current_language = input_sample.extra_info.get("language", None)
 
         return input_sample.save_audio(TEMP_AUDIO_DIR)
 
