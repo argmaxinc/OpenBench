@@ -199,7 +199,7 @@ class TestWDER(unittest.TestCase):
             repo_id=TEST_FIXTURES_REPO,
             repo_type="dataset",
             filename="more_hyp_speakers.json",
-            subfolder="tests/cpwer",
+            subfolder="tests/wder",
         )
         with open(json_path, "r") as f:
             data = json.load(f)
@@ -214,7 +214,7 @@ class TestWDER(unittest.TestCase):
             reference_speakers=ref_speakers,
             hypothesis_text=hyp_text,
             hypothesis_speakers=hyp_speakers,
-            expected_wder=0.08333,
+            expected_wder=data["expected_results"]["wder"],
         )
 
     def test_wder_real_fewer_hyp_speakers(self) -> None:
@@ -223,7 +223,7 @@ class TestWDER(unittest.TestCase):
             repo_id=TEST_FIXTURES_REPO,
             repo_type="dataset",
             filename="fewer_hyp_speakers.json",
-            subfolder="tests/cpwer",
+            subfolder="tests/wder",
         )
         with open(json_path, "r") as f:
             data = json.load(f)
@@ -238,5 +238,5 @@ class TestWDER(unittest.TestCase):
             reference_speakers=ref_speakers,
             hypothesis_text=hyp_text,
             hypothesis_speakers=hyp_speakers,
-            expected_wder=0.16635,
+            expected_wder=data["expected_results"]["wder"],
         )
