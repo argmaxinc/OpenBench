@@ -38,6 +38,7 @@ dependencies = [
     "texterrors==0.5.1",
     "nemo-toolkit[asr]>=2.5.0",
     "openai>=2.7.1",
+    "meeteval>=0.4.3",
 ]
 
 [project.scripts]

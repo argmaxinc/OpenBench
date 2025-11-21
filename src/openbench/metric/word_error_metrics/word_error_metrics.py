@@ -4,6 +4,7 @@
 import jiwer
 import numpy as np
 from argmaxtools.utils import get_logger
+from meeteval.wer.wer.cp import CPErrorRate, cp_word_error_rate
 from pyannote.metrics.base import BaseMetric
 from pyannote.metrics.types import Details, MetricComponents
 from pydantic import BaseModel, Field
@@ -379,122 +380,22 @@ class ConcatenatedMinimumPermutationWER(BaseWordErrorMetric):
             speaker_words = [word for word, spk in zip(hyp_words, hyp_speakers) if spk == speaker]
             hyp_concatenated[speaker] = speaker_words
 
-        # Find the best permutation of hypothesis speakers
-        # We need to try all permutations and find the one with minimum WER
-        best_errors = None
-        best_wer = float("inf")
+        error_rate: CPErrorRate = cp_word_error_rate(
+            reference=ref_concatenated,
+            hypothesis=hyp_concatenated,
+        )
 
-        # If there are more hypothesis speakers than reference speakers, pad reference
-        # If there are more reference speakers than hypothesis speakers, pad hypothesis
-        max_speakers = max(len(unique_ref_speakers), len(unique_hyp_speakers))
+        logger.debug(f"Missed Speaker: {error_rate.missed_speaker}")
+        logger.debug(f"False Alarm Speaker: {error_rate.falarm_speaker}")
+        logger.debug(f"Scored Speaker: {error_rate.scored_speaker}")
+        logger.debug(f"Assigned speakers: {error_rate.assignment}")
 
-        # Generate all permutations of hypothesis speakers
-        from itertools import permutations
-
-        # For efficiency, if we have too many speakers, use Hungarian algorithm instead
-        if len(unique_hyp_speakers) <= 7:  # Permutations are feasible for small numbers
-            for hyp_perm in permutations(unique_hyp_speakers):
-                # Compute WER for this permutation
-                total_subs = 0
-                total_dels = 0
-                total_ins = 0
-                total_words = 0
-
-                for i, ref_speaker in enumerate(unique_ref_speakers):
-                    ref_text = " ".join(ref_concatenated[ref_speaker])
-                    total_words += len(ref_concatenated[ref_speaker])
-
-                    # Get corresponding hypothesis speaker (or empty if no match)
-                    if i < len(hyp_perm):
-                        hyp_text = " ".join(hyp_concatenated[hyp_perm[i]])
-                    else:
-                        hyp_text = ""
-
-                    # Compute WER for this speaker pair
-                    result = jiwer.compute_measures(truth=ref_text, hypothesis=hyp_text)
-                    total_subs += result["substitutions"]
-                    total_dels += result["deletions"]
-                    total_ins += result["insertions"]
-
-                # Handle extra hypothesis speakers (false alarms)
-                for i in range(len(unique_ref_speakers), len(hyp_perm)):
-                    hyp_text = " ".join(hyp_concatenated[hyp_perm[i]])
-                    # All words from extra speakers are insertions
-                    total_ins += len(hyp_concatenated[hyp_perm[i]])
-
-                # Calculate WER for this permutation
-                current_wer = (total_subs + total_dels + total_ins) / total_words if total_words > 0 else 0.0
-
-                if current_wer < best_wer:
-                    best_wer = current_wer
-                    best_errors = {
-                        "num_substitutions": total_subs,
-                        "num_deletions": total_dels,
-                        "num_insertions": total_ins,
-                        "num_words": total_words,
-                    }
-        else:
-            # Use Hungarian algorithm for large numbers of speakers
-            # Build cost matrix based on WER for each speaker pair
-            cost_matrix = np.zeros((max_speakers, max_speakers))
-
-            for i, ref_speaker in enumerate(unique_ref_speakers):
-                ref_text = " ".join(ref_concatenated[ref_speaker])
-
-                for j, hyp_speaker in enumerate(unique_hyp_speakers):
-                    hyp_text = " ".join(hyp_concatenated[hyp_speaker])
-
-                    # Compute WER (substitutions + deletions + insertions)
-                    result = jiwer.compute_measures(truth=ref_text, hypothesis=hyp_text)
-                    errors = result["substitutions"] + result["deletions"] + result["insertions"]
-                    cost_matrix[i, j] = errors
-
-            # Handle missing speakers by adding high costs
-            for i in range(len(unique_ref_speakers), max_speakers):
-                cost_matrix[i, :] = 0  # Dummy rows
-            for j in range(len(unique_hyp_speakers), max_speakers):
-                cost_matrix[:, j] = cost_matrix[:, : len(unique_hyp_speakers)].max() * 2  # Dummy columns
-
-            # Find optimal assignment
-            row_ind, col_ind = optimize.linear_sum_assignment(cost_matrix)
-
-            # Compute errors for optimal assignment
-            total_subs = 0
-            total_dels = 0
-            total_ins = 0
-            total_words = 0
-
-            for i, j in zip(row_ind, col_ind):
-                if i < len(unique_ref_speakers):
-                    ref_speaker = unique_ref_speakers[i]
-                    ref_text = " ".join(ref_concatenated[ref_speaker])
-                    total_words += len(ref_concatenated[ref_speaker])
-
-                    if j < len(unique_hyp_speakers):
-                        hyp_speaker = unique_hyp_speakers[j]
-                        hyp_text = " ".join(hyp_concatenated[hyp_speaker])
-                    else:
-                        hyp_text = ""
-
-                    result = jiwer.compute_measures(truth=ref_text, hypothesis=hyp_text)
-                    total_subs += result["substitutions"]
-                    total_dels += result["deletions"]
-                    total_ins += result["insertions"]
-
-            # Handle unmatched hypothesis speakers
-            matched_hyp_speakers = set(col_ind[col_ind < len(unique_hyp_speakers)])
-            for j, hyp_speaker in enumerate(unique_hyp_speakers):
-                if j not in matched_hyp_speakers:
-                    total_ins += len(hyp_concatenated[hyp_speaker])
-
-            best_errors = {
-                "num_substitutions": total_subs,
-                "num_deletions": total_dels,
-                "num_insertions": total_ins,
-                "num_words": total_words,
-            }
-
-        return best_errors
+        return {
+            "num_substitutions": error_rate.substitutions,
+            "num_deletions": error_rate.deletions,
+            "num_insertions": error_rate.insertions,
+            "num_words": error_rate.length,
+        }
 
     def compute_metric(self, detail: Details) -> float:
         """Compute the cpWER metric from the components.
