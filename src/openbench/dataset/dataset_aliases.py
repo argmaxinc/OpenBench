@@ -239,8 +239,11 @@ def register_dataset_aliases() -> None:
 
     DatasetRegistry.register_alias(
         "earnings22-kws-chunkwise",
-        DatasetConfig(dataset_id="argmaxinc/earnings22-custom-vocab", split="test",
-                      column_mapping={'dictionary': 'keywords-file', 'keywords': 'dictionary'}),
+        DatasetConfig(
+            dataset_id="argmaxinc/earnings22-custom-vocab",
+            split="test",
+            column_mapping={"dictionary": "keywords-file", "keywords": "dictionary"},
+        ),
         supported_pipeline_types={
             PipelineType.TRANSCRIPTION,
         },
