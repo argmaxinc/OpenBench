@@ -257,6 +257,15 @@ def register_dataset_aliases() -> None:
     )
 
     DatasetRegistry.register_alias(
+        "earnings22-kws-golden-filewise",
+        DatasetConfig(dataset_id="argmaxinc/earnings22-kws-golden-filewise", split="test"),
+        supported_pipeline_types={
+            PipelineType.TRANSCRIPTION,
+        },
+        description="Earnings22 keyword spotting golden dataset specifically for keyword boosting transcription evaluation.",
+    )
+
+    DatasetRegistry.register_alias(
         "earnings22-keywords-debug",
         DatasetConfig(dataset_id="argmaxinc/earnings22-kws-golden", split="test", num_samples=5),
         supported_pipeline_types={
