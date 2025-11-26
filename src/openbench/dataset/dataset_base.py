@@ -45,6 +45,38 @@ class DatasetConfig(BaseModel):
     )
 
     def load(self) -> HfDataset:
+        """Load dataset from config.
+
+        Auto-detects if dataset_id is a local directory path or a HuggingFace dataset ID.
+        """
+        # Check if dataset_id is a local path
+        dataset_path = Path(self.dataset_id)
+        if dataset_path.exists() and dataset_path.is_dir():
+            return self._load_local()
+        else:
+            return self._load_huggingface()
+
+    def _load_local(self) -> HfDataset:
+        """Load dataset from local directory."""
+        from .local_dataset_loader import load_local_dataset
+
+        split = self.split or "test"  # Default split
+        ds = load_local_dataset(dataset_dir=Path(self.dataset_id), split=split)
+
+        if self.num_samples is not None:
+            ds = ds.take(self.num_samples)
+
+        if self.column_mapping is not None:
+            ds = ds.rename_columns(self.column_mapping)
+
+        if self.column_transforms is not None:
+            for col, transform in self.column_transforms.items():
+                ds = ds.map(transform)
+
+        return ds
+
+    def _load_huggingface(self) -> HfDataset:
+        """Load dataset from HuggingFace Hub."""
         # TODO: Add support for streaming datasets
         ds = load_dataset(self.dataset_id, self.subset, split=self.split)
         if self.num_samples is not None:
@@ -183,6 +215,10 @@ class BaseDataset(ABC, Generic[SampleType]):
 
     @property
     def organization(self) -> str:
+        """Get dataset organization. For local datasets, returns 'local'."""
+        if not self.ds.info.download_checksums:
+            return "local"
+
         download_url = list(self.ds.info.download_checksums.keys())[0]
         parsed_url = download_url.split("hf://datasets/")[-1]
         return parsed_url.split("/")[0]
