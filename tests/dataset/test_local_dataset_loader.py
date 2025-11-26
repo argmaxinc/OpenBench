@@ -168,7 +168,7 @@ class TestDiarizationDatasetLocal(unittest.TestCase):
             self.assertEqual(len(sample.reference.speakers), 2)
 
     def test_diarization_dataset_with_uem(self) -> None:
-        """Test DiarizationDataset with UEM timestamps."""
+        """Test DiarizationDataset with UEM timestamps in metadata.json."""
         with tempfile.TemporaryDirectory() as tmpdir:
             dataset_dir = Path(tmpdir) / "diarization_dataset"
 
@@ -177,11 +177,20 @@ class TestDiarizationDatasetLocal(unittest.TestCase):
                     "timestamps_start": [0.0, 5.2],
                     "timestamps_end": [5.2, 10.5],
                     "speakers": ["SPEAKER_00", "SPEAKER_01"],
-                    "uem_timestamps": [[0.0, 10.5]],
                 }
 
+            metadata = {
+                "sample_001": {
+                    "uem_timestamps": [[0.0, 10.5]],
+                }
+            }
+
             create_local_dataset(
-                dataset_dir, audio_ids=["sample_001"], reference_data_fn=reference_data_fn, split="test"
+                dataset_dir,
+                audio_ids=["sample_001"],
+                reference_data_fn=reference_data_fn,
+                metadata=metadata,
+                split="test",
             )
 
             config = DatasetConfig(dataset_id=str(dataset_dir), split="test")
@@ -204,12 +213,21 @@ class TestTranscriptionDatasetLocal(unittest.TestCase):
                     "transcript": ["hello", "world", "how", "are", "you"],
                     "word_timestamps_start": [0.0, 0.5, 1.0, 1.5, 2.0],
                     "word_timestamps_end": [0.5, 1.0, 1.5, 2.0, 2.5],
+                }
+
+            metadata = {
+                "sample_001": {
                     "language": "en",
                     "dictionary": ["hello", "world"],
                 }
+            }
 
             create_local_dataset(
-                dataset_dir, audio_ids=["sample_001"], reference_data_fn=reference_data_fn, split="test"
+                dataset_dir,
+                audio_ids=["sample_001"],
+                reference_data_fn=reference_data_fn,
+                metadata=metadata,
+                split="test",
             )
 
             config = DatasetConfig(dataset_id=str(dataset_dir), split="test")
