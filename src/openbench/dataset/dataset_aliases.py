@@ -591,17 +591,18 @@ def register_dataset_aliases() -> None:
 
     # Local dataset to use with env variables to override with env vars
     # and allow easy testing of local datasets
-    DatasetRegistry.register_alias(
-        "local-dataset",
-        DatasetConfig(dataset_id=os.getenv("LOCAL_DATASET_PATH"), split=os.getenv("LOCAL_DATASET_SPLIT")),
-        supported_pipeline_types={
-            PipelineType.TRANSCRIPTION,
-            PipelineType.DIARIZATION,
-            PipelineType.STREAMING_TRANSCRIPTION,
-            PipelineType.ORCHESTRATION,
-        },
-        description="Local dataset for testing. To use this dataset you need to set the `LOCAL_DATASET_PATH` and `LOCAL_DATASET_SPLIT` environment variables.",
-    )
+    if os.getenv("LOCAL_DATASET_PATH") and os.getenv("LOCAL_DATASET_SPLIT"):
+        DatasetRegistry.register_alias(
+            "local-dataset",
+            DatasetConfig(dataset_id=os.getenv("LOCAL_DATASET_PATH"), split=os.getenv("LOCAL_DATASET_SPLIT")),
+            supported_pipeline_types={
+                PipelineType.TRANSCRIPTION,
+                PipelineType.DIARIZATION,
+                PipelineType.STREAMING_TRANSCRIPTION,
+                PipelineType.ORCHESTRATION,
+            },
+            description="Local dataset for testing. To use this dataset you need to set the `LOCAL_DATASET_PATH` and `LOCAL_DATASET_SPLIT` environment variables.",
+        )
 
 
 register_dataset_aliases()
