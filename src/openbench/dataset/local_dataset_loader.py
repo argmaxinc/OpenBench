@@ -122,19 +122,15 @@ def load_local_dataset(dataset_dir: Path, split: str) -> Dataset:
             raise ValueError(f"Reference file not found for audio_id: {audio_id} in {reference_dir}")
 
         reference_data = load_json(reference_file)
+        # Get metadata for this `audio_id` if we have metadata
+        metadata_item = metadata.get(audio_id, {})
 
         # Build row: audio path + reference data + optional metadata
         row = {
             "audio": str(audio_file),
             **reference_data,
+            **metadata_item,
         }
-
-        # Add metadata if available
-        if audio_id in metadata:
-            # Metadata goes into extra_info, but we'll handle that in prepare_sample
-            # For now, we can add it as additional columns if needed
-            # But typically metadata is handled separately
-            pass
 
         rows.append(row)
 
