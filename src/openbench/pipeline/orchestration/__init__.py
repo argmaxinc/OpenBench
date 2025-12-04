@@ -5,6 +5,7 @@ from .orchestration_deepgram import DeepgramOrchestrationPipeline, DeepgramOrche
 from .orchestration_openai import OpenAIOrchestrationPipeline, OpenAIOrchestrationPipelineConfig
 from .orchestration_whisperkitpro import WhisperKitProOrchestrationConfig, WhisperKitProOrchestrationPipeline
 from .whisperx import WhisperXPipeline, WhisperXPipelineConfig
+from .nemo import NeMoMTParakeetPipeline, NeMoMTParakeetPipelineConfig
 
 
 __all__ = [
@@ -16,4 +17,6 @@ __all__ = [
     "WhisperKitProOrchestrationConfig",
     "OpenAIOrchestrationPipeline",
     "OpenAIOrchestrationPipelineConfig",
+    "NeMoMTParakeetPipeline",
+    "NeMoMTParakeetPipelineConfig"
 ]

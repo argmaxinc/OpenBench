@@ -19,6 +19,7 @@ from .orchestration import (
     OpenAIOrchestrationPipeline,
     WhisperKitProOrchestrationPipeline,
     WhisperXPipeline,
+    NeMoMTParakeetPipeline,
 )
 from .pipeline_registry import PipelineRegistry
 from .streaming_transcription import (
@@ -297,6 +298,17 @@ def register_pipeline_aliases() -> None:
             "model_version": "gpt-4o-transcribe-diarize",
         },
         description="OpenAI orchestration pipeline using the `gpt-4o-transcribe-diarize` version of the model. Requires `OPENAI_API_KEY` env var.",
+    )
+
+    PipelineRegistry.register_alias(
+        "nemo-mt-parakeet",
+        NeMoMTParakeetPipeline,
+        default_config={
+            "out_dir": "./nemo_mt_parakeet_logs",
+            "diar_model_id": "nvidia/diar_streaming_sortformer_4spk-v2.1",
+            "asr_model_id": "nvidia/multitalker-parakeet-streaming-0.6b-v1",
+        },
+        description="NeMo Multi-Talker Parakeet orchestration pipeline (diarization + transcription).",
     )
 
     ################# TRANSCRIPTION PIPELINES #################
