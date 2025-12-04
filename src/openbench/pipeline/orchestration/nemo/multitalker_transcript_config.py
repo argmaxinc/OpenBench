@@ -1,3 +1,6 @@
+# Code reference:
+# https://huggingface.co/nvidia/multitalker-parakeet-streaming-0.6b-v1/tree/cfc5de5194e98158bf75507e79a4c9684bf47d29
+
 # Copyright (c) 2025, NVIDIA CORPORATION.  All rights reserved.
 #
 # Licensed under the NVIDIA Open Model License (the "License");
@@ -13,7 +16,6 @@
 # limitations under the License.
 
 from dataclasses import dataclass, field
-from typing import List, Optional
 
 
 @dataclass
@@ -23,9 +25,9 @@ class MultitalkerTranscriptionConfig:
     """
 
     # Required configs
-    diar_model: Optional[str] = None  # Path to a .nemo file
-    diar_pretrained_name: Optional[str] = None  # Name of a pretrained model
-    max_num_of_spks: Optional[int] = 4  # maximum number of speakers
+    diar_model: str | None = None  # Path to a .nemo file
+    diar_pretrained_name: str | None = None  # Name of a pretrained model
+    max_num_of_spks: int | None = 4  # maximum number of speakers
     parallel_speaker_strategy: bool = True  # whether to use parallel speaker strategy
     masked_asr: bool = True  # whether to use masked ASR
     mask_preencode: bool = False  # whether to mask preencode or mask features
@@ -36,7 +38,7 @@ class MultitalkerTranscriptionConfig:
     # General configs
     session_len_sec: float = -1  # End-to-end diarization session length in seconds
     num_workers: int = 8
-    random_seed: Optional[int] = None  # seed number going to be used in seed_everything()
+    random_seed: int | None = None  # seed number going to be used in seed_everything()
     log: bool = True  # If True,log will be printed
 
     # Streaming diarization configs
@@ -49,15 +51,15 @@ class MultitalkerTranscriptionConfig:
     chunk_right_context: int = 0
 
     # If `cuda` is a negative number, inference will be on CPU only.
-    cuda: Optional[int] = None
+    cuda: int | None = None
     allow_mps: bool = True  # allow to select MPS device (Apple Silicon M-series GPU)
     matmul_precision: str = "highest"  # Literal["highest", "high", "medium"]
 
     # ASR Configs
-    asr_model: Optional[str] = None
+    asr_model: str | None = None
     device: str = "mps"
-    audio_file: Optional[str] = None
-    manifest_file: Optional[str] = None
+    audio_file: str | None = None
+    manifest_file: str | None = None
     use_amp: bool = True
     debug_mode: bool = False
     batch_size: int = 32
@@ -65,10 +67,10 @@ class MultitalkerTranscriptionConfig:
     shift_size: int = -1
     left_chunks: int = 2
     online_normalization: bool = False
-    output_path: Optional[str] = None
+    output_path: str | None = None
     pad_and_drop_preencoded: bool = False
-    set_decoder: Optional[str] = None  # ["ctc", "rnnt"]
-    att_context_size: Optional[List[int]] = field(default_factory=lambda: [70, 13])
+    set_decoder: str | None = None  # ["ctc", "rnnt"]
+    att_context_size: list[int] | None = field(default_factory=lambda: [70, 13])
     generate_realtime_scripts: bool = False
 
     word_window: int = 50
@@ -80,10 +82,10 @@ class MultitalkerTranscriptionConfig:
     min_sigmoid_val: float = 1e-2
     discarded_frames: int = 8
     print_time: bool = True
-    print_sample_indices: List[int] = field(default_factory=lambda: [0])
+    print_sample_indices: list[int] = field(default_factory=lambda: [0])
     colored_text: bool = True
     real_time_mode: bool = False
-    print_path: Optional[str] = None
+    print_path: str | None = None
 
     ignored_initial_frame_steps: int = 5
     verbose: bool = False
@@ -96,6 +98,24 @@ class MultitalkerTranscriptionConfig:
 
     @staticmethod
     def init_diar_model(cfg, diar_model):
+        """
+        Initialize the the following parameters for the diarization model:
+            chunk_len: number of frames in the current chunk
+                chunk_len * 0.08s = chunk duration in seconds
+            spkcache_len: number of frames to store in the speaker cache
+                spkcache_len * 0.08s = speaker cache duration in seconds
+            chunk_left_context: number of frames in the past context
+                chunk_left_context * 0.08s = past context duration in seconds
+            chunk_right_context: number of frames in the future context
+                chunk_right_context * 0.08s = future context duration in seconds
+            fifo_len: number of frames to store in the FIFO
+                fifo_len * 0.08s = FIFO duration in seconds
+            spkcache_refresh_rate: number of frames to refresh the speaker cache
+                spkcache_refresh_rate * 0.08s = speaker cache refresh duration in seconds
+
+        Total latency of the diarization model:
+            (chunk_len + chunk_right_context) * 0.08s
+        """
         # Set streaming mode diar_model params (matching the diarization setup from lines 263-271 of reference file)
         diar_model.streaming_mode = cfg.streaming_mode
         diar_model.sortformer_modules.chunk_len = cfg.chunk_len if cfg.chunk_len > 0 else 6

@@ -38,7 +38,7 @@ dependencies = [
     "texterrors==0.5.1",
     "openai>=2.7.1",
     "meeteval>=0.4.3",
-    "nemo-toolkit[asr]",
+    "nemo-toolkit[asr]>=2.6.0",
 ]
 
 [project.scripts]
@@ -99,6 +99,3 @@ skip-magic-trailing-comma = false
 
 # Like Black, automatically detect the appropriate line ending.
 line-ending = "auto"
-
-[tool.uv.sources]
-nemo-toolkit = { git = "https://github.com/NVIDIA-NeMo/NeMo.git", rev = "main" }

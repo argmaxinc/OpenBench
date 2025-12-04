@@ -1014,15 +1014,6 @@ wheels = [
 ]
 
 [[package]]
-name = "diskcache"
-version = "5.6.3"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/3f/21/1c1ffc1a039ddcc459db43cc108658f32c57d271d7289a2794e401d0fdb6/diskcache-5.6.3.tar.gz", hash = "sha256:2c3a3fa2743d8535d832ec61c2054a1641f41775aa7c556758a109941e33e4fc", size = 67916, upload-time = "2023-08-31T06:12:00.316Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/3f/27/4570e78fc0bf5ea0ca45eb1de3818a23787af9b390c0b0a0033a1b8236f9/diskcache-5.6.3-py3-none-any.whl", hash = "sha256:5e31b2d5fbad117cc363ebaf6b689474db18a1f6438bc82358b024abd4c2ca19", size = 45550, upload-time = "2023-08-31T06:11:58.822Z" },
-]
-
-[[package]]
 name = "distro"
 version = "1.9.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2704,8 +2695,8 @@ wheels = [
 
 [[package]]
 name = "nemo-toolkit"
-version = "2.7.0rc0"
-source = { git = "https://github.com/NVIDIA-NeMo/NeMo.git?rev=main#bdd08c86a7747797bca3a70b9ef77a0097e6c9e8" }
+version = "2.6.0"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "fsspec" },
     { name = "huggingface-hub" },
@@ -2726,6 +2717,10 @@ dependencies = [
     { name = "wget" },
     { name = "wrapt" },
 ]
+sdist = { url = "https://files.pythonhosted.org/packages/e0/e4/ba1e8c13088659b2d3876e7e9f36e7c3bca73d6c0b505c63f56831a591f1/nemo_toolkit-2.6.0.tar.gz", hash = "sha256:a01296c6615637787b800df8e9425af4f44edace6680877804424cf0c93a8f25", size = 4151390, upload-time = "2025-12-03T21:01:29.622Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3b/d0/dd254e3f1215fa5a8eb7d0c0c814664362817b95c7c1ed14a638829bb9c7/nemo_toolkit-2.6.0-py3-none-any.whl", hash = "sha256:0849541927e99fb701fc2b4565a54c42d011dc370cc3c3a6b5d8260f521a751f", size = 5899935, upload-time = "2025-12-03T21:01:26.759Z" },
+]
 
 [package.optional-dependencies]
 asr = [
@@ -2733,7 +2728,6 @@ asr = [
     { name = "cloudpickle" },
     { name = "ctc-segmentation" },
     { name = "datasets" },
-    { name = "diskcache" },
     { name = "editdistance" },
     { name = "einops" },
     { name = "fiddle" },
@@ -3365,7 +3359,7 @@ requires-dist = [
     { name = "librosa", specifier = ">=0.10.2.post1,<0.11" },
     { name = "llvmlite", specifier = "==0.43.0" },
     { name = "meeteval", specifier = ">=0.4.3" },
-    { name = "nemo-toolkit", extras = ["asr"], git = "https://github.com/NVIDIA-NeMo/NeMo.git?rev=main" },
+    { name = "nemo-toolkit", extras = ["asr"], specifier = ">=2.6.0" },
     { name = "numba", specifier = "~=0.60.0" },
     { name = "numpy", specifier = ">=1.24.0,<2.0" },
     { name = "openai", specifier = ">=2.7.1" },

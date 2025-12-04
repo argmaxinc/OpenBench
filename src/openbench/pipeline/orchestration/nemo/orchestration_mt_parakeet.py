@@ -79,17 +79,18 @@ class NeMoMTParakeetPipeline(Pipeline):
                     else asr_model.encoder.streaming_cfg.drop_extra_pre_encoded
                 )
                 with torch.inference_mode():
-                    with torch.no_grad():
-                        multispk_asr_streamer.perform_parallel_streaming_stt_spk(
-                            step_num=step_num,
-                            chunk_audio=chunk_audio,
-                            chunk_lengths=chunk_lengths,
-                            is_buffer_empty=streaming_buffer.is_buffer_empty(),
-                            drop_extra_pre_encoded=drop_extra_pre_encoded,
-                        )
+                    multispk_asr_streamer.perform_parallel_streaming_stt_spk(
+                        step_num=step_num,
+                        chunk_audio=chunk_audio,
+                        chunk_lengths=chunk_lengths,
+                        is_buffer_empty=streaming_buffer.is_buffer_empty(),
+                        drop_extra_pre_encoded=drop_extra_pre_encoded,
+                    )
 
             # Generate the speaker-tagged transcript and print it.
             multispk_asr_streamer.generate_seglst_dicts_from_parallel_streaming(samples=samples)
+            # Delete temp audio file
+            sample.audio_path.unlink()
             return multispk_asr_streamer.instance_manager.seglst_dict_list
 
         return inference
