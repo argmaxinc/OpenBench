@@ -1,6 +1,7 @@
 # For licensing see accompanying LICENSE.md file.
 # Copyright (C) 2025 Argmax, Inc. All Rights Reserved.
 
+from .nemo import NeMoMTParakeetPipeline, NeMoMTParakeetPipelineConfig
 from .orchestration_deepgram import DeepgramOrchestrationPipeline, DeepgramOrchestrationPipelineConfig
 from .orchestration_openai import OpenAIOrchestrationPipeline, OpenAIOrchestrationPipelineConfig
 from .orchestration_whisperkitpro import WhisperKitProOrchestrationConfig, WhisperKitProOrchestrationPipeline
@@ -16,4 +17,6 @@ __all__ = [
     "WhisperKitProOrchestrationConfig",
     "OpenAIOrchestrationPipeline",
     "OpenAIOrchestrationPipelineConfig",
+    "NeMoMTParakeetPipeline",
+    "NeMoMTParakeetPipelineConfig",
 ]
