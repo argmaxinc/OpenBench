@@ -16,10 +16,10 @@ from .diarization import (
 )
 from .orchestration import (
     DeepgramOrchestrationPipeline,
+    NeMoMTParakeetPipeline,
     OpenAIOrchestrationPipeline,
     WhisperKitProOrchestrationPipeline,
     WhisperXPipeline,
-    NeMoMTParakeetPipeline,
 )
 from .pipeline_registry import PipelineRegistry
 from .streaming_transcription import (

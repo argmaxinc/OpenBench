@@ -21,6 +21,7 @@ class MultitalkerTranscriptionConfig:
     """
     Configuration for Multi-talker transcription with an ASR model and a diarization model.
     """
+
     # Required configs
     diar_model: Optional[str] = None  # Path to a .nemo file
     diar_pretrained_name: Optional[str] = None  # Name of a pretrained model
@@ -54,7 +55,7 @@ class MultitalkerTranscriptionConfig:
 
     # ASR Configs
     asr_model: Optional[str] = None
-    device: str = 'mps'
+    device: str = "mps"
     audio_file: Optional[str] = None
     manifest_file: Optional[str] = None
     use_amp: bool = True
@@ -100,7 +101,9 @@ class MultitalkerTranscriptionConfig:
         diar_model.sortformer_modules.chunk_len = cfg.chunk_len if cfg.chunk_len > 0 else 6
         diar_model.sortformer_modules.spkcache_len = cfg.spkcache_len
         diar_model.sortformer_modules.chunk_left_context = cfg.chunk_left_context
-        diar_model.sortformer_modules.chunk_right_context = cfg.chunk_right_context if cfg.chunk_right_context > 0 else 7
+        diar_model.sortformer_modules.chunk_right_context = (
+            cfg.chunk_right_context if cfg.chunk_right_context > 0 else 7
+        )
         diar_model.sortformer_modules.fifo_len = cfg.fifo_len
         diar_model.sortformer_modules.log = cfg.log
         diar_model.sortformer_modules.spkcache_refresh_rate = cfg.spkcache_refresh_rate

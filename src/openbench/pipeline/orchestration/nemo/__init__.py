@@ -6,6 +6,7 @@ from .orchestration_mt_parakeet import (
     NeMoMTParakeetPipelineConfig,
 )
 
+
 __all__ = [
     "NeMoMTParakeetPipeline",
     "NeMoMTParakeetPipelineConfig",
