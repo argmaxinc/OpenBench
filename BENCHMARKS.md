@@ -539,7 +539,7 @@
 
 | Dataset                                          |   Deepgram<br/>(nova-3) |   OpenAI<br/>(whisper-1) |   AssemblyAI |   Whisper OSS<br/>(large-v3-turbo) |   Argmax<br/>(parakeet-v2) |   Argmax<br/>(parakeet-v3) |
 |--------------------------------------------------|-------------------------|--------------------------|--------------|------------------------------------|----------------------------|----------------------------|
-| earnings22-keywords<br/>(wo Keyword Recognition) |                    0.15 |                     0.21 |         0.13 |                               0.15 |                       0.15 |                       0.17 |
+| earnings22-keywords<br/>(no keywords) |                    0.15 |                     0.21 |         0.13 |                               0.15 |                       0.15 |                       0.17 |
 | earnings22-keywords<br/>(chunk-keywords)         |                    0.13 |                     0.32 |         0.12 |                               0.21 |                       0.12 |                       0.15 |
 | earnings22-keywords<br/>(file-keywords)          |                    0.14 |                     0.28 |         0.12 |                               0.15 |                       0.13 |                       0.15 |
 
@@ -566,7 +566,7 @@ If the model predicts 20 keywords and 15 of them match the ground truth, precisi
 
 | Dataset                                          |   Deepgram<br/>(nova-3) |   OpenAI<br/>(whisper-1) |   AssemblyAI |   Whisper OSS<br/>(large-v3-turbo) |   Argmax<br/>(parakeet-v2) |   Argmax<br/>(parakeet-v3) |
 |--------------------------------------------------|-------------------------|--------------------------|--------------|------------------------------------|----------------------------|----------------------------|
-| earnings22-keywords<br/>(wo Keyword Recognition) |                    0.98 |                     0.97 |         0.97 |                               0.97 |                       0.97 |                       0.98 |
+| earnings22-keywords<br/>(no keywords) |                    0.98 |                     0.97 |         0.97 |                               0.97 |                       0.97 |                       0.98 |
 | earnings22-keywords<br/>(chunk-keywords)         |                    0.99 |                     0.98 |         0.99 |                               0.96 |                       0.98 |                       0.98 |
 | earnings22-keywords<br/>(file-keywords)          |                    0.96 |                     0.93 |         0.96 |                               0.94 |                       0.96 |                       0.95 |
 
@@ -593,7 +593,7 @@ If the ground-truth transcript has 25 keywords and the model correctly finds 15,
 
 | Dataset                                          |   Deepgram<br/>(nova-3) |   OpenAI<br/>(whisper-1) |   AssemblyAI |   Whisper OSS<br/>(large-v3-turbo) |   Argmax<br/>(parakeet-v2) |   Argmax<br/>(parakeet-v3) |
 |--------------------------------------------------|-------------------------|--------------------------|--------------|------------------------------------|----------------------------|----------------------------|
-| earnings22-keywords<br/>(wo Keyword Recognition) |                    0.61 |                     0.53 |         0.55 |                               0.53 |                       0.47 |                       0.45 |
+| earnings22-keywords<br/>(no keywords) |                    0.61 |                     0.53 |         0.55 |                               0.53 |                       0.47 |                       0.45 |
 | earnings22-keywords<br/>(chunk-keywords)         |                    0.89 |                     0.7  |         0.69 |                               0.77 |                       0.85 |                       0.82 |
 | earnings22-keywords<br/>(file-keywords)          |                    0.83 |                     0.79 |         0.68 |                               0.82 |                       0.82 |                       0.8  |
 
@@ -622,7 +622,7 @@ F1 = 2 × (0.75 × 0.6) / (0.75 + 0.6) = **66.7%**, reflecting the model's overa
 
 | Dataset                                          |   Deepgram<br/>(nova-3) |   OpenAI<br/>(whisper-1) |   AssemblyAI |   Whisper OSS<br/>(large-v3-turbo) |   Argmax<br/>(parakeet-v2) |   Argmax<br/>(parakeet-v3) |
 |--------------------------------------------------|-------------------------|--------------------------|--------------|------------------------------------|----------------------------|----------------------------|
-| earnings22-keywords<br/>(wo Keyword Recognition) |                    0.75 |                     0.68 |         0.7  |                               0.69 |                       0.63 |                       0.62 |
+| earnings22-keywords<br/>(no keywords) |                    0.75 |                     0.68 |         0.7  |                               0.69 |                       0.63 |                       0.62 |
 | earnings22-keywords<br/>(chunk-keywords)         |                    0.94 |                     0.82 |         0.81 |                               0.86 |                       0.91 |                       0.89 |
 | earnings22-keywords<br/>(file-keywords)          |                    0.89 |                     0.86 |         0.8  |                               0.87 |                       0.88 |                       0.87 |
 
