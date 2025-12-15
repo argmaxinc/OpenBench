@@ -98,9 +98,7 @@ class BenchmarkRunner:
                 f"Failed to process sample {sample_id} ({sample.audio_name}) "
                 f"from dataset {dataset_name} with pipeline {pipeline.__class__.__name__}: {e}"
             )
-            raise RuntimeError(
-                f"Pipeline execution failed on sample {sample_id} ({sample.audio_name}): {e}"
-            ) from e
+            raise RuntimeError(f"Pipeline execution failed on sample {sample_id} ({sample.audio_name}): {e}") from e
         audio_duration = sample.get_audio_duration()
         prediction_time = output.prediction_time
 
