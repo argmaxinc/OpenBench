@@ -539,9 +539,9 @@
 
 | Dataset                                          |   Deepgram<br/>(nova-3) |   OpenAI<br/>(whisper-1) |   AssemblyAI |   Whisper OSS<br/>(large-v3-turbo) |   Argmax<br/>(parakeet-v2) |   Argmax<br/>(parakeet-v3) |
 |--------------------------------------------------|-------------------------|--------------------------|--------------|------------------------------------|----------------------------|----------------------------|
-| earnings22-keywords<br/>(no keywords) |                    0.15 |                     0.21 |         0.13 |                               0.15 |                       0.15 |                       0.17 |
-| earnings22-keywords<br/>(chunk-keywords)         |                    0.13 |                     0.32 |         0.12 |                               0.21 |                       0.12 |                       0.15 |
-| earnings22-keywords<br/>(file-keywords)          |                    0.14 |                     0.28 |         0.12 |                               0.15 |                       0.13 |                       0.15 |
+| earnings22-keywords<br/>(no keywords) |                    15.34 |                     20.69 |         12.58 |                               15.4 |                       14.69 |                       16.89 |
+| earnings22-keywords<br/>(chunk-keywords)         |                   13.28 |                    31.97 |        11.67 |                              21.24 |                      12.46 |                      14.57 |
+| earnings22-keywords<br/>(file-keywords)          |                   13.85 |                    28.37 |        11.80 |                              14.69 |                      12.57 |                      14.73 |
 
 <br/><br/>
 
