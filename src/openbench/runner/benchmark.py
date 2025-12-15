@@ -91,7 +91,16 @@ class BenchmarkRunner:
         dataset_length: int,
     ) -> ProcessingResult:
         sample_id, sample = sample_and_id
-        output = pipeline(sample)
+        try:
+            output = pipeline(sample)
+        except Exception as e:
+            logger.error(
+                f"Failed to process sample {sample_id} ({sample.audio_name}) "
+                f"from dataset {dataset_name} with pipeline {pipeline.__class__.__name__}: {e}"
+            )
+            raise RuntimeError(
+                f"Pipeline execution failed on sample {sample_id} ({sample.audio_name}): {e}"
+            ) from e
         audio_duration = sample.get_audio_duration()
         prediction_time = output.prediction_time
 
@@ -212,17 +221,22 @@ class BenchmarkRunner:
         # but this would defeat the purpose of using the MPS backend and would be slower.
         # Ref: https://github.com/pytorch/pytorch/issues/87688
         with Pool(processes=pipeline.config.num_worker_processes) as pool:
-            results = list(
-                tqdm.tqdm(
-                    pool.imap(
-                        self._process_single_sample_wrapper,
-                        args_list,
-                        chunksize=pipeline.config.per_worker_chunk_size,
-                    ),
-                    total=dataset_length,
-                    desc=f"Processing {dataset_name}",
+            try:
+                results = list(
+                    tqdm.tqdm(
+                        pool.imap(
+                            self._process_single_sample_wrapper,
+                            args_list,
+                            chunksize=pipeline.config.per_worker_chunk_size,
+                        ),
+                        total=dataset_length,
+                        desc=f"Processing {dataset_name}",
+                    )
                 )
-            )
+            except Exception as e:
+                logger.error(f"Evaluation failed on dataset {dataset_name}: {e}")
+                pool.terminate()
+                raise
 
         # Sort results by sample_id to maintain order
         results.sort(key=lambda x: x.sample_id)
