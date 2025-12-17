@@ -114,12 +114,8 @@ class BenchmarkRunner:
         )
 
         if pipeline.pipeline_type == PipelineType.DIARIZATION:
-            sample_results_attributes["num_speakers_predicted"] = (
-                output.prediction.num_speakers
-            )
-            sample_results_attributes["num_speakers_reference"] = (
-                sample.reference.num_speakers
-            )
+            sample_results_attributes["num_speakers_predicted"] = output.prediction.num_speakers
+            sample_results_attributes["num_speakers_reference"] = sample.reference.num_speakers
 
         sample_result = sample_result_class(**sample_results_attributes)
 

@@ -183,9 +183,7 @@ def register_pipeline_aliases() -> None:
             "model_version": "nova-3",
             "enable_diarization": True,
         },
-        description=(
-            "Deepgram streaming orchestration pipeline with diarization enabled."
-        ),
+        description=("Deepgram streaming orchestration pipeline with diarization enabled."),
     )
 
     PipelineRegistry.register_alias(

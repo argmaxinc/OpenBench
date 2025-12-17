@@ -26,23 +26,15 @@ logger = get_logger(__name__)
 
 class DeepgramApi:
     def __init__(self, cfg) -> None:
-        self.realtime_resolution = getattr(
-            cfg, 'realtime_resolution', 0.020
-        )
-        self.model_version = getattr(cfg, 'model_version', "nova-3")
+        self.realtime_resolution = getattr(cfg, "realtime_resolution", 0.020)
+        self.model_version = getattr(cfg, "model_version", "nova-3")
         self.api_key = os.getenv("DEEPGRAM_API_KEY")
-        assert (
-            self.api_key is not None
-        ), "Please set API key in environment"
+        assert self.api_key is not None, "Please set API key in environment"
         self.channels = cfg.channels
         self.sample_width = cfg.sample_width
         self.sample_rate = cfg.sample_rate
-        self.host_url = os.getenv(
-            "DEEPGRAM_HOST_URL", "wss://api.deepgram.com"
-        )
-        self.enable_diarization = getattr(
-            cfg, 'enable_diarization', False
-        )
+        self.host_url = os.getenv("DEEPGRAM_HOST_URL", "wss://api.deepgram.com")
+        self.enable_diarization = getattr(cfg, "enable_diarization", False)
 
     async def run(self, data, key, channels, sample_width, sample_rate):
         """Connect to Deepgram real-time streaming endpoint.
@@ -136,25 +128,14 @@ class DeepgramApi:
                     if alternatives["transcript"] != "":
                         if not msg["is_final"]:
                             audio_cursor_l.append(audio_cursor)
-                            model_timestamps_hypothesis.append(
-                                alternatives["words"]
-                            )
-                            interim_transcripts.append(
-                                transcript + " " + alternatives["transcript"]
-                            )
-                            logger.debug(
-                                "\n" + "Transcription: " + transcript +
-                                alternatives["transcript"]
-                            )
+                            model_timestamps_hypothesis.append(alternatives["words"])
+                            interim_transcripts.append(transcript + " " + alternatives["transcript"])
+                            logger.debug("\n" + "Transcription: " + transcript + alternatives["transcript"])
 
                         elif msg["is_final"]:
                             confirmed_audio_cursor_l.append(audio_cursor)
-                            transcript = (
-                                transcript + " " + alternatives["transcript"]
-                            )
-                            confirmed_interim_transcripts.append(
-                                transcript
-                            )
+                            transcript = transcript + " " + alternatives["transcript"]
+                            confirmed_interim_transcripts.append(transcript)
                             words = alternatives["words"]
                             model_timestamps_confirmed.append(words)
 
@@ -162,20 +143,15 @@ class DeepgramApi:
                             if self.enable_diarization:
                                 for word_info in words:
                                     if "speaker" in word_info:
-                                        speaker_label = (
-                                            f"SPEAKER_"
-                                            f"{word_info['speaker']}"
+                                        speaker_label = f"SPEAKER_{word_info['speaker']}"
+                                        words_with_speakers.append(
+                                            {
+                                                "word": word_info.get("word", ""),
+                                                "speaker": speaker_label,
+                                                "start": word_info.get("start", 0),
+                                                "end": word_info.get("end", 0),
+                                            }
                                         )
-                                        words_with_speakers.append({
-                                            "word": word_info.get(
-                                                "word", ""
-                                            ),
-                                            "speaker": speaker_label,
-                                            "start": word_info.get(
-                                                "start", 0
-                                            ),
-                                            "end": word_info.get("end", 0),
-                                        })
 
             await asyncio.gather(sender(ws), receiver(ws))
             return (
@@ -201,25 +177,16 @@ class DeepgramApi:
             model_timestamps_confirmed,
             words_with_speakers,
         ) = asyncio.get_event_loop().run_until_complete(
-            self.run(
-                sample, self.api_key, self.channels,
-                self.sample_width, self.sample_rate
-            )
+            self.run(sample, self.api_key, self.channels, self.sample_width, self.sample_rate)
         )
         return {
             "transcript": transcript,
             "interim_transcripts": interim_transcripts,
             "audio_cursor": audio_cursor_l,
-            "confirmed_interim_transcripts": (
-                confirmed_interim_transcripts
-            ),
+            "confirmed_interim_transcripts": (confirmed_interim_transcripts),
             "confirmed_audio_cursor": confirmed_audio_cursor_l,
-            "model_timestamps_hypothesis": (
-                model_timestamps_hypothesis
-            ),
-            "model_timestamps_confirmed": (
-                model_timestamps_confirmed
-            ),
+            "model_timestamps_hypothesis": (model_timestamps_hypothesis),
+            "model_timestamps_confirmed": (model_timestamps_confirmed),
             "words_with_speakers": words_with_speakers,
         }
 
@@ -229,9 +196,7 @@ class DeepgramStreamingPipelineConfig(StreamingTranscriptionConfig):
     channels: int
     sample_width: int
     realtime_resolution: float
-    model_version: str = Field(
-        ..., description="The model to use for real-time transcription"
-    )
+    model_version: str = Field(..., description="The model to use for real-time transcription")
 
 
 @register_pipeline
@@ -245,31 +210,19 @@ class DeepgramStreamingPipeline(Pipeline):
         audio_data_byte = y_int16.T.tobytes()
         return audio_data_byte
 
-    def parse_output(
-        self, output
-    ) -> StreamingTranscriptionOutput:
-        model_timestamps_hypothesis = (
-            output["model_timestamps_hypothesis"]
-        )
-        model_timestamps_confirmed = (
-            output["model_timestamps_confirmed"]
-        )
+    def parse_output(self, output) -> StreamingTranscriptionOutput:
+        model_timestamps_hypothesis = output["model_timestamps_hypothesis"]
+        model_timestamps_confirmed = output["model_timestamps_confirmed"]
 
         if model_timestamps_hypothesis is not None:
             model_timestamps_hypothesis = [
-                [
-                    {"start": word["start"], "end": word["end"]}
-                    for word in interim_result_words
-                ]
+                [{"start": word["start"], "end": word["end"]} for word in interim_result_words]
                 for interim_result_words in model_timestamps_hypothesis
             ]
 
         if model_timestamps_confirmed is not None:
             model_timestamps_confirmed = [
-                [
-                    {"start": word["start"], "end": word["end"]}
-                    for word in interim_result_words
-                ]
+                [{"start": word["start"], "end": word["end"]} for word in interim_result_words]
                 for interim_result_words in model_timestamps_confirmed
             ]
 
@@ -278,9 +231,7 @@ class DeepgramStreamingPipeline(Pipeline):
             audio_cursor=output["audio_cursor"],
             interim_results=output["interim_transcripts"],
             confirmed_audio_cursor=output["confirmed_audio_cursor"],
-            confirmed_interim_results=(
-                output["confirmed_interim_transcripts"]
-            ),
+            confirmed_interim_results=(output["confirmed_interim_transcripts"]),
             model_timestamps_hypothesis=model_timestamps_hypothesis,
             model_timestamps_confirmed=model_timestamps_confirmed,
         )
