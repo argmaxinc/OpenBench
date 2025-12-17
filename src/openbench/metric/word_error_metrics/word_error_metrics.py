@@ -298,7 +298,7 @@ class WordErrorRate(BaseWordErrorMetric):
 
 
 @MetricRegistry.register_metric(
-    (PipelineType.ORCHESTRATION, PipelineType.STREAMING_DIARIZATION),
+    PipelineType.ORCHESTRATION,
     MetricOptions.CPWER,
 )
 class ConcatenatedMinimumPermutationWER(BaseWordErrorMetric):
