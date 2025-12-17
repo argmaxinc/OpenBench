@@ -36,8 +36,9 @@ dependencies = [
     "groq>=0.31.0",
     "openai-whisper>=20240930",
     "texterrors==0.5.1",
-    "nemo-toolkit[asr]>=2.5.0",
     "openai>=2.7.1",
+    "meeteval>=0.4.3",
+    "nemo-toolkit[asr]>=2.6.0",
 ]
 
 [project.scripts]

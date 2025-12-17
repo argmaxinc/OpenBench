@@ -238,8 +238,30 @@ def register_dataset_aliases() -> None:
     )
 
     DatasetRegistry.register_alias(
-        "earnings22-keywords",
-        DatasetConfig(dataset_id="argmaxinc/earnings22-kws-golden", split="test"),
+        "earnings22-kws-chunkwise",
+        DatasetConfig(
+            dataset_id="argmaxinc/earnings22-custom-vocab",
+            split="test",
+            column_mapping={"dictionary": "keywords-file", "keywords": "dictionary"},
+        ),
+        supported_pipeline_types={
+            PipelineType.TRANSCRIPTION,
+        },
+        description="Earnings22 keyword spotting golden dataset specifically for keyword boosting transcription evaluation.",
+    )
+
+    DatasetRegistry.register_alias(
+        "earnings22-kws-filewise",
+        DatasetConfig(dataset_id="argmaxinc/earnings22-custom-vocab", split="test"),
+        supported_pipeline_types={
+            PipelineType.TRANSCRIPTION,
+        },
+        description="Earnings22 keyword spotting golden dataset specifically for keyword boosting transcription evaluation.",
+    )
+
+    DatasetRegistry.register_alias(
+        "earnings22-kws-golden-filewise",
+        DatasetConfig(dataset_id="argmaxinc/earnings22-kws-golden-filewise", split="test"),
         supported_pipeline_types={
             PipelineType.TRANSCRIPTION,
         },
@@ -579,6 +601,21 @@ def register_dataset_aliases() -> None:
         supported_pipeline_types={PipelineType.STREAMING_TRANSCRIPTION},
         description="TIMIT stitched dataset with very long silences for endpointing evals",
     )
+
+    # Local dataset to use with env variables to override with env vars
+    # and allow easy testing of local datasets
+    if os.getenv("LOCAL_DATASET_PATH") and os.getenv("LOCAL_DATASET_SPLIT"):
+        DatasetRegistry.register_alias(
+            "local-dataset",
+            DatasetConfig(dataset_id=os.getenv("LOCAL_DATASET_PATH"), split=os.getenv("LOCAL_DATASET_SPLIT")),
+            supported_pipeline_types={
+                PipelineType.TRANSCRIPTION,
+                PipelineType.DIARIZATION,
+                PipelineType.STREAMING_TRANSCRIPTION,
+                PipelineType.ORCHESTRATION,
+            },
+            description="Local dataset for testing. To use this dataset you need to set the `LOCAL_DATASET_PATH` and `LOCAL_DATASET_SPLIT` environment variables.",
+        )
 
 
 register_dataset_aliases()

@@ -2,8 +2,9 @@
 # Copyright (C) 2025 Argmax, Inc. All Rights Reserved.
 
 # Importing from typing_extensions is required for Python <3.12 to use TypedDict with pydantic
+from datasets import Audio as HfAudio
 from pyannote.core import Segment, Timeline
-from typing_extensions import TypedDict
+from typing_extensions import NotRequired, TypedDict
 
 from ..pipeline_prediction import DiarizationAnnotation
 from .dataset_base import BaseDataset, BaseSample
@@ -13,6 +14,16 @@ class DiarizationExtraInfo(TypedDict, total=False):
     """Extra info for diarization samples."""
 
     uem: Timeline
+
+
+class DiarizationRow(TypedDict):
+    """Expected row structure for diarization datasets."""
+
+    audio: HfAudio  # HF Audio object
+    timestamps_start: list[float]
+    timestamps_end: list[float]
+    speakers: list[str]
+    uem_timestamps: NotRequired[list[tuple[float, float]]]
 
 
 class DiarizationSample(BaseSample[DiarizationAnnotation, DiarizationExtraInfo]):
@@ -30,7 +41,7 @@ class DiarizationDataset(BaseDataset[DiarizationSample]):
     _expected_columns = ["audio", "timestamps_start", "timestamps_end", "speakers"]
     _sample_class = DiarizationSample
 
-    def prepare_sample(self, row: dict) -> tuple[DiarizationAnnotation, DiarizationExtraInfo]:
+    def prepare_sample(self, row: DiarizationRow) -> tuple[DiarizationAnnotation, DiarizationExtraInfo]:
         """Prepare diarization annotation and extra info from dataset row."""
         # Prepare reference
         timestamps_start = row["timestamps_start"]

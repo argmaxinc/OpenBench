@@ -97,25 +97,22 @@ class DeepgramApi:
             async def sender(ws):
                 """Sends the data, mimicking a real-time connection."""
                 nonlocal data, audio_cursor
-                try:
-                    while len(data):
-                        # How many bytes in `REALTIME_RESOLUTION` seconds
-                        i = int(byte_rate * self.realtime_resolution)
-                        chunk, data = data[:i], data[i:]
-                        # Send the data
-                        await ws.send(chunk)
-                        # Move the audio cursor
-                        audio_cursor += self.realtime_resolution
-                        # Mimic real-time by waiting
-                        await asyncio.sleep(self.realtime_resolution)
+                while len(data):
+                    # How many bytes are in `REALTIME_RESOLUTION` seconds of audio
+                    i = int(byte_rate * self.realtime_resolution)
+                    chunk, data = data[:i], data[i:]
+                    # Send the data
+                    await ws.send(chunk)
+                    # Move the audio cursor
+                    audio_cursor += self.realtime_resolution
+                    # Mimic real-time by waiting `REALTIME_RESOLUTION` seconds
+                    # before the next packet.
+                    await asyncio.sleep(self.realtime_resolution)
 
-                    # A CloseStream message tells Deepgram that no more
-                    # audio will be sent. Deepgram will close connection
-                    # once all audio has finished processing.
-                    await ws.send(json.dumps({"type": "CloseStream"}))
-                except Exception as e:
-                    print(f"Error while sending: {e}")
-                    raise
+                # A CloseStream message tells Deepgram that no more audio
+                # will be sent. Deepgram will close the connection once all
+                # audio has finished processing.
+                await ws.send(json.dumps({"type": "CloseStream"}))
 
             async def receiver(ws):
                 """Print out messages received from the server."""
@@ -180,10 +177,7 @@ class DeepgramApi:
                                             "end": word_info.get("end", 0),
                                         })
 
-            await asyncio.wait([
-                asyncio.ensure_future(sender(ws)),
-                asyncio.ensure_future(receiver(ws))
-            ])
+            await asyncio.gather(sender(ws), receiver(ws))
             return (
                 transcript,
                 interim_transcripts,

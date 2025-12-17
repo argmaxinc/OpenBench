@@ -1,7 +1,8 @@
 # For licensing see accompanying LICENSE.md file.
 # Copyright (C) 2025 Argmax, Inc. All Rights Reserved.
 
-from typing_extensions import TypedDict
+from datasets import Audio as HfAudio
+from typing_extensions import NotRequired, TypedDict
 
 from ..pipeline_prediction import Transcript
 from .dataset_base import BaseDataset, BaseSample
@@ -12,6 +13,17 @@ class TranscriptionExtraInfo(TypedDict, total=False):
 
     language: str
     dictionary: list[str]
+
+
+class TranscriptionRow(TypedDict):
+    """Expected row structure for transcription datasets."""
+
+    audio: HfAudio  # HF Audio object
+    transcript: list[str]
+    word_timestamps_start: NotRequired[list[float]]
+    word_timestamps_end: NotRequired[list[float]]
+    language: NotRequired[str]
+    dictionary: NotRequired[list[str]]
 
 
 class TranscriptionSample(BaseSample[Transcript, TranscriptionExtraInfo]):
@@ -34,7 +46,7 @@ class TranscriptionDataset(BaseDataset[TranscriptionSample]):
     _expected_columns = ["audio", "transcript"]
     _sample_class = TranscriptionSample
 
-    def prepare_sample(self, row: dict) -> tuple[Transcript, TranscriptionExtraInfo]:
+    def prepare_sample(self, row: TranscriptionRow) -> tuple[Transcript, TranscriptionExtraInfo]:
         """Prepare transcript and extra info from dataset row."""
         transcript_words = row["transcript"]
         reference = Transcript.from_words_info(

@@ -276,6 +276,91 @@ OpenBench supports different pipeline types, each requiring specific dataset sch
 
 **Note**: Currently, most available datasets are optimized for diarization tasks. For transcription, orchestration, and streaming transcription pipelines, you may need to prepare additional annotations or use datasets that include the required fields for each task type.
 
+### Local Datasets
+
+OpenBench supports loading datasets from local directories, which is useful for:
+- Datasets that cannot be uploaded to HuggingFace Hub due to privacy/licensing restrictions
+- Custom datasets you've prepared locally
+- Testing with small local datasets
+
+#### Local Dataset Structure
+
+Local datasets should follow this directory structure:
+
+```
+dataset_dir/
+├── audio/              # Audio files named by audio_id (e.g., sample_001.wav)
+├── reference/          # JSON files with same names as audio (e.g., sample_001.json)
+│                       # Each JSON file contains a dict with columns matching the expected schema
+│                       # Example for diarization:
+│                       #   {"timestamps_start": [0.0, 5.2, ...], 
+│                       #    "timestamps_end": [5.2, 10.5, ...], 
+│                       #    "speakers": ["SPEAKER_00", "SPEAKER_01", ...]}
+│                       # Example for transcription:
+│                       #   {"transcript": ["hello", "world", ...]}
+├── splits/             # Split definitions (train.txt, test.txt, validation.txt)
+│   └── test.txt        # Each line contains an audio_id (without extension)
+└── metadata.json       # Optional: {audio_id: {extra_info_fields}}
+                        #   Example: {"sample_001": {"language": "en", "dictionary": [...]}}
+```
+
+#### Reference JSON File Format
+
+Each reference JSON file should contain a dictionary where:
+- **Keys** match the expected columns for the dataset type (except `audio`, which comes from audio files)
+- **Values** are the data that `prepare_sample()` expects
+
+For example, a diarization reference file (`sample_001.json`) should contain:
+```json
+{
+  "timestamps_start": [0.0, 5.2, 10.5],
+  "timestamps_end": [5.2, 10.5, 15.8],
+  "speakers": ["SPEAKER_00", "SPEAKER_01", "SPEAKER_00"],
+  "uem_timestamps": [[0.0, 15.8]]  // Optional
+}
+```
+
+A transcription reference file should contain:
+```json
+{
+  "transcript": ["hello", "world", "how", "are", "you"],
+  "word_timestamps_start": [0.0, 0.5, 1.0, 1.5, 2.0],  // Optional
+  "word_timestamps_end": [0.5, 1.0, 1.5, 2.0, 2.5],    // Optional
+  "language": "en",  // Optional, goes to extra_info
+  "dictionary": ["hello", "world"]  // Optional, goes to extra_info
+}
+```
+
+#### Using Local Datasets
+
+To use a local dataset, simply pass the directory path as the `dataset_id` in your `DatasetConfig`:
+
+```python
+from openbench.dataset.dataset_base import DatasetConfig
+from openbench.dataset.dataset_diarization import DiarizationDataset
+
+# Local dataset - just use a path!
+config = DatasetConfig(
+    dataset_id="downloaded_datasets/earnings21",  # Path to local dataset directory
+    split="test"
+)
+
+# Works exactly the same as HuggingFace datasets
+dataset = DiarizationDataset.from_config(config)
+```
+
+The system automatically detects if `dataset_id` is a local directory path (by checking if it exists and is a directory) and loads it accordingly. If it's not a local path, it treats it as a HuggingFace dataset ID.
+
+#### Supported Audio Formats
+
+The local dataset loader supports common audio formats:
+- `.wav` (preferred)
+- `.flac`
+- `.mp3`
+- `.m4a`
+
+The loader will automatically detect the audio file format by trying these extensions in order.
+
 ### Downloading Datasets
 
 If you want to reproduce the exact dataset downloads and processing, you can use our dataset downloading scripts. First, make sure you have the required dependencies installed as mentioned in the `Getting Started` section and also install the `dataset` dependencies doing `uv sync --group dataset`

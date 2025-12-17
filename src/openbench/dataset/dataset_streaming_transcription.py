@@ -3,11 +3,22 @@
 
 from typing import Any
 
+from datasets import Audio as HfAudio
+from typing_extensions import NotRequired, TypedDict
+
 from ..pipeline_prediction import Transcript
 from .dataset_base import BaseDataset, BaseSample
 
 
 DEFAULT_SAMPLE_RATE = 16000
+
+
+class StreamingTranscriptionRow(TypedDict):
+    """Expected row structure for streaming transcription datasets."""
+
+    audio: HfAudio  # HF Audio object
+    text: str
+    word_detail: NotRequired[list[dict[str, float]]]  # List of dicts with "start" and "stop" keys
 
 
 # Although the prediction of streaming transcription pipelines is a StreamingTranscript object
@@ -25,7 +36,7 @@ class StreamingDataset(BaseDataset[StreamingSample]):
     _expected_columns = ["audio", "text"]
     _sample_class = StreamingSample
 
-    def prepare_sample(self, row: dict) -> tuple[Transcript, dict[str, Any]]:
+    def prepare_sample(self, row: StreamingTranscriptionRow) -> tuple[Transcript, dict[str, Any]]:
         """Prepare streaming transcript and extra info from dataset row."""
         transcript_text = row["text"].split()
         word_timestamps = row.get("word_detail")

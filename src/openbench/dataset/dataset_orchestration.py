@@ -3,10 +3,22 @@
 
 from typing import Any
 
+from datasets import Audio as HfAudio
 from pydantic import model_validator
+from typing_extensions import NotRequired, TypedDict
 
 from ..pipeline_prediction import Transcript
 from .dataset_base import BaseDataset, BaseSample
+
+
+class OrchestrationRow(TypedDict):
+    """Expected row structure for orchestration datasets."""
+
+    audio: HfAudio  # HF Audio object
+    transcript: list[str]
+    word_speakers: list[str]
+    word_timestamps_start: NotRequired[list[float]]
+    word_timestamps_end: NotRequired[list[float]]
 
 
 class OrchestrationSample(BaseSample[Transcript, dict[str, Any]]):
@@ -26,7 +38,7 @@ class OrchestrationDataset(BaseDataset[OrchestrationSample]):
     _expected_columns = ["audio", "transcript", "word_speakers"]
     _sample_class = OrchestrationSample
 
-    def prepare_sample(self, row: dict) -> tuple[Transcript, dict[str, Any]]:
+    def prepare_sample(self, row: OrchestrationRow) -> tuple[Transcript, dict[str, Any]]:
         """Prepare transcript with speaker labels and extra info from dataset row."""
         transcript_words = row["transcript"]
         word_speakers = row["word_speakers"]

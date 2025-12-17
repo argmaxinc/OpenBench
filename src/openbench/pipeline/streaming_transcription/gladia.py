@@ -222,15 +222,12 @@ class GladiaApi:
             async with connect(websocket_url) as websocket:
                 try:
                     logger.debug("\n#### Begin Gladia session ####\n")
-                    tasks = []
-                    tasks.append(asyncio.create_task(send_audio(websocket, data)))
-                    tasks.append(asyncio.create_task(print_messages_from_socket(websocket)))
-
-                    await asyncio.wait(tasks)
+                    await asyncio.gather(
+                        send_audio(websocket, data),
+                        print_messages_from_socket(websocket),
+                    )
                 except asyncio.exceptions.CancelledError:
                     logger.debug("Tasks cancelled, cleaning up...")
-                    for task in tasks:
-                        task.cancel()
                     await stop_recording(websocket)
                     await print_messages_from_socket(websocket)
                 except Exception as e:
