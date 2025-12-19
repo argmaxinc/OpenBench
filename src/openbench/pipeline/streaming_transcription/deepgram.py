@@ -188,20 +188,28 @@ class DeepgramStreamingPipeline(Pipeline):
             model_timestamps_hypothesis = [
                 [{"start": word["start"], "end": word["end"]} for word in interim_result_words]
                 for interim_result_words in model_timestamps_hypothesis
+                if len(interim_result_words) > 0
             ]
 
         if model_timestamps_confirmed is not None:
             model_timestamps_confirmed = [
                 [{"start": word["start"], "end": word["end"]} for word in interim_result_words]
                 for interim_result_words in model_timestamps_confirmed
+                if len(interim_result_words) > 0
             ]
 
         prediction = StreamingTranscript(
             transcript=output["transcript"],
-            audio_cursor=output["audio_cursor"],
-            interim_results=output["interim_transcripts"],
-            confirmed_audio_cursor=output["confirmed_audio_cursor"],
-            confirmed_interim_results=output["confirmed_interim_transcripts"],
+            audio_cursor=[a for a, m in zip(output["audio_cursor"], model_timestamps_hypothesis) if len(m) > 0],
+            interim_results=[
+                t for t, m in zip(output["interim_transcripts"], model_timestamps_hypothesis) if len(m) > 0
+            ],
+            confirmed_audio_cursor=[
+                a for a, m in zip(output["confirmed_audio_cursor"], model_timestamps_confirmed) if len(m) > 0
+            ],
+            confirmed_interim_results=[
+                t for t, m in zip(output["confirmed_interim_transcripts"], model_timestamps_confirmed) if len(m) > 0
+            ],
             model_timestamps_hypothesis=model_timestamps_hypothesis,
             model_timestamps_confirmed=model_timestamps_confirmed,
         )
