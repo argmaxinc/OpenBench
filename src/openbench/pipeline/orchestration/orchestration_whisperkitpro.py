@@ -96,7 +96,7 @@ class WhisperKitProOrchestrationPipeline(Pipeline):
         # Extract language if force_language is enabled
         language = None
         if self.config.force_language:
-            language = input_sample.extra_info.get("language", None)
+            language = input_sample.language
 
         return WhisperKitProInput(
             audio_path=input_sample.save_audio(TEMP_AUDIO_DIR),

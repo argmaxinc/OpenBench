@@ -216,18 +216,9 @@ class WhisperKitProConfig(BaseModel):
             downloaded_path = snapshot_download(
                 repo_id=self.repo_id,
                 allow_patterns=f"{self.model_variant}/*",
-                local_dir=cache_dir / repo_dir,
-                local_dir_use_symlinks=False,
             )
-
             logger.info(f"Model downloaded to: {downloaded_path}")
-            logger.info(f"Model path for CLI: {model_path}")
-
-            if not model_path.exists():
-                raise RuntimeError(f"Model download succeeded but path doesn't exist: {model_path}")
-
-            return model_path
-
+            return f"{downloaded_path}/{self.model_variant}"
         except Exception as e:
             raise RuntimeError(f"Failed to download model from {self.repo_id}: {e}") from e
 
