@@ -348,7 +348,6 @@ def register_dataset_aliases() -> None:
             dataset_id="argmaxinc/common_voice_17_0-argmax_subset-400-openbench",
             split="test",
             subset="pt",
-            num_samples=20,
         ),
         supported_pipeline_types={
             PipelineType.TRANSCRIPTION,

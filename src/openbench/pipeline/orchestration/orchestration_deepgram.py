@@ -34,26 +34,19 @@ class DeepgramOrchestrationPipeline(Pipeline):
         # Create base API with auto language detection
         base_api = DeepgramApi(
             options=PrerecordedOptions(
-                model=self.config.model_version, smart_format=True, diarize=True, detect_language=True
+                model=self.config.model_version,
+                smart_format=True,
+                diarize=True,
+                detect_language=not self.config.force_language,
             )
         )
 
         def transcribe(audio_path: Path) -> DeepgramApiResponse:
             # Use language-specific API if language is set, otherwise use base API
             if self.current_language:
-                api = DeepgramApi(
-                    options=PrerecordedOptions(
-                        model=self.config.model_version,
-                        smart_format=True,
-                        diarize=True,
-                        detect_language=False,
-                        language=self.current_language,
-                    )
-                )
-            else:
-                api = base_api
+                base_api.set_language(self.current_language)
 
-            response = api.transcribe(audio_path)
+            response = base_api.transcribe(audio_path)
             # Remove temporary audio path
             audio_path.unlink(missing_ok=True)
             return response

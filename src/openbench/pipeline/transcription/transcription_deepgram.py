@@ -28,23 +28,18 @@ class DeepgramTranscriptionPipeline(Pipeline):
 
     def build_pipeline(self) -> Callable[[Path], DeepgramApiResponse]:
         # Create base API without language detection
-        base_api = DeepgramApi(options=PrerecordedOptions(model=self.config.model_version, smart_format=True))
+        base_api = DeepgramApi(
+            options=PrerecordedOptions(
+                model=self.config.model_version, smart_format=True, detect_language=not self.config.force_language
+            )
+        )
 
         def transcribe(audio_path: Path) -> DeepgramApiResponse:
             # Use language-specific API if language is set, otherwise use base API
             if self.current_language:
-                api = DeepgramApi(
-                    options=PrerecordedOptions(
-                        model=self.config.model_version,
-                        smart_format=True,
-                        detect_language=False,
-                        language=self.current_language,
-                    )
-                )
-            else:
-                api = base_api
+                base_api.set_language(self.current_language)
 
-            response = api.transcribe(audio_path, keyterm=self.current_keywords)
+            response = base_api.transcribe(audio_path, keyterm=self.current_keywords)
             # Remove temporary audio path
             audio_path.unlink(missing_ok=True)
             return response
