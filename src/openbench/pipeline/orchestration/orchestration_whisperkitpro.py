@@ -11,8 +11,8 @@ from pydantic import Field
 from ...dataset import OrchestrationSample
 from ...engine import WhisperKitPro, WhisperKitProConfig, WhisperKitProInput, WhisperKitProOutput
 from ...pipeline_prediction import Transcript, Word
-from ..base import Pipeline, PipelineConfig, PipelineType, register_pipeline
-from .common import OrchestrationOutput
+from ..base import Pipeline, PipelineType, register_pipeline
+from .common import OrchestrationConfig, OrchestrationOutput
 
 
 logger = get_logger(__name__)
@@ -20,7 +20,7 @@ logger = get_logger(__name__)
 TEMP_AUDIO_DIR = Path("./temp_audio")
 
 
-class WhisperKitProOrchestrationConfig(PipelineConfig):
+class WhisperKitProOrchestrationConfig(OrchestrationConfig):
     cli_path: str = Field(
         ...,
         description="The path to the WhisperKitPro CLI",
@@ -93,9 +93,15 @@ class WhisperKitProOrchestrationPipeline(Pipeline):
         return engine
 
     def parse_input(self, input_sample: OrchestrationSample) -> WhisperKitProInput:
+        # Extract language if force_language is enabled
+        language = None
+        if self.config.force_language:
+            language = input_sample.extra_info.get("language", None)
+
         return WhisperKitProInput(
             audio_path=input_sample.save_audio(TEMP_AUDIO_DIR),
             keep_audio=False,
+            language=language,
         )
 
     def parse_output(self, output: WhisperKitProOutput) -> OrchestrationOutput:

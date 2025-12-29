@@ -27,10 +27,24 @@ class DeepgramTranscriptionPipeline(Pipeline):
     pipeline_type = PipelineType.TRANSCRIPTION
 
     def build_pipeline(self) -> Callable[[Path], DeepgramApiResponse]:
-        deepgram_api = DeepgramApi(options=PrerecordedOptions(model=self.config.model_version, smart_format=True))
+        # Create base API without language detection
+        base_api = DeepgramApi(options=PrerecordedOptions(model=self.config.model_version, smart_format=True))
 
         def transcribe(audio_path: Path) -> DeepgramApiResponse:
-            response = deepgram_api.transcribe(audio_path, keyterm=self.current_keywords)
+            # Use language-specific API if language is set, otherwise use base API
+            if self.current_language:
+                api = DeepgramApi(
+                    options=PrerecordedOptions(
+                        model=self.config.model_version,
+                        smart_format=True,
+                        detect_language=False,
+                        language=self.current_language,
+                    )
+                )
+            else:
+                api = base_api
+
+            response = api.transcribe(audio_path, keyterm=self.current_keywords)
             # Remove temporary audio path
             audio_path.unlink(missing_ok=True)
             return response
@@ -38,13 +52,18 @@ class DeepgramTranscriptionPipeline(Pipeline):
         return transcribe
 
     def parse_input(self, input_sample) -> Path:
-        """Override to extract keywords from sample before processing."""
+        """Override to extract keywords and language from sample before processing."""
         self.current_keywords = None
         if self.config.use_keywords:
             keywords = input_sample.extra_info.get("dictionary", [])
             if keywords:
                 # Add + between keywords for Deepgram URL
                 self.current_keywords = "+".join(keywords)
+
+        # Extract language if force_language is enabled
+        self.current_language = None
+        if self.config.force_language:
+            self.current_language = input_sample.extra_info.get("language", None)
 
         return input_sample.save_audio(TEMP_AUDIO_DIR)
 

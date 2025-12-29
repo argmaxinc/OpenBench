@@ -33,6 +33,7 @@ class OpenAITranscriptionPipeline(Pipeline):
             response = openai_api.transcribe(
                 audio_path,
                 prompt=self.current_keywords_prompt,
+                language=self.current_language,
             )
             # Remove temporary audio path
             audio_path.unlink(missing_ok=True)
@@ -41,7 +42,7 @@ class OpenAITranscriptionPipeline(Pipeline):
         return transcribe
 
     def parse_input(self, input_sample) -> Path:
-        """Override to extract keywords from sample before processing."""
+        """Override to extract keywords and language from sample before processing."""
         # Extract keywords from sample's extra_info if flag is enabled
         self.current_keywords_prompt = None
         if self.config.use_keywords:
@@ -49,6 +50,11 @@ class OpenAITranscriptionPipeline(Pipeline):
             if keywords:
                 # Format keywords as comma-separated prompt for OpenAI
                 self.current_keywords_prompt = ", ".join(keywords)
+
+        # Extract language if force_language is enabled
+        self.current_language = None
+        if self.config.force_language:
+            self.current_language = input_sample.extra_info.get("language", None)
 
         return input_sample.save_audio(TEMP_AUDIO_DIR)
 

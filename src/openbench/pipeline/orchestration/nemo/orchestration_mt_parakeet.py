@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Callable
 
 import torch
-from argmaxtools.utils import get_fastest_device
+from argmaxtools.utils import get_fastest_device, get_logger
 from nemo.collections.asr.models import ASRModel, SortformerEncLabelModel
 
 # Use the helper class `SpeakerTaggedASR`, which handles all ASR and diarization cache data for streaming.
@@ -16,13 +16,16 @@ from pydantic import Field
 
 from ....dataset import OrchestrationSample
 from ....pipeline_prediction import Transcript, Word
-from ...base import Pipeline, PipelineConfig, PipelineType, register_pipeline
+from ...base import Pipeline, PipelineType, register_pipeline
 from ...diarization.nemo.sortformer_pipeline import NeMoSortformerPipelineInput
-from ..common import OrchestrationOutput
+from ..common import OrchestrationConfig, OrchestrationOutput
 
 # Use the pre-defined dataclass template `MultitalkerTranscriptionConfig` from `multitalker_transcript_config.py`.
 # Configure the diarization model using streaming parameters:
 from .multitalker_transcript_config import MultitalkerTranscriptionConfig
+
+
+logger = get_logger(__name__)
 
 
 # Constants
@@ -31,7 +34,7 @@ TEMP_AUDIO_DIR = Path("./temp_audio")
 __all__ = ["NeMoMTParakeetPipeline", "NeMoMTParakeetPipelineConfig"]
 
 
-class NeMoMTParakeetPipelineConfig(PipelineConfig):
+class NeMoMTParakeetPipelineConfig(OrchestrationConfig):
     diar_model_id: str = Field(
         default="nvidia/diar_streaming_sortformer_4spk-v2.1",
         description="The ID of the diarization model to use.",
@@ -97,6 +100,14 @@ class NeMoMTParakeetPipeline(Pipeline):
 
     def parse_input(self, input_sample: OrchestrationSample) -> OrchestrationSample:
         assert input_sample.sample_rate == 16000, "Sample rate must be 16kHz"
+
+        # Warn if force_language is enabled (not currently supported)
+        if self.config.force_language:
+            logger.warning(
+                f"{self.__class__.__name__} does not support language hinting. "
+                "The force_language flag will be ignored."
+            )
+
         parsed_input = NeMoSortformerPipelineInput(
             audio_path=input_sample.save_audio(TEMP_AUDIO_DIR),
             keep_audio=False,

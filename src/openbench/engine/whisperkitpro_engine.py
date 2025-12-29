@@ -238,6 +238,7 @@ class WhisperKitProInput(BaseModel):
     audio_path: Path
     keep_audio: bool = False
     custom_vocabulary_path: str | None = Field(None, description="Optional path to custom vocabulary file")
+    language: str | None = Field(None, description="Optional language hint for transcription")
 
 
 class WhisperKitProOutput(BaseModel):
@@ -294,6 +295,10 @@ class WhisperKitPro:
         # Add custom vocabulary path if provided
         if input.custom_vocabulary_path:
             cmd.extend(["--custom-vocabulary-path", input.custom_vocabulary_path])
+
+        # Add language hint if provided
+        if input.language:
+            cmd.extend(["--language", input.language])
 
         if "WHISPERKITPRO_API_KEY" in os.environ:
             cmd.extend(["--api-key", os.environ["WHISPERKITPRO_API_KEY"]])
