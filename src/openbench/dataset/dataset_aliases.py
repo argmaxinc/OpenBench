@@ -165,6 +165,26 @@ def register_dataset_aliases() -> None:
     ########## TRANSCRIPTION ##########
 
     DatasetRegistry.register_alias(
+        "ami-ihm-asr",
+        DatasetConfig(dataset_id="argmaxinc/ami-mt-asr-openbench", split="test", subset="ihm-mix"),
+        supported_pipeline_types={
+            PipelineType.TRANSCRIPTION,
+            PipelineType.ORCHESTRATION,
+        },
+        description="AMI-IHM dataset for ASR and orchestration evaluation.",
+    )
+
+    DatasetRegistry.register_alias(
+        "ami-sdm-asr",
+        DatasetConfig(dataset_id="argmaxinc/ami-mt-asr-openbench", split="test", subset="sdm"),
+        supported_pipeline_types={
+            PipelineType.TRANSCRIPTION,
+            PipelineType.ORCHESTRATION,
+        },
+        description="AMI-SDM dataset for ASR and orchestration evaluation.",
+    )
+
+    DatasetRegistry.register_alias(
         "callhome-english",
         DatasetConfig(
             dataset_id=os.getenv("CALLHOME_ENGLISH_DATASET_REPO_ID", "argmaxinc/callhome-english"), split="test"
@@ -172,6 +192,7 @@ def register_dataset_aliases() -> None:
         supported_pipeline_types={
             PipelineType.TRANSCRIPTION,
             PipelineType.ORCHESTRATION,
+            PipelineType.DIARIZATION,
         },
         description=(
             "Callhome English dataset for transcription and orchestration evaluation. "
