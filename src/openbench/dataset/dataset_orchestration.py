@@ -1,14 +1,18 @@
 # For licensing see accompanying LICENSE.md file.
 # Copyright (C) 2025 Argmax, Inc. All Rights Reserved.
 
-from typing import Any
-
 from datasets import Audio as HfAudio
 from pydantic import model_validator
 from typing_extensions import NotRequired, TypedDict
 
 from ..pipeline_prediction import Transcript
 from .dataset_base import BaseDataset, BaseSample
+
+
+class OrchestrationExtraInfo(TypedDict, total=False):
+    """Extra info for orchestration samples."""
+
+    language: str
 
 
 class OrchestrationRow(TypedDict):
@@ -19,9 +23,10 @@ class OrchestrationRow(TypedDict):
     word_speakers: list[str]
     word_timestamps_start: NotRequired[list[float]]
     word_timestamps_end: NotRequired[list[float]]
+    language: NotRequired[str]
 
 
-class OrchestrationSample(BaseSample[Transcript, dict[str, Any]]):
+class OrchestrationSample(BaseSample[Transcript, OrchestrationExtraInfo]):
     """Orchestration sample with speaker validation."""
 
     @model_validator(mode="after")
@@ -31,6 +36,11 @@ class OrchestrationSample(BaseSample[Transcript, dict[str, Any]]):
             raise ValueError("Orchestration samples require transcript with speaker labels")
         return self
 
+    @property
+    def language(self) -> str | None:
+        """Convenience property to access language from extra_info."""
+        return self.extra_info.get("language")
+
 
 class OrchestrationDataset(BaseDataset[OrchestrationSample]):
     """Dataset for orchestration pipelines."""
@@ -38,7 +48,7 @@ class OrchestrationDataset(BaseDataset[OrchestrationSample]):
     _expected_columns = ["audio", "transcript", "word_speakers"]
     _sample_class = OrchestrationSample
 
-    def prepare_sample(self, row: OrchestrationRow) -> tuple[Transcript, dict[str, Any]]:
+    def prepare_sample(self, row: OrchestrationRow) -> tuple[Transcript, OrchestrationExtraInfo]:
         """Prepare transcript with speaker labels and extra info from dataset row."""
         transcript_words = row["transcript"]
         word_speakers = row["word_speakers"]
@@ -52,5 +62,7 @@ class OrchestrationDataset(BaseDataset[OrchestrationSample]):
             end=row.get("word_timestamps_end"),
             speaker=word_speakers,
         )
-        extra_info: dict[str, Any] = {}
+        extra_info: OrchestrationExtraInfo = {}
+        if "language" in row:
+            extra_info["language"] = row["language"]
         return reference, extra_info
