@@ -165,23 +165,35 @@ def register_dataset_aliases() -> None:
     ########## TRANSCRIPTION ##########
 
     DatasetRegistry.register_alias(
-        "ami-ihm-asr",
-        DatasetConfig(dataset_id="argmaxinc/ami-mt-asr-openbench", split="test", subset="ihm-mix"),
+        "ami-ihm-openbench",
+        DatasetConfig(dataset_id="argmaxinc/ami-openbench", split="test", subset="ihm-mix"),
         supported_pipeline_types={
             PipelineType.TRANSCRIPTION,
             PipelineType.ORCHESTRATION,
+            PipelineType.DIARIZATION,
         },
-        description="AMI-IHM dataset for ASR and orchestration evaluation.",
+        description=(
+            "AMI-IHM dataset for transcription, orchestration and diarization evaluation. "
+            "The audio files and the MT-ASR annotations were taken from https://github.com/BUTSpeechFIT/mt-asr-data-prep and processed to create the dataset. "
+            "The diarization annotations were taken from https://github.com/nttcslab-sp/diar-forced-alignment which should contain tighter annotations "
+            "when compared to using the ASR segments as the ground truth. See `Can We Really Repurpose Multi-Speaker ASR Corpus for Speaker Diarization?` for more details."
+        ),
     )
 
     DatasetRegistry.register_alias(
-        "ami-sdm-asr",
-        DatasetConfig(dataset_id="argmaxinc/ami-mt-asr-openbench", split="test", subset="sdm"),
+        "ami-sdm-openbench",
+        DatasetConfig(dataset_id="argmaxinc/ami-openbench", split="test", subset="sdm"),
         supported_pipeline_types={
             PipelineType.TRANSCRIPTION,
             PipelineType.ORCHESTRATION,
+            PipelineType.DIARIZATION,
         },
-        description="AMI-SDM dataset for ASR and orchestration evaluation.",
+        description=(
+            "AMI-SDM dataset for transcription, orchestration and diarization evaluation. "
+            "The audio files and the MT-ASR annotations were taken from https://github.com/BUTSpeechFIT/mt-asr-data-prep and processed to create the dataset. "
+            "The diarization annotations were taken from https://github.com/nttcslab-sp/diar-forced-alignment which should contain tighter annotations "
+            "when compared to using the ASR segments as the ground truth. See `Can We Really Repurpose Multi-Speaker ASR Corpus for Speaker Diarization?` for more details."
+        ),
     )
 
     DatasetRegistry.register_alias(
