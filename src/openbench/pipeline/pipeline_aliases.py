@@ -171,6 +171,7 @@ def register_pipeline_aliases() -> None:
         description="Deepgram orchestration pipeline. Requires API key from https://www.deepgram.com/. Set `DEEPGRAM_API_KEY` env var.",
     )
 
+
     PipelineRegistry.register_alias(
         "whisperkitpro-orchestration-tiny",
         WhisperKitProOrchestrationPipeline,
@@ -607,6 +608,30 @@ def register_pipeline_aliases() -> None:
             "use_keywords": False,
         },
         description="AssemblyAI transcription pipeline with keyword boosting support. Requires API key from https://www.assemblyai.com/. Set `ASSEMBLYAI_API_KEY` env var.",
+    )
+
+    PipelineRegistry.register_alias(
+        "apple-speech-analyzer",
+        SpeechAnalyzerPipeline,
+        default_config={
+            "use_keywords": False,
+            "use_server": False,  # On-device SpeechTranscriber (default)
+        },
+        description="Apple Speech Analyzer (on-device) using SpeechTranscriber. "
+        "Fast on-device recognition. Use 'apple-speech-analyzer-server' for server-based recognition. "
+        "Requires macOS 26+ and Xcode.",
+    )
+
+    PipelineRegistry.register_alias(
+        "apple-speech-analyzer-server",
+        SpeechAnalyzerPipeline,
+        default_config={
+            "use_keywords": False,
+            "use_server": True,  # Server-based SFSpeechRecognizer
+        },
+        description="Apple Speech Analyzer (server) using SFSpeechRecognizer with server-based recognition. "
+        "Supports contextualStrings for custom vocabulary. Requires network connection. "
+        "Requires macOS and Xcode.",
     )
 
     ################# STREAMING TRANSCRIPTION PIPELINES #################
