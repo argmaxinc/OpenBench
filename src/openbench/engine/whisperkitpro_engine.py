@@ -54,9 +54,9 @@ class WhisperKitProConfig(BaseModel):
         None,
         description="Model variant folder name",
     )
-    models_cache_dir: str | None = Field(
+    model_dir: str | None = Field(
         None,
-        description="Directory to cache downloaded models",
+        description="Local path to model directory, if this is provided it will ignore the repo_id and model_variant and use the provided path directly",
     )
     word_timestamps: bool = Field(
         True,
@@ -197,36 +197,17 @@ class WhisperKitProConfig(BaseModel):
         if not self.use_model_path:
             raise ValueError("download_and_prepare_model requires repo_id and model_variant")
 
-        cache_dir = Path(self.models_cache_dir or "./models_cache")
-        cache_dir.mkdir(parents=True, exist_ok=True)
-
-        # Model path: cache_dir / repo_id / model_variant
-        repo_dir = self.repo_id.replace("/", "_")
-        model_path = cache_dir / repo_dir / self.model_variant
-
         # Check if model already exists
-        if model_path.exists():
-            logger.info(f"Model already exists at: {model_path}")
-            return model_path
+        if self.model_dir is not None and os.path.exists(self.model_dir):
+            logger.info(f"Model already exists at: {self.model_dir}")
+            return Path(self.model_dir)
 
         logger.info(f"Downloading model from {self.repo_id}, variant: {self.model_variant}")
 
         # Download specific model variant folder from HuggingFace
         try:
-            downloaded_path = snapshot_download(
-                repo_id=self.repo_id,
-                allow_patterns=f"{self.model_variant}/*",
-                local_dir=cache_dir / repo_dir,
-                local_dir_use_symlinks=False,
-            )
-
-            logger.info(f"Model downloaded to: {downloaded_path}")
-            logger.info(f"Model path for CLI: {model_path}")
-
-            if not model_path.exists():
-                raise RuntimeError(f"Model download succeeded but path doesn't exist: {model_path}")
-
-            return model_path
+            downloaded_path = snapshot_download(repo_id=self.repo_id, allow_patterns=f"{self.model_variant}/*")
+            return Path(f"{downloaded_path}/{self.model_variant}")
         except Exception as e:
             raise RuntimeError(f"Failed to download model from {self.repo_id}: {e}") from e
 
@@ -271,10 +252,10 @@ class WhisperKitPro:
         # Download and prepare model if using new model management
         self.model_path = None
         if self.transcription_config.use_model_path:
-            logger.info("Using new model management with repo_id/model_variant")
+            logger.debug("Using model path management with repo_id/model_variant")
             self.model_path = self.transcription_config.download_and_prepare_model()
         else:
-            logger.info("Using legacy model management")
+            logger.debug("Using legacy model management")
 
         # Generate CLI args (with model_path if available)
         self.transcription_args = self.transcription_config.generate_cli_args(model_path=self.model_path)
