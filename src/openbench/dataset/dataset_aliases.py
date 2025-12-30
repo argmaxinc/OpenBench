@@ -344,7 +344,11 @@ def register_dataset_aliases() -> None:
     # Portuguese
     DatasetRegistry.register_alias(
         "common-voice-pt",
-        DatasetConfig(dataset_id="argmaxinc/common_voice_17_0-argmax_subset-400-openbench", split="test", subset="pt"),
+        DatasetConfig(
+            dataset_id="argmaxinc/common_voice_17_0-argmax_subset-400-openbench",
+            split="test",
+            subset="pt",
+        ),
         supported_pipeline_types={
             PipelineType.TRANSCRIPTION,
         },

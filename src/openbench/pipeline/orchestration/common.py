@@ -23,6 +23,15 @@ from ..transcription import TranscriptionOutput
 logger = get_logger(__name__)
 
 
+class OrchestrationConfig(PipelineConfig):
+    """Base configuration for orchestration pipelines."""
+
+    force_language: bool = Field(
+        False,
+        description="Force the language of the audio files i.e. hint the model to use the correct language.",
+    )
+
+
 class OrchestrationOutput(PipelineOutput[Transcript]):
     transcription_output: TranscriptionOutput | None = Field(
         default=None,

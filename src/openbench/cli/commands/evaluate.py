@@ -175,6 +175,7 @@ def run_alias_mode(
     wandb_run_name: str | None,
     wandb_tags: list[str] | None,
     use_keywords: bool | None,
+    force_language: bool,
     verbose: bool,
 ) -> BenchmarkResult:
     """Run evaluation using pipeline and dataset aliases."""
@@ -200,6 +201,12 @@ def run_alias_mode(
             pipeline_config_override["use_keywords"] = use_keywords
             if verbose:
                 typer.echo(f"✅ Keywords: {'enabled' if use_keywords else 'disabled'} (override)")
+
+        # Handle force_language override
+        if force_language:
+            pipeline_config_override["force_language"] = force_language
+            if verbose:
+                typer.echo("✅ Force language: enabled")
 
         pipeline = PipelineRegistry.create_pipeline(pipeline_name, config=pipeline_config_override)
 
@@ -333,6 +340,11 @@ def evaluate(
         "--use-keywords",
         help="Enable keyword boosting for compatible pipelines (overrides default config)",
     ),
+    force_language: bool = typer.Option(
+        False,
+        "--force-language",
+        help="Force language hinting for compatible pipelines",
+    ),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output"),
 ) -> None:
     """Run evaluation benchmarks.
@@ -393,6 +405,7 @@ def evaluate(
                 wandb_run_name=wandb_run_name,
                 wandb_tags=wandb_tags,
                 use_keywords=use_keywords,
+                force_language=force_language,
                 verbose=verbose,
             )
         display_result(result)
