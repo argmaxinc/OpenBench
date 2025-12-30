@@ -165,14 +165,43 @@ def register_dataset_aliases() -> None:
     ########## TRANSCRIPTION ##########
 
     DatasetRegistry.register_alias(
+        "ami-ihm-openbench",
+        DatasetConfig(dataset_id="argmaxinc/ami-openbench", split="test", subset="ihm-mix"),
+        supported_pipeline_types={
+            PipelineType.TRANSCRIPTION,
+            PipelineType.ORCHESTRATION,
+            PipelineType.DIARIZATION,
+        },
+        description=(
+            "AMI-IHM dataset for transcription, orchestration and diarization evaluation. "
+            "The audio files and the MT-ASR annotations were taken from https://github.com/BUTSpeechFIT/mt-asr-data-prep and processed to create the dataset. "
+            "The diarization annotations were taken from https://github.com/nttcslab-sp/diar-forced-alignment which should contain tighter annotations "
+            "when compared to using the ASR segments as the ground truth. See `Can We Really Repurpose Multi-Speaker ASR Corpus for Speaker Diarization?` for more details."
+        ),
+    )
+
+    DatasetRegistry.register_alias(
+        "ami-sdm-openbench",
+        DatasetConfig(dataset_id="argmaxinc/ami-openbench", split="test", subset="sdm"),
+        supported_pipeline_types={
+            PipelineType.TRANSCRIPTION,
+            PipelineType.ORCHESTRATION,
+            PipelineType.DIARIZATION,
+        },
+        description=(
+            "AMI-SDM dataset for transcription, orchestration and diarization evaluation. "
+            "The audio files and the MT-ASR annotations were taken from https://github.com/BUTSpeechFIT/mt-asr-data-prep and processed to create the dataset. "
+            "The diarization annotations were taken from https://github.com/nttcslab-sp/diar-forced-alignment which should contain tighter annotations "
+            "when compared to using the ASR segments as the ground truth. See `Can We Really Repurpose Multi-Speaker ASR Corpus for Speaker Diarization?` for more details."
+        ),
+    )
+
+    DatasetRegistry.register_alias(
         "callhome-english",
         DatasetConfig(
             dataset_id=os.getenv("CALLHOME_ENGLISH_DATASET_REPO_ID", "argmaxinc/callhome-english"), split="test"
         ),
-        supported_pipeline_types={
-            PipelineType.TRANSCRIPTION,
-            PipelineType.ORCHESTRATION,
-        },
+        supported_pipeline_types={PipelineType.TRANSCRIPTION, PipelineType.ORCHESTRATION},
         description=(
             "Callhome English dataset for transcription and orchestration evaluation. "
             "To use this dataset you need to buy the license for the audio files at https://catalog.ldc.upenn.edu/LDC97S42 and the license for the transcript files at https://catalog.ldc.upenn.edu/LDC97T14"
