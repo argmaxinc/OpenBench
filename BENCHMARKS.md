@@ -539,7 +539,7 @@
 
 | Dataset                                          |   Deepgram<br/>(nova-3) |   OpenAI<br/>(whisper-1) |   AssemblyAI |   Whisper OSS<br/>(large-v3-turbo) |   Argmax<br/>(parakeet-v2) |   Argmax<br/>(parakeet-v3) | Apple <br/> SFSpeechTranscriber <br/> (Old API) | Apple <br/>(SpeechAnalyzer)|
 |--------------------------------------------------|-------------------------|--------------------------|--------------|------------------------------------|----------------------------|----------------------------|-------------------------------------------------|----------------------------|
-| earnings22-keywords<br/>(no keywords) |                    15.34 |                     20.69 |         12.58 |                               15.4 |   28.42  | 17 |                     14.69 |                       16.89 |
+| earnings22-keywords<br/>(no keywords) |                    15.34 |                     20.69 |         12.58 |                               15.4 |   28.42  | 14.69 |                     28.42 |                       17 |
 | earnings22-keywords<br/>(chunk-keywords)         |                   13.28 |                    31.97 |        11.67 |                              21.24 |                      12.46 |                      14.57 | 26.98 | - |
 | earnings22-keywords<br/>(file-keywords)          |                   13.85 |                    28.37 |        11.80 |                              14.69 |                      12.57 |                      14.73 | 27.26 | - |
 
