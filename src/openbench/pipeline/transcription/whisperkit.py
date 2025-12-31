@@ -257,9 +257,15 @@ class WhisperKitTranscriptionPipeline(Pipeline):
         return engine.transcribe
 
     def parse_input(self, input_sample: TranscriptionSample) -> TranscriptionCliInput:
+        # Extract language if force_language is enabled
+        language = None
+        if self.config.force_language:
+            language = input_sample.language
+
         return TranscriptionCliInput(
             audio_path=input_sample.save_audio(TEMP_AUDIO_DIR),
             keep_audio=False,
+            language=language,
         )
 
     def parse_output(self, output: TranscriptionCliOutput) -> TranscriptionOutput:

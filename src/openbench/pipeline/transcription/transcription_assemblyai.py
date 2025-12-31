@@ -99,6 +99,13 @@ class AssemblyAITranscriptionPipeline(Pipeline):
             if keywords:
                 self.current_keywords = keywords
 
+        # Warn if force_language is enabled (not currently supported)
+        if self.config.force_language:
+            logger.warning(
+                f"{self.__class__.__name__} does not support language hinting. "
+                "The force_language flag will be ignored."
+            )
+
         return input_sample.save_audio(TEMP_AUDIO_DIR)
 
     def parse_output(self, output: str) -> TranscriptionOutput:

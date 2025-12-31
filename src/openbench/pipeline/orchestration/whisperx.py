@@ -11,8 +11,8 @@ from pydantic import Field
 
 from ...dataset import DiarizationSample
 from ...pipeline_prediction import Transcript
-from ..base import Pipeline, PipelineConfig, PipelineType, register_pipeline
-from .common import OrchestrationOutput
+from ..base import Pipeline, PipelineType, register_pipeline
+from .common import OrchestrationConfig, OrchestrationOutput
 
 
 logger = get_logger(__name__)
@@ -20,7 +20,7 @@ logger = get_logger(__name__)
 TEMP_AUDIO_DIR = Path("audio_temp")
 
 
-class WhisperXPipelineConfig(PipelineConfig):
+class WhisperXPipelineConfig(OrchestrationConfig):
     model_name: str = Field(
         default="tiny",
         description="The name of the Whisper model to use",
@@ -43,11 +43,20 @@ class WhisperXPipelineConfig(PipelineConfig):
     )
 
 
+class WhisperXInput:
+    """Input for WhisperX CLI."""
+
+    def __init__(self, audio_path: Path, language: str | None = None):
+        self.audio_path = audio_path
+        self.language = language
+
+
 class WhisperX:
     def __init__(self, config: WhisperXPipelineConfig):
         self.config = config
 
-    def __call__(self, audio_path: Path | str) -> pd.DataFrame:
+    def __call__(self, input: WhisperXInput) -> pd.DataFrame:
+        audio_path = input.audio_path
         if isinstance(audio_path, str):
             audio_path = Path(audio_path)
 
@@ -71,6 +80,10 @@ class WhisperX:
             str(self.config.threads),
             "--diarize",
         ]
+
+        # Add language if provided
+        if input.language:
+            args.extend(["--language", input.language])
 
         # Run whisperx CLI
         subprocess.run(args)
@@ -127,11 +140,19 @@ class WhisperXPipeline(Pipeline):
     _config_class = WhisperXPipelineConfig
     pipeline_type = PipelineType.ORCHESTRATION
 
-    def build_pipeline(self) -> Callable[[Path], pd.DataFrame]:
+    def build_pipeline(self) -> Callable[[WhisperXInput], pd.DataFrame]:
         return WhisperX(self.config)
 
-    def parse_input(self, input_sample: DiarizationSample) -> Path:
-        return input_sample.save_audio(TEMP_AUDIO_DIR)
+    def parse_input(self, input_sample: DiarizationSample) -> WhisperXInput:
+        # Extract language if force_language is enabled
+        language = None
+        if self.config.force_language:
+            language = input_sample.language
+
+        return WhisperXInput(
+            audio_path=input_sample.save_audio(TEMP_AUDIO_DIR),
+            language=language,
+        )
 
     def parse_output(self, output: pd.DataFrame) -> OrchestrationOutput:
         output = output.assign(words=lambda df: df["text"].str.split()).explode("words")

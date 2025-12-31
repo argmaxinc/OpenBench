@@ -110,7 +110,7 @@ class WhisperKitProTranscriptionPipeline(Pipeline):
         return engine
 
     def parse_input(self, input_sample: TranscriptionSample) -> WhisperKitProInput:
-        """Override to extract keywords from sample before processing."""
+        """Override to extract keywords and language from sample before processing."""
         # Extract keywords from sample's extra_info if flag is enabled
         custom_vocab_path = None
         if self.config.use_keywords:
@@ -129,10 +129,16 @@ class WhisperKitProTranscriptionPipeline(Pipeline):
                 custom_vocab_path = str(vocab_file)
                 logger.debug(f"Created custom vocabulary file: {custom_vocab_path} with {len(keywords)} keywords")
 
+        # Extract language if force_language is enabled
+        language = None
+        if self.config.force_language:
+            language = input_sample.language
+
         return WhisperKitProInput(
             audio_path=input_sample.save_audio(TEMP_AUDIO_DIR),
             keep_audio=False,
             custom_vocabulary_path=custom_vocab_path,
+            language=language,
         )
 
     def parse_output(self, output: WhisperKitProOutput) -> TranscriptionOutput:
