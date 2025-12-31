@@ -68,19 +68,13 @@ class DeepgramStreamingOrchestrationPipeline(Pipeline):
                         speaker=word_info.get("speaker"),
                     )
                 )
-        elif "model_timestamps_confirmed" in output and output["model_timestamps_confirmed"]:
-            # Fallback to regular transcription without speaker
-            for timestamp_group in output["model_timestamps_confirmed"]:
-                for word_info in timestamp_group:
-                    if "word" in word_info:
-                        words.append(
-                            Word(
-                                word=word_info.get("word", ""),
-                                start=word_info.get("start"),
-                                end=word_info.get("end"),
-                                speaker=None,
-                            )
-                        )
+        else:
+            # Speaker labels are required for orchestration pipelines
+            raise ValueError(
+                "No speaker diarization data available. "
+                "Orchestration pipelines require speaker labels. "
+                "Ensure 'enable_diarization' is set to True in the pipeline config."
+            )
 
         # Create final transcript with speaker-attributed words
         transcript = Transcript(words=words)
