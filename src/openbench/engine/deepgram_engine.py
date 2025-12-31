@@ -38,6 +38,9 @@ class DeepgramApi:
 
         self.client = DeepgramClient(os.getenv("DEEPGRAM_API_KEY"))
 
+    def set_language(self, language: str) -> None:
+        self.options.language = language
+
     # Only intended to be used with offiline transcription
     def transcribe(self, audio_path: Path | str, keyterm: str | None = None) -> DeepgramApiResponse:
         # Manually construct URL with keyterm parameter using + separator

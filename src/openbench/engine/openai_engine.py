@@ -37,7 +37,7 @@ class OpenAIApi:
         }
 
     def transcribe(
-        self, audio_path: Path | str, prompt: str | None = None
+        self, audio_path: Path | str, prompt: str | None = None, language: str | None = None
     ) -> TranscriptionVerbose | TranscriptionDiarized:
         if isinstance(audio_path, str):
             audio_path = Path(audio_path)
@@ -49,6 +49,9 @@ class OpenAIApi:
 
             if prompt is not None:
                 kwargs["prompt"] = prompt
+
+            if language is not None:
+                kwargs["language"] = language
 
             response = self.client.audio.transcriptions.create(**kwargs)
 

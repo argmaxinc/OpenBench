@@ -157,7 +157,7 @@ class WhisperOSSTranscriptionPipeline(Pipeline):
         # Extract language if force_language is enabled
         self.current_language = None
         if self.config.force_language:
-            self.current_language = input_sample.extra_info.get("language", None)
+            self.current_language = input_sample.language
 
         return input_sample.save_audio(TEMP_AUDIO_DIR)
 

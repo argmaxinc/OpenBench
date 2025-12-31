@@ -219,6 +219,13 @@ class NeMoTranscriptionPipeline(Pipeline):
                     self.context_graph = context_biasing.ContextGraphCTC(blank_id=self.blank_idx)
                     self.context_graph.add_to_graph(context_transcripts)
 
+        # Warn if force_language is enabled (not currently supported)
+        if self.config.force_language:
+            logger.warning(
+                f"{self.__class__.__name__} does not support language hinting. "
+                "The force_language flag will be ignored."
+            )
+
         return input_sample.save_audio(TEMP_AUDIO_DIR)
 
     def parse_output(self, output: TranscriptionOutput) -> TranscriptionOutput:
