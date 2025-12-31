@@ -24,8 +24,8 @@ PRODUCT_NAME = "apple-speechanalyzer-cli"
 TEMP_AUDIO_DIR = Path("./temp_audio")
 SPEECH_ANALYZER_DEFAULT_REPORT_PATH = Path("speech_analyzer_report")
 SPEECH_ANALYZER_DEFAULT_CLONE_DIR = "./speech_analyzer_repo"
-# Commit hash for berkin/sfspeechrecognizer branch with SFSpeechRecognizer support for contextualStrings
-SPEECH_ANALYZER_DEFAULT_COMMIT_HASH = "b5a40f3bc08743a46caec4383f38119ce4f8e087"
+# Commit hash for berkin/sfspeechrecognizer branch
+SPEECH_ANALYZER_DEFAULT_COMMIT_HASH = "f47d46b83e79f5f687075de392f6689c758b67d7"
 
 
 class SpeechAnalyzerConfig(TranscriptionConfig):
