@@ -1,0 +1,3 @@
+# Dummy argument to make the config file valid
+cpwer:
+  skip_overlap: false
