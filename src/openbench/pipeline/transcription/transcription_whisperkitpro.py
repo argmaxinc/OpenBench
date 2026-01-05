@@ -57,7 +57,7 @@ class WhisperKitProTranscriptionConfig(TranscriptionConfig):
         None,
         description="Model variant folder name",
     )
-    models_cache_dir: str | None = Field(
+    model_dir: str | None = Field(
         None,
         description="Directory to cache downloaded models",
     )
@@ -92,7 +92,7 @@ class WhisperKitProTranscriptionPipeline(Pipeline):
             model_repo_name=self.config.model_repo_name,
             repo_id=self.config.repo_id,
             model_variant=self.config.model_variant,
-            models_cache_dir=self.config.models_cache_dir,
+            model_dir=self.config.model_dir,
             audio_encoder_compute_units=(self.config.audio_encoder_compute_units),
             text_decoder_compute_units=(self.config.text_decoder_compute_units),
             report_path="whisperkitpro_transcription_reports",
