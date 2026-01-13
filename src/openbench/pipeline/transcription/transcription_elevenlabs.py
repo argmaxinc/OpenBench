@@ -83,4 +83,3 @@ class ElevenLabsTranscriptionPipeline(Pipeline):
         words = output.split() if output else []
         transcript = Transcript.from_words_info(words=words)
         return TranscriptionOutput(prediction=transcript)
-
