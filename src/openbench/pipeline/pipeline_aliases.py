@@ -32,6 +32,7 @@ from .streaming_transcription import (
 from .transcription import (
     AssemblyAITranscriptionPipeline,
     DeepgramTranscriptionPipeline,
+    ElevenLabsTranscriptionPipeline,
     GroqTranscriptionPipeline,
     NeMoTranscriptionPipeline,
     OpenAITranscriptionPipeline,
@@ -583,6 +584,16 @@ def register_pipeline_aliases() -> None:
             "use_keywords": False,
         },
         description="AssemblyAI transcription pipeline with keyword boosting support. Requires API key from https://www.assemblyai.com/. Set `ASSEMBLYAI_API_KEY` env var.",
+    )
+
+    PipelineRegistry.register_alias(
+        "elevenlabs-transcription",
+        ElevenLabsTranscriptionPipeline,
+        default_config={
+            "model_id": "scribe_v2",
+            "use_keywords": False,
+        },
+        description="ElevenLabs transcription pipeline with keyterm prompting support. Requires API key from https://elevenlabs.io/. Set `ELEVENLABS_API_KEY` env var.",
     )
 
     ################# STREAMING TRANSCRIPTION PIPELINES #################
