@@ -8,6 +8,7 @@ import os
 from .diarization import (
     AWSTranscribePipeline,
     DeepgramDiarizationPipeline,
+    ElevenLabsDiarizationPipeline,
     NeMoSortformerPipeline,
     PicovoicePipeline,
     PyannoteApiPipeline,
@@ -16,6 +17,7 @@ from .diarization import (
 )
 from .orchestration import (
     DeepgramOrchestrationPipeline,
+    ElevenLabsOrchestrationPipeline,
     NeMoMTParakeetPipeline,
     OpenAIOrchestrationPipeline,
     WhisperKitProOrchestrationPipeline,
@@ -132,6 +134,16 @@ def register_pipeline_aliases() -> None:
         description="Deepgram diarization pipeline. Requires API key from https://www.deepgram.com/. Set `DEEPGRAM_API_KEY` env var.",
     )
 
+    PipelineRegistry.register_alias(
+        "elevenlabs-diarization",
+        ElevenLabsDiarizationPipeline,
+        default_config={
+            "out_dir": "./elevenlabs_diarization_results",
+            "model_id": "scribe_v2",
+        },
+        description="ElevenLabs diarization pipeline. Requires API key from https://elevenlabs.io/. Set `ELEVENLABS_API_KEY` env var.",
+    )
+
     ################# ORCHESTRATION PIPELINES #################
 
     PipelineRegistry.register_alias(
@@ -170,6 +182,16 @@ def register_pipeline_aliases() -> None:
             "model_version": "nova-3",
         },
         description="Deepgram orchestration pipeline. Requires API key from https://www.deepgram.com/. Set `DEEPGRAM_API_KEY` env var.",
+    )
+
+    PipelineRegistry.register_alias(
+        "elevenlabs-orchestration",
+        ElevenLabsOrchestrationPipeline,
+        default_config={
+            "out_dir": "./elevenlabs_orchestration_results",
+            "model_id": "scribe_v2",
+        },
+        description="ElevenLabs orchestration pipeline with diarization. Requires API key from https://elevenlabs.io/. Set `ELEVENLABS_API_KEY` env var.",
     )
 
     PipelineRegistry.register_alias(
