@@ -47,10 +47,8 @@ class ElevenLabsTranscriptionPipeline(Pipeline):
 
             # Add keyterms if available (up to 100, max 50 chars each)
             if self.current_keywords:
-                # Filter keywords to max 50 chars and limit to 100
-                filtered_keywords = [kw for kw in self.current_keywords]
-                kwargs["keyterms"] = filtered_keywords
-                logger.debug(f"Using keyterms: {filtered_keywords}")
+                kwargs["keyterms"] = self.current_keywords
+                logger.debug(f"Using keyterms: {self.current_keywords}")
 
             if self.config.force_language:
                 kwargs["language_code"] = self.current_language
@@ -71,6 +69,9 @@ class ElevenLabsTranscriptionPipeline(Pipeline):
             keywords = input_sample.extra_info.get("dictionary", [])
             if keywords:
                 self.current_keywords = keywords
+        self.current_language = None
+        if self.config.force_language:
+            self.current_language = input_sample.language
 
         return input_sample.save_audio(TEMP_AUDIO_DIR)
 
