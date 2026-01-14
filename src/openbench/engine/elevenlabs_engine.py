@@ -107,4 +107,3 @@ class ElevenLabsApi:
             start=[float(w.start) for w in words],
             end=[float(w.end) for w in words],
         )
-

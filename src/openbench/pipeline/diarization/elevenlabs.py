@@ -59,10 +59,7 @@ class ElevenLabsDiarizationPipeline(Pipeline):
 
     def parse_output(self, output: ElevenLabsApiResponse) -> DiarizationOutput:
         annotation = DiarizationAnnotation()
-        for word, speaker, start, end in zip(
-            output.words, output.speakers, output.start, output.end
-        ):
+        for word, speaker, start, end in zip(output.words, output.speakers, output.start, output.end):
             annotation[Segment(start, end)] = f"SPEAKER_{speaker}"
 
         return DiarizationOutput(prediction=annotation)
-

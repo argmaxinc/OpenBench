@@ -68,4 +68,3 @@ class ElevenLabsOrchestrationPipeline(Pipeline):
             diarization_output=None,
             transcription_output=None,
         )
-

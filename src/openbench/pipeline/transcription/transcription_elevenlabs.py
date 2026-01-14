@@ -59,9 +59,7 @@ class ElevenLabsTranscriptionPipeline(Pipeline):
 
         return input_sample.save_audio(TEMP_AUDIO_DIR)
 
-    def parse_output(
-        self, output: ElevenLabsApiResponse
-    ) -> TranscriptionOutput:
+    def parse_output(self, output: ElevenLabsApiResponse) -> TranscriptionOutput:
         return TranscriptionOutput(
             prediction=Transcript.from_words_info(
                 words=output.words,
