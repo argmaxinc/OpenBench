@@ -78,7 +78,6 @@ class ElevenLabsApi:
         kwargs = {
             "model_id": self.model_id,
             "file": audio_data,
-            "timestamps_granularity": "word",
         }
 
         if keyterms:
@@ -99,30 +98,13 @@ class ElevenLabsApi:
 
         response = self.client.speech_to_text.convert(**kwargs)
 
-        # Extract word-level info from response
-        words = []
-        speakers = []
-        starts = []
-        ends = []
-
-        if hasattr(response, "words") and response.words:
-            for word in response.words:
-                words.append(word.text)
-                speakers.append(str(word.speaker_id) if word.speaker_id else "0")
-                starts.append(float(word.start) if word.start else 0.0)
-                ends.append(float(word.end) if word.end else 0.0)
-        elif hasattr(response, "text") and response.text:
-            # Fallback: split text into words without timestamps
-            for word in response.text.split():
-                words.append(word)
-                speakers.append("0")
-                starts.append(0.0)
-                ends.append(0.0)
+        # ElevenLabs returns whitespace as separate "words" - filter them out
+        words = [w for w in response.words if w.text and w.text.strip()]
 
         return ElevenLabsApiResponse(
-            words=words,
-            speakers=speakers,
-            start=starts,
-            end=ends,
+            words=[w.text for w in words],
+            speakers=[str(w.speaker_id) for w in words],
+            start=[float(w.start) for w in words],
+            end=[float(w.end) for w in words],
         )
 
