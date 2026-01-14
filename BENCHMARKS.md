@@ -549,11 +549,17 @@
 
 </details>
 
-| Dataset                                          |   Deepgram<br/>(nova-3) |   OpenAI<br/>(whisper-1) |   AssemblyAI |   Whisper OSS<br/>(large-v3-turbo) |   Argmax<br/>(parakeet-v2) |   Argmax<br/>(parakeet-v3) | ElevenLabs | Apple <br/> (SFSpeechRecognizer) <br/>      | Apple <br/>(SpeechAnalyzer)|
-|--------------------------------------------------|-------------------------|--------------------------|--------------|------------------------------------|----------------------------|----------------------------|------------|---------------------------------------------|----------------------------|
-| earnings22-keywords<br/>(no keywords)            |                   15.34 |                    20.69 |        12.58 |                               15.4 |                      14.69 |                      16.89 | 10.53 | 28.42 |                       17 |
-| earnings22-keywords<br/>(chunk-keywords)         |                   13.28 |                    31.97 |        11.67 |                              21.24 |                      12.46 |                      14.57 | 9.13 | 26.98 | - |
-| earnings22-keywords<br/>(file-keywords)          |                   13.85 |                    28.37 |        11.80 |                              14.69 |                      12.57 |                      14.73 | 9.08 | 27.26 | - |
+| System                                     | no keywords | chunk-keywords | file-keywords |
+|--------------------------------------------|-------------|----------------|---------------|
+| Deepgram (nova-3)                          | 15.34       | 13.28          | 13.85         |
+| OpenAI (whisper-1)                         | 20.69       | 31.97          | 28.37         |
+| AssemblyAI                                 | 12.58       | 11.67          | 11.80         |
+| Whisper OSS (large-v3-turbo)               | 15.4        | 21.24          | 14.69         |
+| Argmax (parakeet-v2)                       | 14.69       | 12.46          | 12.57         |
+| Argmax (parakeet-v3)                       | 16.89       | 14.57          | 14.73         |
+| ElevenLabs                                 | 10.53       | 9.13           | 9.08          |
+| Apple (SFSpeechRecognizer)                 | 28.42       | 26.98          | 27.26         |
+| Apple (SpeechAnalyzer)                     | 17          | -              | -             |
 
 <br/><br/>
 
@@ -576,11 +582,17 @@ If the model predicts 20 keywords and 15 of them match the ground truth, precisi
 
 </details>
 
-| Dataset                                          |   Deepgram<br/>(nova-3) |   OpenAI<br/>(whisper-1) |   AssemblyAI |   Whisper OSS<br/>(large-v3-turbo) |   Argmax<br/>(parakeet-v2) |   Argmax<br/>(parakeet-v3) | ElevenLabs | Apple <br/> (SFSpeechRecognizer) <br/> | Apple <br/>(SpeechAnalyzer)|
-|--------------------------------------------------|-------------------------|--------------------------|--------------|------------------------------------|----------------------------|----------------------------|------------|-------------------------------------------------|----------------------------|
-| earnings22-keywords<br/>(no keywords)            |                    0.98 |                     0.97 |         0.97 |                               0.97 |                       0.97 |                       0.98 |  0.97 |  1   | 0.99 |
-| earnings22-keywords<br/>(chunk-keywords)         |                    0.99 |                     0.98 |         0.99 |                               0.96 |                       0.98 |                       0.98 | 0.99 |   0.99  | - |
-| earnings22-keywords<br/>(file-keywords)          |                    0.96 |                     0.93 |         0.96 |                               0.94 |                       0.96 |                       0.95 |  0.96 |  0.99   | - | 
+| System                                     | no keywords | chunk-keywords | file-keywords |
+|--------------------------------------------|-------------|----------------|---------------|
+| Deepgram (nova-3)                          | 0.98        | 0.99           | 0.96          |
+| OpenAI (whisper-1)                         | 0.97        | 0.98           | 0.93          |
+| AssemblyAI                                 | 0.97        | 0.99           | 0.96          |
+| Whisper OSS (large-v3-turbo)               | 0.97        | 0.96           | 0.94          |
+| Argmax (parakeet-v2)                       | 0.97        | 0.98           | 0.96          |
+| Argmax (parakeet-v3)                       | 0.98        | 0.98           | 0.95          |
+| ElevenLabs                                 | 0.97        | 0.99           | 0.96          |
+| Apple (SFSpeechRecognizer)                 | 1           | 0.99           | 0.99          |
+| Apple (SpeechAnalyzer)                     | 0.99        | -              | -             |
 
 <br/><br/>
 
@@ -603,11 +615,17 @@ If the ground-truth transcript has 25 keywords and the model correctly finds 15,
 
 </details>
 
-| Dataset                                          |   Deepgram<br/>(nova-3) |   OpenAI<br/>(whisper-1) |   AssemblyAI |   Whisper OSS<br/>(large-v3-turbo) |   Argmax<br/>(parakeet-v2) |   Argmax<br/>(parakeet-v3) | ElevenLabs | Apple <br/> (SFSpeechRecognizer) <br/> | Apple <br/>(SpeechAnalyzer)|
-|--------------------------------------------------|-------------------------|--------------------------|--------------|------------------------------------|----------------------------|----------------------------|------------|-------------------------------------------------|----------------------------|
-| earnings22-keywords<br/>(no keywords)            |                    0.61 |                     0.53 |         0.55 |                               0.53 |                       0.47 |                       0.45 | 0.75 |  0.26  | 0.39 |
-| earnings22-keywords<br/>(chunk-keywords)         |                    0.89 |                     0.7  |         0.69 |                               0.77 |                       0.85 |                       0.82 | 0.96 |  0.45  | - |
-| earnings22-keywords<br/>(file-keywords)          |                    0.83 |                     0.79 |         0.68 |                               0.82 |                       0.82 |                       0.8  |  0.94 |  0.4  | - | 
+| System                                     | no keywords | chunk-keywords | file-keywords |
+|--------------------------------------------|-------------|----------------|---------------|
+| Deepgram (nova-3)                          | 0.61        | 0.89           | 0.83          |
+| OpenAI (whisper-1)                         | 0.53        | 0.7            | 0.79          |
+| AssemblyAI                                 | 0.55        | 0.69           | 0.68          |
+| Whisper OSS (large-v3-turbo)               | 0.53        | 0.77           | 0.82          |
+| Argmax (parakeet-v2)                       | 0.47        | 0.85           | 0.82          |
+| Argmax (parakeet-v3)                       | 0.45        | 0.82           | 0.8           |
+| ElevenLabs                                 | 0.75        | 0.96           | 0.94          |
+| Apple (SFSpeechRecognizer)                 | 0.26        | 0.45           | 0.4           |
+| Apple (SpeechAnalyzer)                     | 0.39        | -              | -             |
 
 <br/><br/>
 
@@ -632,11 +650,17 @@ F1 = 2 × (0.75 × 0.6) / (0.75 + 0.6) = **66.7%**, reflecting the model's overa
 
 </details>
 
-| Dataset                                          |   Deepgram<br/>(nova-3) |   OpenAI<br/>(whisper-1) |   AssemblyAI |   Whisper OSS<br/>(large-v3-turbo) |   Argmax<br/>(parakeet-v2) |   Argmax<br/>(parakeet-v3) | ElevenLabs | Apple <br/> SFSpeechRecognizer <br/> (Old API) | Apple <br/>(SpeechAnalyzer)|
-|--------------------------------------------------|-------------------------|--------------------------|--------------|------------------------------------|----------------------------|----------------------------|------------|-------------------------------------------------|----------------------------|
-| earnings22-keywords<br/>(no keywords)            |                    0.75 |                     0.68 |         0.7  |                               0.69 |                       0.63 |                       0.62 | 0.84 |  0.41  | 0.56 |
-| earnings22-keywords<br/>(chunk-keywords)         |                    0.94 |                     0.82 |         0.81 |                               0.86 |                       0.91 |                       0.89 | 0.97 |  0.62  | - |
-| earnings22-keywords<br/>(file-keywords)          |                    0.89 |                     0.86 |         0.8  |                               0.87 |                       0.88 |                       0.87 | 0.95 |  0.58  | - |  
+| System                                     | no keywords | chunk-keywords | file-keywords |
+|--------------------------------------------|-------------|----------------|---------------|
+| Deepgram (nova-3)                          | 0.75        | 0.94           | 0.89          |
+| OpenAI (whisper-1)                         | 0.68        | 0.82           | 0.86          |
+| AssemblyAI                                 | 0.7         | 0.81           | 0.8           |
+| Whisper OSS (large-v3-turbo)               | 0.69        | 0.86           | 0.87          |
+| Argmax (parakeet-v2)                       | 0.63        | 0.91           | 0.88          |
+| Argmax (parakeet-v3)                       | 0.62        | 0.89           | 0.87          |
+| ElevenLabs                                 | 0.84        | 0.97           | 0.95          |
+| Apple (SFSpeechRecognizer)                 | 0.41        | 0.62           | 0.58          |
+| Apple (SpeechAnalyzer)                     | 0.56        | -              | -             |
 
 <br/><br/>
 
