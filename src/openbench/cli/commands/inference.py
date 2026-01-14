@@ -88,7 +88,7 @@ def get_dummy_sample(
             waveform=waveform,
             sample_rate=sample_rate,
             extra_info={},
-            reference=Transcript.from_words_info(words=["dummy"]),
+            reference=Transcript.from_words_info(words=["dummy"], speaker=["SPEAKER_0"]),
         )
     elif pipeline_type == PipelineType.TRANSCRIPTION:
         return TranscriptionSample(

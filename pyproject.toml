@@ -39,6 +39,7 @@ dependencies = [
     "openai>=2.7.1",
     "meeteval>=0.4.3",
     "nemo-toolkit[asr]>=2.6.0",
+    "elevenlabs>=2.30.0",
 ]
 
 [project.scripts]
