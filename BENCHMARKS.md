@@ -549,17 +549,17 @@
 
 </details>
 
-| System                                     | no keywords | chunk-keywords | file-keywords |
-|--------------------------------------------|-------------|----------------|---------------|
-| Deepgram (nova-3)                          | 15.34       | 13.28          | 13.85         |
-| OpenAI (whisper-1)                         | 20.69       | 31.97          | 28.37         |
+| System                                     | earnings22-keywords<br/>(no keywords) | earnings22-keywords<br/>(chunk-keywords) | earnings22-keywords<br/>(file-keywords) |
+|--------------------------------------------|---------------------------------------|------------------------------------------|----------------------------------------|
+| Deepgram<br/>(nova-3)                      | 15.34       | 13.28          | 13.85         |
+| OpenAI<br/>(whisper-1)                     | 20.69       | 31.97          | 28.37         |
 | AssemblyAI                                 | 12.58       | 11.67          | 11.80         |
-| Whisper OSS (large-v3-turbo)               | 15.4        | 21.24          | 14.69         |
-| Argmax (parakeet-v2)                       | 14.69       | 12.46          | 12.57         |
-| Argmax (parakeet-v3)                       | 16.89       | 14.57          | 14.73         |
+| Whisper OSS<br/>(large-v3-turbo)           | 15.4        | 21.24          | 14.69         |
+| Argmax<br/>(parakeet-v2)                   | 14.69       | 12.46          | 12.57         |
+| Argmax<br/>(parakeet-v3)                   | 16.89       | 14.57          | 14.73         |
 | ElevenLabs                                 | 10.53       | 9.13           | 9.08          |
-| Apple (SFSpeechRecognizer)                 | 28.42       | 26.98          | 27.26         |
-| Apple (SpeechAnalyzer)                     | 17          | -              | -             |
+| Apple<br/>(SFSpeechRecognizer)             | 28.42       | 26.98          | 27.26         |
+| Apple<br/>(SpeechAnalyzer)                 | 17          | -              | -             |
 
 <br/><br/>
 
@@ -582,17 +582,17 @@ If the model predicts 20 keywords and 15 of them match the ground truth, precisi
 
 </details>
 
-| System                                     | no keywords | chunk-keywords | file-keywords |
-|--------------------------------------------|-------------|----------------|---------------|
-| Deepgram (nova-3)                          | 0.98        | 0.99           | 0.96          |
-| OpenAI (whisper-1)                         | 0.97        | 0.98           | 0.93          |
+| System                                     | earnings22-keywords<br/>(no keywords) | earnings22-keywords<br/>(chunk-keywords) | earnings22-keywords<br/>(file-keywords) |
+|--------------------------------------------|---------------------------------------|------------------------------------------|----------------------------------------|
+| Deepgram<br/>(nova-3)                      | 0.98        | 0.99           | 0.96          |
+| OpenAI<br/>(whisper-1)                     | 0.97        | 0.98           | 0.93          |
 | AssemblyAI                                 | 0.97        | 0.99           | 0.96          |
-| Whisper OSS (large-v3-turbo)               | 0.97        | 0.96           | 0.94          |
-| Argmax (parakeet-v2)                       | 0.97        | 0.98           | 0.96          |
-| Argmax (parakeet-v3)                       | 0.98        | 0.98           | 0.95          |
+| Whisper OSS<br/>(large-v3-turbo)           | 0.97        | 0.96           | 0.94          |
+| Argmax<br/>(parakeet-v2)                   | 0.97        | 0.98           | 0.96          |
+| Argmax<br/>(parakeet-v3)                   | 0.98        | 0.98           | 0.95          |
 | ElevenLabs                                 | 0.97        | 0.99           | 0.96          |
-| Apple (SFSpeechRecognizer)                 | 1           | 0.99           | 0.99          |
-| Apple (SpeechAnalyzer)                     | 0.99        | -              | -             |
+| Apple<br/>(SFSpeechRecognizer)             | 1           | 0.99           | 0.99          |
+| Apple<br/>(SpeechAnalyzer)                 | 0.99        | -              | -             |
 
 <br/><br/>
 
@@ -615,17 +615,17 @@ If the ground-truth transcript has 25 keywords and the model correctly finds 15,
 
 </details>
 
-| System                                     | no keywords | chunk-keywords | file-keywords |
-|--------------------------------------------|-------------|----------------|---------------|
-| Deepgram (nova-3)                          | 0.61        | 0.89           | 0.83          |
-| OpenAI (whisper-1)                         | 0.53        | 0.7            | 0.79          |
+| System                                     | earnings22-keywords<br/>(no keywords) | earnings22-keywords<br/>(chunk-keywords) | earnings22-keywords<br/>(file-keywords) |
+|--------------------------------------------|---------------------------------------|------------------------------------------|----------------------------------------|
+| Deepgram<br/>(nova-3)                      | 0.61        | 0.89           | 0.83          |
+| OpenAI<br/>(whisper-1)                     | 0.53        | 0.7            | 0.79          |
 | AssemblyAI                                 | 0.55        | 0.69           | 0.68          |
-| Whisper OSS (large-v3-turbo)               | 0.53        | 0.77           | 0.82          |
-| Argmax (parakeet-v2)                       | 0.47        | 0.85           | 0.82          |
-| Argmax (parakeet-v3)                       | 0.45        | 0.82           | 0.8           |
+| Whisper OSS<br/>(large-v3-turbo)           | 0.53        | 0.77           | 0.82          |
+| Argmax<br/>(parakeet-v2)                   | 0.47        | 0.85           | 0.82          |
+| Argmax<br/>(parakeet-v3)                   | 0.45        | 0.82           | 0.8           |
 | ElevenLabs                                 | 0.75        | 0.96           | 0.94          |
-| Apple (SFSpeechRecognizer)                 | 0.26        | 0.45           | 0.4           |
-| Apple (SpeechAnalyzer)                     | 0.39        | -              | -             |
+| Apple<br/>(SFSpeechRecognizer)             | 0.26        | 0.45           | 0.4           |
+| Apple<br/>(SpeechAnalyzer)                 | 0.39        | -              | -             |
 
 <br/><br/>
 
@@ -650,17 +650,17 @@ F1 = 2 × (0.75 × 0.6) / (0.75 + 0.6) = **66.7%**, reflecting the model's overa
 
 </details>
 
-| System                                     | no keywords | chunk-keywords | file-keywords |
-|--------------------------------------------|-------------|----------------|---------------|
-| Deepgram (nova-3)                          | 0.75        | 0.94           | 0.89          |
-| OpenAI (whisper-1)                         | 0.68        | 0.82           | 0.86          |
+| System                                     | earnings22-keywords<br/>(no keywords) | earnings22-keywords<br/>(chunk-keywords) | earnings22-keywords<br/>(file-keywords) |
+|--------------------------------------------|---------------------------------------|------------------------------------------|----------------------------------------|
+| Deepgram<br/>(nova-3)                      | 0.75        | 0.94           | 0.89          |
+| OpenAI<br/>(whisper-1)                     | 0.68        | 0.82           | 0.86          |
 | AssemblyAI                                 | 0.7         | 0.81           | 0.8           |
-| Whisper OSS (large-v3-turbo)               | 0.69        | 0.86           | 0.87          |
-| Argmax (parakeet-v2)                       | 0.63        | 0.91           | 0.88          |
-| Argmax (parakeet-v3)                       | 0.62        | 0.89           | 0.87          |
+| Whisper OSS<br/>(large-v3-turbo)           | 0.69        | 0.86           | 0.87          |
+| Argmax<br/>(parakeet-v2)                   | 0.63        | 0.91           | 0.88          |
+| Argmax<br/>(parakeet-v3)                   | 0.62        | 0.89           | 0.87          |
 | ElevenLabs                                 | 0.84        | 0.97           | 0.95          |
-| Apple (SFSpeechRecognizer)                 | 0.41        | 0.62           | 0.58          |
-| Apple (SpeechAnalyzer)                     | 0.56        | -              | -             |
+| Apple<br/>(SFSpeechRecognizer)             | 0.41        | 0.62           | 0.58          |
+| Apple<br/>(SpeechAnalyzer)                 | 0.56        | -              | -             |
 
 <br/><br/>
 
