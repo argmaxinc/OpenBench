@@ -34,6 +34,12 @@ MODEL_CONFIRMED_STREAMING_LATENCY = "model_timestamp_confirmed_streaming_latency
 MODEL_CONFIRMED_AVG_LAT = "model_timestamp_confirmed_scaled_avg_latency"
 MODEL_CONFIRMED_AUD_DUR = "model_timestamp_confirmed_audio_duration"
 
+# Percentile metrics
+STREAMING_LATENCY_P90 = "streaming_latency_p90"
+STREAMING_LATENCY_P99 = "streaming_latency_p99"
+CONFIRMED_STREAMING_LATENCY_P90 = "confirmed_streaming_latency_p90"
+CONFIRMED_STREAMING_LATENCY_P99 = "confirmed_streaming_latency_p99"
+
 # Latency metrics are adapted from the example at:
 # https://developers.deepgram.com/docs/measuring-streaming-latency
 # with slight modifications to the original metric definitions.
@@ -231,6 +237,14 @@ class StreamingLatency(BaseStreamingLatency):
     the content in result t.
     """
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._all_latencies: list[float] = []
+
+    def reset(self):
+        super().reset()
+        self._all_latencies = []
+
     @classmethod
     def metric_name(cls) -> str:
         return STREAMING_LATENCY
@@ -250,6 +264,10 @@ class StreamingLatency(BaseStreamingLatency):
         if gt_max_latency_l is None or gt_min_latency_l is None:
             return {AVG_LAT: None, AUD_DUR: 0}
         avg_latency = [(min + max) / 2 for min, max in zip(gt_min_latency_l, gt_max_latency_l)]
+
+        # Store raw latencies for percentile calculations
+        self._all_latencies.extend(avg_latency)
+
         detail = {
             AVG_LAT: sum(avg_lat * aud_dur for avg_lat, aud_dur in zip(avg_latency, gt_audio_duration)),
             AUD_DUR: np.sum(gt_audio_duration),
@@ -265,6 +283,14 @@ class StreamingLatency(BaseStreamingLatency):
 
 @MetricRegistry.register_metric(PipelineType.STREAMING_TRANSCRIPTION, MetricOptions.CONFIRMED_STREAMING_LATENCY)
 class ConfirmedStreamingLatency(BaseStreamingLatency):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._all_latencies: list[float] = []
+
+    def reset(self):
+        super().reset()
+        self._all_latencies = []
+
     @classmethod
     def metric_name(cls) -> str:
         return CONFIRMED_STREAMING_LATENCY
@@ -288,6 +314,10 @@ class ConfirmedStreamingLatency(BaseStreamingLatency):
             return {CONFIRMED_AVG_LAT: None, CONFIRMED_AUD_DUR: 0}
 
         avg_latency = [(min + max) / 2 for min, max in zip(gt_min_latency_l, gt_max_latency_l)]
+
+        # Store raw latencies for percentile calculations
+        self._all_latencies.extend(avg_latency)
+
         detail = {
             CONFIRMED_AVG_LAT: sum(avg_lat * aud_dur for avg_lat, aud_dur in zip(avg_latency, gt_audio_duration)),
             CONFIRMED_AUD_DUR: np.sum(gt_audio_duration),
@@ -382,3 +412,79 @@ class ModelTimestampBasedStreamingLatency(BaseStreamingLatency):
         if detail[MODEL_AUD_DUR] == 0:
             return None
         return detail[MODEL_AVG_LAT] / detail[MODEL_AUD_DUR]
+
+
+@MetricRegistry.register_metric(PipelineType.STREAMING_TRANSCRIPTION, MetricOptions.STREAMING_LATENCY_P90)
+class StreamingLatencyP90(StreamingLatency):
+    """90th percentile of streaming latency for hypothesis/interim results."""
+
+    @classmethod
+    def metric_name(cls) -> str:
+        return STREAMING_LATENCY_P90
+
+    def compute_metric(self, detail: Details | None) -> float | None:
+        if not self._all_latencies:
+            return None
+        return float(np.percentile(self._all_latencies, 90))
+
+    def __abs__(self) -> float | None:
+        if not self._all_latencies:
+            return None
+        return float(np.percentile(self._all_latencies, 90))
+
+
+@MetricRegistry.register_metric(PipelineType.STREAMING_TRANSCRIPTION, MetricOptions.STREAMING_LATENCY_P99)
+class StreamingLatencyP99(StreamingLatency):
+    """99th percentile of streaming latency for hypothesis/interim results."""
+
+    @classmethod
+    def metric_name(cls) -> str:
+        return STREAMING_LATENCY_P99
+
+    def compute_metric(self, detail: Details | None) -> float | None:
+        if not self._all_latencies:
+            return None
+        return float(np.percentile(self._all_latencies, 99))
+
+    def __abs__(self) -> float | None:
+        if not self._all_latencies:
+            return None
+        return float(np.percentile(self._all_latencies, 99))
+
+
+@MetricRegistry.register_metric(PipelineType.STREAMING_TRANSCRIPTION, MetricOptions.CONFIRMED_STREAMING_LATENCY_P90)
+class ConfirmedStreamingLatencyP90(ConfirmedStreamingLatency):
+    """90th percentile of streaming latency for confirmed results."""
+
+    @classmethod
+    def metric_name(cls) -> str:
+        return CONFIRMED_STREAMING_LATENCY_P90
+
+    def compute_metric(self, detail: Details | None) -> float | None:
+        if not self._all_latencies:
+            return None
+        return float(np.percentile(self._all_latencies, 90))
+
+    def __abs__(self) -> float | None:
+        if not self._all_latencies:
+            return None
+        return float(np.percentile(self._all_latencies, 90))
+
+
+@MetricRegistry.register_metric(PipelineType.STREAMING_TRANSCRIPTION, MetricOptions.CONFIRMED_STREAMING_LATENCY_P99)
+class ConfirmedStreamingLatencyP99(ConfirmedStreamingLatency):
+    """99th percentile of streaming latency for confirmed results."""
+
+    @classmethod
+    def metric_name(cls) -> str:
+        return CONFIRMED_STREAMING_LATENCY_P99
+
+    def compute_metric(self, detail: Details | None) -> float | None:
+        if not self._all_latencies:
+            return None
+        return float(np.percentile(self._all_latencies, 99))
+
+    def __abs__(self) -> float | None:
+        if not self._all_latencies:
+            return None
+        return float(np.percentile(self._all_latencies, 99))
