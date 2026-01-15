@@ -78,6 +78,16 @@ class MetricOptions(Enum):
     # Time passed after an audio chunk is sent until its corresponding transcription is received.
     CONFIRMED_STREAMING_LATENCY = "confirmed_streaming_latency"
 
+    # Streaming Latency Percentiles (p90, p99) for Hypothesis/Interim results
+    # Computed on raw (unweighted) latency values across all interim results
+    STREAMING_LATENCY_P90 = "streaming_latency_p90"
+    STREAMING_LATENCY_P99 = "streaming_latency_p99"
+
+    # Streaming Latency Percentiles (p90, p99) for Confirmed results
+    # Computed on raw (unweighted) latency values across all confirmed results
+    CONFIRMED_STREAMING_LATENCY_P90 = "confirmed_streaming_latency_p90"
+    CONFIRMED_STREAMING_LATENCY_P99 = "confirmed_streaming_latency_p99"
+
     # Streaming Transcription Latency Based on Confirmed Transcript and Model Word Timestamps
     # Evaluates the Latency of Realtime Transcription
     # Time passed after an audio chunk is sent until its corresponding transcription is received.
