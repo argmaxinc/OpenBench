@@ -10,6 +10,7 @@ from .transcription_groq import GroqTranscriptionConfig, GroqTranscriptionPipeli
 from .transcription_nemo import NeMoTranscriptionPipeline, NeMoTranscriptionPipelineConfig
 from .transcription_openai import OpenAITranscriptionPipeline, OpenAITranscriptionPipelineConfig
 from .transcription_oss_whisper import WhisperOSSTranscriptionPipeline, WhisperOSSTranscriptionPipelineConfig
+from .transcription_pyannote import PyannoteTranscriptionPipeline, PyannoteTranscriptionPipelineConfig
 from .transcription_whisperkitpro import WhisperKitProTranscriptionConfig, WhisperKitProTranscriptionPipeline
 from .whisperkit import WhisperKitTranscriptionConfig, WhisperKitTranscriptionPipeline
 
@@ -34,4 +35,6 @@ __all__ = [
     "ElevenLabsTranscriptionPipelineConfig",
     "NeMoTranscriptionPipeline",
     "NeMoTranscriptionPipelineConfig",
+    "PyannoteTranscriptionPipeline",
+    "PyannoteTranscriptionPipelineConfig",
 ]

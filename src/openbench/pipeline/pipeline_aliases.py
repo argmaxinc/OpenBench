@@ -20,6 +20,7 @@ from .orchestration import (
     ElevenLabsOrchestrationPipeline,
     NeMoMTParakeetPipeline,
     OpenAIOrchestrationPipeline,
+    PyannoteOrchestrationPipeline,
     WhisperKitProOrchestrationPipeline,
     WhisperXPipeline,
 )
@@ -38,6 +39,7 @@ from .transcription import (
     GroqTranscriptionPipeline,
     NeMoTranscriptionPipeline,
     OpenAITranscriptionPipeline,
+    PyannoteTranscriptionPipeline,
     SpeechAnalyzerPipeline,
     WhisperKitProTranscriptionPipeline,
     WhisperKitTranscriptionPipeline,
@@ -324,6 +326,17 @@ def register_pipeline_aliases() -> None:
             "asr_model_id": "nvidia/multitalker-parakeet-streaming-0.6b-v1",
         },
         description="NeMo Multi-Talker Parakeet orchestration pipeline (diarization + transcription).",
+    )
+
+    PipelineRegistry.register_alias(
+        "pyannote-orchestration",
+        PyannoteOrchestrationPipeline,
+        default_config={
+            "out_dir": "./pyannote_orchestration_results",
+            "timeout": 3600,
+            "request_buffer": 30,
+        },
+        description="PyannoteAI orchestration pipeline (diarization + transcription). Uses the precision-2 model with Nvidia Parakeet STT. Requires `PYANNOTE_TOKEN` env var from https://www.pyannote.ai/.",
     )
 
     ################# TRANSCRIPTION PIPELINES #################
@@ -616,6 +629,17 @@ def register_pipeline_aliases() -> None:
             "use_keywords": False,
         },
         description="ElevenLabs transcription pipeline with keyterm prompting support. Requires API key from https://elevenlabs.io/. Set `ELEVENLABS_API_KEY` env var.",
+    )
+
+    PipelineRegistry.register_alias(
+        "pyannote-transcription",
+        PyannoteTranscriptionPipeline,
+        default_config={
+            "out_dir": "./pyannote_transcription_results",
+            "timeout": 3600,
+            "request_buffer": 30,
+        },
+        description="PyannoteAI transcription pipeline (ignores speaker attribution). Uses the precision-2 model with Nvidia Parakeet STT. Requires `PYANNOTE_TOKEN` env var from https://www.pyannote.ai/.",
     )
 
     ################# STREAMING TRANSCRIPTION PIPELINES #################

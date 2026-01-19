@@ -1,0 +1,5 @@
+PyannoteTranscriptionPipeline:
+  config:
+    out_dir: ./pyannote-transcription
+    timeout: 3600 # 1 hour
+    request_buffer: 30
