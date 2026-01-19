@@ -4,6 +4,7 @@
 from .aws import *
 from .common import *
 from .diarization_deepgram import *
+from .elevenlabs import *
 from .nemo import *
 from .picovoice import *
 from .pyannote import *

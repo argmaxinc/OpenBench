@@ -5,6 +5,7 @@ from .apple_speech_analyzer import SpeechAnalyzerConfig, SpeechAnalyzerPipeline
 from .common import TranscriptionOutput
 from .transcription_assemblyai import AssemblyAITranscriptionPipeline, AssemblyAITranscriptionPipelineConfig
 from .transcription_deepgram import DeepgramTranscriptionPipeline, DeepgramTranscriptionPipelineConfig
+from .transcription_elevenlabs import ElevenLabsTranscriptionPipeline, ElevenLabsTranscriptionPipelineConfig
 from .transcription_groq import GroqTranscriptionConfig, GroqTranscriptionPipeline
 from .transcription_nemo import NeMoTranscriptionPipeline, NeMoTranscriptionPipelineConfig
 from .transcription_openai import OpenAITranscriptionPipeline, OpenAITranscriptionPipelineConfig
@@ -30,6 +31,8 @@ __all__ = [
     "WhisperOSSTranscriptionPipelineConfig",
     "DeepgramTranscriptionPipeline",
     "DeepgramTranscriptionPipelineConfig",
+    "ElevenLabsTranscriptionPipeline",
+    "ElevenLabsTranscriptionPipelineConfig",
     "NeMoTranscriptionPipeline",
     "NeMoTranscriptionPipelineConfig",
     "PyannoteTranscriptionPipeline",

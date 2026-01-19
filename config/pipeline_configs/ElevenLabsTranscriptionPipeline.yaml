@@ -1,0 +1,5 @@
+ElevenLabsTranscriptionPipeline:
+  config:
+    model_id: "scribe_v2"
+    use_keywords: true
+

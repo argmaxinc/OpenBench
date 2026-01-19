@@ -1,4 +1,5 @@
 from .deepgram_engine import DeepgramApi, DeepgramApiResponse
+from .elevenlabs_engine import ElevenLabsApi, ElevenLabsApiResponse
 from .openai_engine import OpenAIApi
 from .pyannote_engine import (
     PyannoteAIApi,
@@ -19,6 +20,8 @@ from .whisperkitpro_engine import (
 __all__ = [
     "DeepgramApi",
     "DeepgramApiResponse",
+    "ElevenLabsApi",
+    "ElevenLabsApiResponse",
     "OpenAIApi",
     "PyannoteAIApi",
     "PyannoteApiDiarizationOutput",

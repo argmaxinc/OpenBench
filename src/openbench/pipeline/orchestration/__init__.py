@@ -3,6 +3,7 @@
 
 from .nemo import NeMoMTParakeetPipeline, NeMoMTParakeetPipelineConfig
 from .orchestration_deepgram import DeepgramOrchestrationPipeline, DeepgramOrchestrationPipelineConfig
+from .orchestration_elevenlabs import ElevenLabsOrchestrationPipeline, ElevenLabsOrchestrationPipelineConfig
 from .orchestration_openai import OpenAIOrchestrationPipeline, OpenAIOrchestrationPipelineConfig
 from .orchestration_pyannote import PyannoteOrchestrationPipeline, PyannoteOrchestrationPipelineConfig
 from .orchestration_whisperkitpro import WhisperKitProOrchestrationConfig, WhisperKitProOrchestrationPipeline
@@ -12,6 +13,8 @@ from .whisperx import WhisperXPipeline, WhisperXPipelineConfig
 __all__ = [
     "DeepgramOrchestrationPipeline",
     "DeepgramOrchestrationPipelineConfig",
+    "ElevenLabsOrchestrationPipeline",
+    "ElevenLabsOrchestrationPipelineConfig",
     "WhisperXPipeline",
     "WhisperXPipelineConfig",
     "WhisperKitProOrchestrationPipeline",
