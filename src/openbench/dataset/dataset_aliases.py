@@ -554,6 +554,20 @@ def register_dataset_aliases() -> None:
         description="Common Voice dataset for transcription evaluation with up to 400 samples per language this subset contains only russian",
     )
 
+    ########## SPEECH GENERATION ##########
+
+    DatasetRegistry.register_alias(
+        "customer-service-tts-prompts-vocalized",
+        DatasetConfig(
+            dataset_id="argmaxinc/customer-service-tts-prompts-vocalized",
+            split="validation",
+        ),
+        supported_pipeline_types={
+            PipelineType.SPEECH_GENERATION,
+        },
+        description="Customer service TTS prompts with vocalized audio for speech generation evaluation.",
+    )
+
     ########## STREAMING TRANSCRIPTION ##########
 
     DatasetRegistry.register_alias(

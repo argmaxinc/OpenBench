@@ -6,6 +6,7 @@ from .dataset_base import BaseDataset, BaseSample, DatasetConfig
 from .dataset_diarization import DiarizationDataset, DiarizationSample
 from .dataset_orchestration import OrchestrationDataset, OrchestrationSample
 from .dataset_registry import DatasetRegistry
+from .dataset_speech_generation import SpeechGenerationDataset, SpeechGenerationSample
 from .dataset_streaming_transcription import StreamingDataset, StreamingSample
 from .dataset_transcription import TranscriptionDataset, TranscriptionSample
 
@@ -24,11 +25,13 @@ __all__ = [
     "TranscriptionDataset",
     "StreamingDataset",
     "OrchestrationDataset",
+    "SpeechGenerationDataset",
     # Sample types
     "DiarizationSample",
     "TranscriptionSample",
     "StreamingSample",
     "OrchestrationSample",
+    "SpeechGenerationSample",
     # Registry
     "DatasetRegistry",
 ]

@@ -223,6 +223,7 @@ class WordDiarizationErrorRate(BaseWordErrorMetric):
         PipelineType.TRANSCRIPTION,
         PipelineType.ORCHESTRATION,
         PipelineType.STREAMING_TRANSCRIPTION,
+        PipelineType.SPEECH_GENERATION,
     ),
     MetricOptions.WER,
 )

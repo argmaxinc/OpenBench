@@ -25,6 +25,9 @@ from .orchestration import (
     WhisperXPipeline,
 )
 from .pipeline_registry import PipelineRegistry
+from .speech_generation import (
+    WhisperKitSpeechGenerationPipeline,
+)
 from .streaming_transcription import (
     AssemblyAIStreamingPipeline,
     DeepgramStreamingPipeline,
@@ -640,6 +643,29 @@ def register_pipeline_aliases() -> None:
             "request_buffer": 30,
         },
         description="PyannoteAI transcription pipeline (ignores speaker attribution). Uses the precision-2 model with Nvidia Parakeet STT. Requires `PYANNOTE_TOKEN` env var from https://www.pyannote.ai/.",
+    )
+
+    ################# SPEECH GENERATION PIPELINES #################
+
+    PipelineRegistry.register_alias(
+        "whisperkit-speech-generation",
+        WhisperKitSpeechGenerationPipeline,
+        default_config={
+            "out_dir": "./speech_generation_results",
+            "cli_path": os.getenv("WHISPERKIT_CLI_PATH"),
+            "speaker": "aiden",
+            "language": "english",
+            "seed": 10,
+            "temperature": 0.9,
+            "top_k": 50,
+            "max_new_tokens": 245,
+            "transcription_cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
+            "transcription_repo_id": "argmaxinc/parakeetkit-pro",
+            "transcription_model_variant": "nvidia_parakeet-v2_476MB",
+        },
+        description="WhisperKit speech generation pipeline. Generates audio from text prompts using whisperkit-cli TTS, "
+        "then transcribes the generated audio to compute WER against the original prompt. "
+        "Requires `WHISPERKIT_CLI_PATH` env var pointing to the whisperkit-cli binary.",
     )
 
     ################# STREAMING TRANSCRIPTION PIPELINES #################

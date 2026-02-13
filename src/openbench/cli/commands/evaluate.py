@@ -176,6 +176,7 @@ def run_alias_mode(
     wandb_tags: list[str] | None,
     use_keywords: bool | None,
     force_language: bool,
+    pipeline_config: list[str] | None,
     verbose: bool,
 ) -> BenchmarkResult:
     """Run evaluation using pipeline and dataset aliases."""
@@ -207,6 +208,19 @@ def run_alias_mode(
             pipeline_config_override["force_language"] = force_language
             if verbose:
                 typer.echo("✅ Force language: enabled")
+
+        # Handle generic pipeline config overrides (key=value pairs)
+        if pipeline_config:
+            for item in pipeline_config:
+                if "=" not in item:
+                    raise typer.BadParameter(
+                        f"Invalid --pipeline-config format: '{item}'. "
+                        f"Expected key=value"
+                    )
+                key, value = item.split("=", 1)
+                pipeline_config_override[key] = value
+                if verbose:
+                    typer.echo(f"✅ Config override: {key}={value}")
 
         pipeline = PipelineRegistry.create_pipeline(pipeline_name, config=pipeline_config_override)
 
@@ -345,6 +359,12 @@ def evaluate(
         "--force-language",
         help="Force language hinting for compatible pipelines",
     ),
+    pipeline_config: list[str] | None = typer.Option(
+        None,
+        "--pipeline-config",
+        "-pc",
+        help="Override pipeline config values as key=value pairs (e.g. --pipeline-config speaker=serena)",
+    ),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output"),
 ) -> None:
     """Run evaluation benchmarks.
@@ -406,6 +426,7 @@ def evaluate(
                 wandb_tags=wandb_tags,
                 use_keywords=use_keywords,
                 force_language=force_language,
+                pipeline_config=pipeline_config,
                 verbose=verbose,
             )
         display_result(result)
