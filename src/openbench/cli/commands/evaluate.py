@@ -220,7 +220,7 @@ def run_alias_mode(
                 key, value = item.split("=", 1)
                 pipeline_config_override[key] = value
                 if verbose:
-                    typer.echo(f"✅ Config override: {key}={value}")
+                    typer.echo(f"Config override: {key}={value}")
 
         pipeline = PipelineRegistry.create_pipeline(pipeline_name, config=pipeline_config_override)
 
