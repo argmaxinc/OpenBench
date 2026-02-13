@@ -213,10 +213,7 @@ def run_alias_mode(
         if pipeline_config:
             for item in pipeline_config:
                 if "=" not in item:
-                    raise typer.BadParameter(
-                        f"Invalid --pipeline-config format: '{item}'. "
-                        f"Expected key=value"
-                    )
+                    raise typer.BadParameter(f"Invalid --pipeline-config format: '{item}'. Expected key=value")
                 key, value = item.split("=", 1)
                 pipeline_config_override[key] = value
                 if verbose:

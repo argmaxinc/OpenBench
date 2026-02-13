@@ -51,10 +51,7 @@ class SpeechGenerationInput(BaseModel):
     )
     audio_name: str = Field(
         ...,
-        description=(
-            "Unique identifier for this sample "
-            "(used for temp file naming)."
-        ),
+        description=("Unique identifier for this sample (used for temp file naming)."),
     )
 
 
@@ -85,57 +82,44 @@ class WhisperKitSpeechGenerationPipeline(Pipeline):
         def generate_and_transcribe(
             input: SpeechGenerationInput,
         ) -> Transcript:
-            TEMP_TTS_AUDIO_DIR.mkdir(
-                parents=True, exist_ok=True
-            )
+            TEMP_TTS_AUDIO_DIR.mkdir(parents=True, exist_ok=True)
 
-            audio_path = (
-                TEMP_TTS_AUDIO_DIR
-                / f"{input.audio_name}.wav"
-            )
+            audio_path = TEMP_TTS_AUDIO_DIR / f"{input.audio_name}.wav"
 
             # -- Step 1: Generate audio via TTS --
             tts_cmd = [
                 config.cli_path,
                 "tts",
-                "--text", input.text,
-                "--speaker", config.speaker,
-                "--language", config.language,
-                "--output-path", str(audio_path),
-                "--temperature", str(config.temperature),
-                "--top-k", str(config.top_k),
+                "--text",
+                input.text,
+                "--speaker",
+                config.speaker,
+                "--language",
+                config.language,
+                "--output-path",
+                str(audio_path),
+                "--temperature",
+                str(config.temperature),
+                "--top-k",
+                str(config.top_k),
                 "--max-new-tokens",
                 str(config.max_new_tokens),
             ]
 
             if config.seed is not None:
-                tts_cmd.extend(
-                    ["--seed", str(config.seed)]
-                )
+                tts_cmd.extend(["--seed", str(config.seed)])
             if config.models_path is not None:
-                tts_cmd.extend(
-                    ["--models-path", config.models_path]
-                )
+                tts_cmd.extend(["--models-path", config.models_path])
             if config.model_repo is not None:
-                tts_cmd.extend(
-                    ["--model-repo", config.model_repo]
-                )
+                tts_cmd.extend(["--model-repo", config.model_repo])
             if config.version_dir is not None:
-                tts_cmd.extend(
-                    ["--version-dir", config.version_dir]
-                )
+                tts_cmd.extend(["--version-dir", config.version_dir])
             if config.tokenizer is not None:
-                tts_cmd.extend(
-                    ["--tokenizer", config.tokenizer]
-                )
+                tts_cmd.extend(["--tokenizer", config.tokenizer])
 
-            logger.debug(
-                f"Running TTS: {' '.join(tts_cmd)}"
-            )
+            logger.debug(f"Running TTS: {' '.join(tts_cmd)}")
 
-            tts_result = subprocess.run(
-                tts_cmd, capture_output=True, text=True
-            )
+            tts_result = subprocess.run(tts_cmd, capture_output=True, text=True)
 
             if tts_result.returncode != 0:
                 raise RuntimeError(
@@ -148,39 +132,27 @@ class WhisperKitSpeechGenerationPipeline(Pipeline):
                 )
 
             if not audio_path.exists():
-                raise RuntimeError(
-                    "TTS completed but audio file "
-                    f"not found at {audio_path}"
-                )
+                raise RuntimeError(f"TTS completed but audio file not found at {audio_path}")
 
-            logger.info(
-                f"Generated TTS audio: {audio_path}"
-            )
+            logger.info(f"Generated TTS audio: {audio_path}")
 
             # -- Step 2: Read audio duration before
             #    transcription (engine may delete file) --
             try:
                 import soundfile as sf
+
                 info = sf.info(str(audio_path))
-                pipeline_ref._last_generated_duration = (
-                    info.duration
-                )
+                pipeline_ref._last_generated_duration = info.duration
             except Exception as e:
-                logger.warning(
-                    f"WAV duration read failed: {e}"
-                )
-                pipeline_ref._last_generated_duration = (
-                    None
-                )
+                logger.warning(f"WAV duration read failed: {e}")
+                pipeline_ref._last_generated_duration = None
 
             # -- Step 3: Transcribe via WhisperKitPro --
             engine_input = WhisperKitProInput(
                 audio_path=audio_path,
                 keep_audio=False,
             )
-            engine_output = transcription_engine(
-                engine_input
-            )
+            engine_output = transcription_engine(engine_input)
 
             # -- Step 4: Parse transcription report --
             json_path = engine_output.json_report_path
@@ -188,27 +160,21 @@ class WhisperKitSpeechGenerationPipeline(Pipeline):
                 with json_path.open("r") as f:
                     data = json.load(f)
                 all_words, all_starts, all_ends = (
-                    [], [], [],
+                    [],
+                    [],
+                    [],
                 )
                 for seg in data.get("segments", []):
                     for w in seg.get("words", []):
                         all_words.append(w["word"])
                         if "start" in w:
-                            all_starts.append(
-                                w["start"]
-                            )
+                            all_starts.append(w["start"])
                         if "end" in w:
                             all_ends.append(w["end"])
                 transcript = Transcript.from_words_info(
                     words=all_words,
-                    start=(
-                        all_starts
-                        if all_starts else None
-                    ),
-                    end=(
-                        all_ends
-                        if all_ends else None
-                    ),
+                    start=(all_starts if all_starts else None),
+                    end=(all_ends if all_ends else None),
                 )
                 # Clean up report files
                 json_path.unlink(missing_ok=True)
@@ -216,17 +182,9 @@ class WhisperKitSpeechGenerationPipeline(Pipeline):
                 if srt_path:
                     srt_path.unlink(missing_ok=True)
             else:
-                raise RuntimeError(
-                    "Transcription report not found "
-                    f"at {json_path}"
-                )
+                raise RuntimeError(f"Transcription report not found at {json_path}")
 
-            logger.info(
-                "Transcription: "
-                + transcript.get_transcript_string(
-                )[:100]
-                + "..."
-            )
+            logger.info("Transcription: " + transcript.get_transcript_string()[:100] + "...")
 
             return transcript
 
@@ -240,11 +198,10 @@ class WhisperKitSpeechGenerationPipeline(Pipeline):
         handles model download, caching, and CLI args.
         """
         config = self.config
-        cli_path = (
-            config.transcription_cli_path or config.cli_path
-        )
+        cli_path = config.transcription_cli_path or config.cli_path
 
         import coremltools as ct
+
         engine_config = WhisperKitProConfig(
             repo_id=config.transcription_repo_id,
             model_variant=config.transcription_model_variant,
@@ -260,9 +217,7 @@ class WhisperKitSpeechGenerationPipeline(Pipeline):
             transcription_config=engine_config,
         )
 
-    def __call__(
-        self, input_sample: BaseSample
-    ) -> PipelineOutput:
+    def __call__(self, input_sample: BaseSample) -> PipelineOutput:
         """Run pipeline and set generated audio duration.
 
         Overrides base __call__ to propagate the real
@@ -282,35 +237,21 @@ class WhisperKitSpeechGenerationPipeline(Pipeline):
 
         # Propagate generated audio duration to sample
         dur = self._last_generated_duration
-        logger.info(
-            f"Generated audio duration: {dur}s"
-        )
-        if (
-            isinstance(input_sample, SpeechGenerationSample)
-            and dur is not None
-        ):
+        logger.info(f"Generated audio duration: {dur}s")
+        if isinstance(input_sample, SpeechGenerationSample) and dur is not None:
             input_sample.generated_audio_duration = dur
-            logger.info(
-                "Set sample duration to "
-                f"{input_sample.generated_audio_duration}s"
-            )
+            logger.info(f"Set sample duration to {input_sample.generated_audio_duration}s")
 
         return parsed_output
 
-    def parse_input(
-        self, input_sample: SpeechGenerationSample
-    ) -> SpeechGenerationInput:
+    def parse_input(self, input_sample: SpeechGenerationSample) -> SpeechGenerationInput:
         """Extract text prompt from the sample."""
-        text = (
-            input_sample.reference.get_transcript_string()
-        )
+        text = input_sample.reference.get_transcript_string()
         return SpeechGenerationInput(
             text=text,
             audio_name=input_sample.audio_name,
         )
 
-    def parse_output(
-        self, output: Transcript
-    ) -> SpeechGenerationOutput:
+    def parse_output(self, output: Transcript) -> SpeechGenerationOutput:
         """Wrap transcription into output."""
         return SpeechGenerationOutput(prediction=output)

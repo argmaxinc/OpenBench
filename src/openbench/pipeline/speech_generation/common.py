@@ -12,10 +12,7 @@ class SpeechGenerationConfig(PipelineConfig):
 
     cli_path: str = Field(
         ...,
-        description=(
-            "Path to the whisperkit-cli binary "
-            "(used for TTS generation)."
-        ),
+        description=("Path to the whisperkit-cli binary (used for TTS generation)."),
     )
 
     # TTS parameters
@@ -63,31 +60,19 @@ class SpeechGenerationConfig(PipelineConfig):
     # Transcription parameters
     transcription_cli_path: str | None = Field(
         default=None,
-        description=(
-            "Path to CLI for transcription. "
-            "Defaults to cli_path if not set."
-        ),
+        description=("Path to CLI for transcription. Defaults to cli_path if not set."),
     )
     transcription_repo_id: str | None = Field(
         default=None,
-        description=(
-            "HuggingFace repo ID for transcription "
-            "model (e.g. argmaxinc/parakeetkit-pro)."
-        ),
+        description=("HuggingFace repo ID for transcription model (e.g. argmaxinc/parakeetkit-pro)."),
     )
     transcription_model_variant: str | None = Field(
         default=None,
-        description=(
-            "Model variant folder within the repo "
-            "(e.g. nvidia_parakeet-v2_476MB)."
-        ),
+        description=("Model variant folder within the repo (e.g. nvidia_parakeet-v2_476MB)."),
     )
     transcription_model_path: str | None = Field(
         default=None,
-        description=(
-            "Local path to ASR model dir. "
-            "Overrides repo_id/model_variant."
-        ),
+        description=("Local path to ASR model dir. Overrides repo_id/model_variant."),
     )
     transcription_word_timestamps: bool = Field(
         default=True,

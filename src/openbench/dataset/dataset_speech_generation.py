@@ -24,9 +24,7 @@ class SpeechGenerationRow(TypedDict):
     text: str
 
 
-class SpeechGenerationSample(
-    BaseSample[Transcript, SpeechGenerationExtraInfo]
-):
+class SpeechGenerationSample(BaseSample[Transcript, SpeechGenerationExtraInfo]):
     """Sample for speech generation tasks.
 
     The reference Transcript is created from the text
@@ -36,10 +34,7 @@ class SpeechGenerationSample(
 
     generated_audio_duration: float | None = Field(
         default=None,
-        description=(
-            "Duration (seconds) of the TTS-generated audio. "
-            "Set by the pipeline after generation."
-        ),
+        description=("Duration (seconds) of the TTS-generated audio. Set by the pipeline after generation."),
     )
 
     def get_audio_duration(self) -> float:
@@ -58,9 +53,7 @@ class SpeechGenerationSample(
         return self.reference.get_transcript_string()
 
 
-class SpeechGenerationDataset(
-    BaseDataset[SpeechGenerationSample]
-):
+class SpeechGenerationDataset(BaseDataset[SpeechGenerationSample]):
     """Dataset for speech generation pipelines.
 
     Expects column: 'text' (the prompt string).
@@ -71,9 +64,7 @@ class SpeechGenerationDataset(
     _expected_columns = ["text"]
     _sample_class = SpeechGenerationSample
 
-    def _extract_audio_info(
-        self, row: dict
-    ) -> tuple[str, np.ndarray, int]:
+    def _extract_audio_info(self, row: dict) -> tuple[str, np.ndarray, int]:
         """Override to provide dummy audio info.
 
         Speech generation datasets don't have input audio.
@@ -89,9 +80,7 @@ class SpeechGenerationDataset(
         dummy_sample_rate = 16000
         return audio_name, dummy_waveform, dummy_sample_rate
 
-    def prepare_sample(
-        self, row: SpeechGenerationRow
-    ) -> tuple[Transcript, SpeechGenerationExtraInfo]:
+    def prepare_sample(self, row: SpeechGenerationRow) -> tuple[Transcript, SpeechGenerationExtraInfo]:
         """Prepare reference from dataset row.
 
         Splits text prompt into words to create the
