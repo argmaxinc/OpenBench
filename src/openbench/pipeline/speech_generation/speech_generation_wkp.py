@@ -237,10 +237,10 @@ class WhisperKitSpeechGenerationPipeline(Pipeline):
 
         # Propagate generated audio duration to sample
         dur = self._last_generated_duration
-        logger.info(f"Generated audio duration: {dur}s")
+        logger.debug(f"Generated audio duration: {dur}s")
         if isinstance(input_sample, SpeechGenerationSample) and dur is not None:
             input_sample.generated_audio_duration = dur
-            logger.info(f"Set sample duration to {input_sample.generated_audio_duration}s")
+            logger.debug(f"Set sample duration to {input_sample.generated_audio_duration}s")
 
         return parsed_output
 
