@@ -162,6 +162,7 @@ class WhisperKitProConfig(BaseModel):
                 COMPUTE_UNITS_MAPPER[self.text_decoder_compute_units],
                 "--fast-load",
                 str(self.fast_load).lower(),
+                "--verbose",
             ]
         )
 
