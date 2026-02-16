@@ -69,13 +69,17 @@ class WhisperKitProOrchestrationConfig(OrchestrationConfig):
         ComputeUnit.CPU_AND_NE,
         description="The compute units to use for the text decoder. Default is CPU_AND_NE.",
     )
-    orchestration_strategy: Literal["word", "segment"] = Field(
-        "segment",
-        description="The orchestration strategy to use either `word` or `segment`",
+    orchestration_strategy: Literal["word", "segment", "subsegment"] = Field(
+        "subsegment",
+        description="The orchestration strategy to use either `word`, `segment` or `subsegment`",
     )
-    clusterer_version: Literal["pyannote3", "pyannote4"] = Field(
+    clusterer_version: Literal["pyannote3", "pyannote4", "sortformer"] = Field(
         "pyannote4",
-        description="The version of the clusterer to use",
+        description="The version of the clusterer to use. If `sortformer` is the diarization model used is Sortformer, otherwise it is pyannote.",
+    )
+    diarization_mode: Literal["realtime", "prerecorded"] = Field(
+        "prerecorded",
+        description="Sortformer streaming mode: `realtime` (1.04s latency) or `prerecorded` (9.84s latency). This is only applicable when `clusterer_version` is `sortformer`.",
     )
     use_exclusive_reconciliation: bool = Field(
         False,
@@ -107,7 +111,8 @@ class WhisperKitProOrchestrationPipeline(Pipeline):
             chunking_strategy="vad",
             diarization=True,
             orchestration_strategy=self.config.orchestration_strategy,
-            clusterer_version_string=self.config.clusterer_version,
+            clusterer_version=self.config.clusterer_version,
+            diarization_mode=self.config.diarization_mode,
             use_exclusive_reconciliation=self.config.use_exclusive_reconciliation,
             fast_load=self.config.fast_load,
         )

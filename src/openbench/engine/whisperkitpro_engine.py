@@ -90,7 +90,11 @@ class WhisperKitProConfig(BaseModel):
         False,
         description="Whether to perform diarization",
     )
-    orchestration_strategy: Literal["word", "segment"] = Field(
+    diarization_mode: Literal["realtime", "prerecorded"] = Field(
+        "prerecorded",
+        description="Sortformer streaming mode: `realtime` (1.04s latency) or `prerecorded` (9.84s latency). This is only applicable when `clusterer_version` is `sortformer`.",
+    )
+    orchestration_strategy: Literal["word", "segment", "subsegment"] = Field(
         "segment",
         description="The orchestration strategy to use either `word` or `segment`",
     )
@@ -98,9 +102,9 @@ class WhisperKitProConfig(BaseModel):
         None,
         description="The path to the speaker models directory",
     )
-    clusterer_version: Literal["pyannote3", "pyannote4"] = Field(
+    clusterer_version: Literal["pyannote3", "pyannote4", "sortformer"] = Field(
         "pyannote4",
-        description="The version of the clusterer to use",
+        description="The version of the clusterer to use. If `sortformer` is the diarization model used is Sortformer, otherwise it is pyannote.",
     )
     use_exclusive_reconciliation: bool = Field(
         False,
@@ -174,6 +178,7 @@ class WhisperKitProConfig(BaseModel):
             # Add rttm path
             args.extend(["--rttm-path", self.rttm_path])
             args.extend(["--clusterer-version", self.clusterer_version])
+            args.extend(["--diarization-mode", self.diarization_mode])
             # If speaker models path is provided use it
             if self.speaker_models_path:
                 args.extend(["--speaker-models-path", self.speaker_models_path])
