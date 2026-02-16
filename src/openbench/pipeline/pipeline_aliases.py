@@ -114,7 +114,22 @@ def register_pipeline_aliases() -> None:
             "cli_path": os.getenv("SPEAKERKIT_CLI_PATH"),
             "clusterer_version": "pyannote4",
         },
-        description="SpeakerKit speaker diarization pipeline. Requires CLI installation and API key. Set `SPEAKERKIT_CLI_PATH` and `SPEAKERKIT_API_KEY` env vars. For access to the CLI binary contact speakerkitpro@argmaxinc.com",
+        description="SpeakerKit speaker diarization pipeline using community-1 model from pyannote. Requires CLI installation and API key. Set `SPEAKERKIT_CLI_PATH` and `SPEAKERKIT_API_KEY` env vars. For access to the CLI binary contact speakerkitpro@argmaxinc.com",
+    )
+
+    PipelineRegistry.register_alias(
+        "speakerkit-sortformer-compressed",
+        SpeakerKitPipeline,
+        default_config={
+            "out_dir": "./speakerkit-sortformer-report",
+            "cli_path": os.getenv("SPEAKERKIT_CLI_PATH"),
+            "sortformer_model_name": "v2-1",
+            "sortformer_model_variant": "384_94MB",
+        },
+        description=(
+            "SpeakerKit speaker diarization pipeline using Sortformer model compressed to 94MB. Requires CLI installation and API key. "
+            "Set `SPEAKERKIT_CLI_PATH` and `SPEAKERKIT_API_KEY` env vars. For access to the CLI binary contact speakerkitpro@argmaxinc.com."
+        ),
     )
 
     PipelineRegistry.register_alias(

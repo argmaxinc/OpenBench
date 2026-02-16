@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Callable, Literal, TypedDict
 
 from argmaxtools.utils import get_logger
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from ...dataset import DiarizationSample
 from ...pipeline_prediction import DiarizationAnnotation
@@ -23,47 +23,112 @@ logger = get_logger(__name__)
 TEMP_AUDIO_DIR = Path("audio_temp")
 
 
-class SpeakerKitPipelineConfig(DiarizationPipelineConfig):
-    cli_path: str = Field(..., description="The absolute path to the SpeakerKit CLI")
-    clusterer_version: Literal["pyannote3", "pyannote4"] = Field(
-        "pyannote4", description="The version of the clusterer to use"
-    )
-    model_path: str | None = Field(None, description="The absolute path to the SpeakerKit model")
-
-
 class SpeakerKitInput(TypedDict):
     audio_path: Path
     output_path: Path
     num_speakers: int | None
 
 
-class SpeakerKitCli:
-    def __init__(self, config: SpeakerKitPipelineConfig):
-        self.cli_path = config.cli_path
-        self.model_path = config.model_path
-        self.clusterer_version = config.clusterer_version
+class SpeakerKitPipelineConfig(DiarizationPipelineConfig):
+    cli_path: str = Field(..., description="The absolute path to the SpeakerKit CLI")
+    model_path: str | None = Field(None, description="The absolute path to the SpeakerKit model directory")
+    clusterer_version: Literal["pyannote3", "pyannote4"] | None = Field(
+        None, description="The version of the clusterer to use"
+    )
+    sortformer_model_name: str | None = Field(None, description="The name of the Sortformer model to use")
+    sortformer_model_variant: str | None = Field(None, description="The variant of the Sortformer model to use")
 
-    def __call__(self, speakerkit_input: SpeakerKitInput) -> tuple[Path, float]:
+    @model_validator(mode="after")
+    def validate_sortformer_model(self) -> "SpeakerKitPipelineConfig":
+        if self.sortformer_model_name is not None and self.sortformer_model_variant is None:
+            raise ValueError(
+                "If `sortformer_model_name` is provided, `sortformer_model_variant` must also be provided"
+            )
+
+        if self.sortformer_model_name is None and self.sortformer_model_variant is not None:
+            raise ValueError(
+                "If `sortformer_model_variant` is provided, `sortformer_model_name` must also be provided"
+            )
+
+        return self
+
+    @model_validator(mode="after")
+    def validate_model_options(self) -> "SpeakerKitPipelineConfig":
+        if (
+            self.clusterer_version is None
+            and self.sortformer_model_name is None
+            and self.sortformer_model_variant is None
+        ):
+            raise ValueError(
+                "At least one of `clusterer_version`, `sortformer_model_name`, or `sortformer_model_variant` must be provided"
+            )
+
+        if (
+            self.clusterer_version is not None
+            and self.sortformer_model_name is not None
+            and self.sortformer_model_variant is not None
+        ):
+            raise ValueError(
+                "Only one of `clusterer_version`, `sortformer_model_name`, or `sortformer_model_variant` can be provided"
+            )
+
+        return self
+
+    @property
+    def is_sortformer(self) -> bool:
+        return self.clusterer_version is None
+
+    def generate_cli_args(self, inputs: SpeakerKitInput) -> list[str]:
         cmd = [
             self.cli_path,
             "diarize",
             "--audio-path",
-            str(speakerkit_input["audio_path"]),
+            str(inputs["audio_path"]),
             "--rttm-path",
-            str(speakerkit_input["output_path"]),
-            "--clusterer-version",
-            self.clusterer_version,
+            str(inputs["output_path"]),
             "--verbose",
         ]
 
-        if self.model_path:
+        if self.clusterer_version is not None:
+            cmd.extend(["--clusterer-version", self.clusterer_version])
+        elif self.sortformer_model_name is not None and self.sortformer_model_variant is not None:
+            cmd.extend(
+                [
+                    "--sortformer-model-name",
+                    self.sortformer_model_name,
+                    "--sortformer-model-variant",
+                    self.sortformer_model_variant,
+                ]
+            )
+
+        if self.model_path is not None:
             cmd.extend(["--model-path", self.model_path])
 
-        if speakerkit_input["num_speakers"] is not None:
-            cmd.extend(["--num-speakers", str(speakerkit_input["num_speakers"])])
+        if inputs["num_speakers"] is not None:
+            if self.is_sortformer:
+                logger.warning("`num_speakers` is not supported for Sortformer. Ignoring...")
+            else:
+                cmd.extend(["--num-speakers", str(inputs["num_speakers"])])
 
         if "SPEAKERKIT_API_KEY" in os.environ:
             cmd.extend(["--api-key", os.environ["SPEAKERKIT_API_KEY"]])
+
+        return cmd
+
+
+def parse_stdout(stdout: str) -> float:
+    pattern = r"Model Load Time:\s+\d+\.\d+\s+ms\nTotal Time:\s+(\d+\.\d+)\s+ms"
+    matches = re.search(pattern, stdout)
+    total_time = float(matches.group(1))
+    return total_time / 1000
+
+
+class SpeakerKitCli:
+    def __init__(self, config: SpeakerKitPipelineConfig):
+        self.config = config
+
+    def __call__(self, speakerkit_input: SpeakerKitInput) -> tuple[Path, float]:
+        cmd = self.config.generate_cli_args(speakerkit_input)
 
         try:
             result = subprocess.run(cmd, check=True, capture_output=True, text=True)
@@ -81,11 +146,9 @@ class SpeakerKitCli:
         speakerkit_input["audio_path"].unlink()
 
         # Parse stdout and take the total time it took to diarize
-        pattern = r"Model Load Time:\s+\d+\.\d+\s+ms\nTotal Time:\s+(\d+\.\d+)\s+ms"
-        matches = re.search(pattern, result.stdout)
-        total_time = float(matches.group(1))
+        total_time = parse_stdout(result.stdout)
 
-        return speakerkit_input["output_path"], total_time / 1000
+        return speakerkit_input["output_path"], total_time
 
 
 @register_pipeline
