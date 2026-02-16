@@ -32,8 +32,8 @@ class SpeakerKitInput(TypedDict):
 class SpeakerKitPipelineConfig(DiarizationPipelineConfig):
     cli_path: str = Field(..., description="The absolute path to the SpeakerKit CLI")
     model_path: str | None = Field(None, description="The absolute path to the SpeakerKit model directory")
-    clusterer_version: Literal["pyannote3", "pyannote4"] | None = Field(
-        None, description="The version of the clusterer to use"
+    clusterer_version: Literal["pyannote3", "pyannote4", "sortformer"] = Field(
+        "pyannote4", description="The version of the clusterer to use"
     )
     sortformer_model_name: str | None = Field(None, description="The name of the Sortformer model to use")
     sortformer_model_variant: str | None = Field(None, description="The variant of the Sortformer model to use")
@@ -52,31 +52,9 @@ class SpeakerKitPipelineConfig(DiarizationPipelineConfig):
 
         return self
 
-    @model_validator(mode="after")
-    def validate_model_options(self) -> "SpeakerKitPipelineConfig":
-        if (
-            self.clusterer_version is None
-            and self.sortformer_model_name is None
-            and self.sortformer_model_variant is None
-        ):
-            raise ValueError(
-                "At least one of `clusterer_version`, `sortformer_model_name`, or `sortformer_model_variant` must be provided"
-            )
-
-        if (
-            self.clusterer_version is not None
-            and self.sortformer_model_name is not None
-            and self.sortformer_model_variant is not None
-        ):
-            raise ValueError(
-                "Only one of `clusterer_version`, `sortformer_model_name`, or `sortformer_model_variant` can be provided"
-            )
-
-        return self
-
     @property
     def is_sortformer(self) -> bool:
-        return self.clusterer_version is None
+        return self.clusterer_version == "sortformer"
 
     def generate_cli_args(self, inputs: SpeakerKitInput) -> list[str]:
         cmd = [
@@ -86,12 +64,13 @@ class SpeakerKitPipelineConfig(DiarizationPipelineConfig):
             str(inputs["audio_path"]),
             "--rttm-path",
             str(inputs["output_path"]),
+            "--clusterer-version",
+            self.clusterer_version,
             "--verbose",
         ]
 
-        if self.clusterer_version is not None:
-            cmd.extend(["--clusterer-version", self.clusterer_version])
-        elif self.sortformer_model_name is not None and self.sortformer_model_variant is not None:
+        # Only check variant as we already checked both should be provided
+        if self.sortformer_model_variant is not None:
             cmd.extend(
                 [
                     "--sortformer-model-name",
@@ -115,12 +94,20 @@ class SpeakerKitPipelineConfig(DiarizationPipelineConfig):
 
         return cmd
 
+    def parse_stdout(self, stdout: str) -> float:
+        # Default pattern for pyannote models
+        pattern = r"Model Load Time:\s+\d+\.\d+\s+ms\nTotal Time:\s+(\d+\.\d+)\s+ms"
+        divisor = 1000.0
 
-def parse_stdout(stdout: str) -> float:
-    pattern = r"Model Load Time:\s+\d+\.\d+\s+ms\nTotal Time:\s+(\d+\.\d+)\s+ms"
-    matches = re.search(pattern, stdout)
-    total_time = float(matches.group(1))
-    return total_time / 1000
+        # if model is sortfomer we override the pattern and divisor
+        if self.is_sortformer:
+            pattern = r"Prediction time:\s+(\d+\.\d+)\s+seconds"
+            divisor = 1.0
+
+        matches = re.search(pattern, stdout)
+        if matches is None:
+            raise ValueError(f"Could not parse prediction time from stdout: {stdout!r}")
+        return float(matches.group(1)) / divisor
 
 
 class SpeakerKitCli:
@@ -146,7 +133,7 @@ class SpeakerKitCli:
         speakerkit_input["audio_path"].unlink()
 
         # Parse stdout and take the total time it took to diarize
-        total_time = parse_stdout(result.stdout)
+        total_time = self.config.parse_stdout(result.stdout)
 
         return speakerkit_input["output_path"], total_time
 

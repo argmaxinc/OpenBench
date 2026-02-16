@@ -123,8 +123,9 @@ def register_pipeline_aliases() -> None:
         default_config={
             "out_dir": "./speakerkit-sortformer-report",
             "cli_path": os.getenv("SPEAKERKIT_CLI_PATH"),
-            "sortformer_model_name": "v2-1",
             "sortformer_model_variant": "384_94MB",
+            "sortformer_model_name": "sortformer",
+            "clusterer_version": "sortformer",
         },
         description=(
             "SpeakerKit speaker diarization pipeline using Sortformer model compressed to 94MB. Requires CLI installation and API key. "
