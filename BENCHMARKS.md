@@ -13,11 +13,11 @@
   - [Word Error Rate (WER)](#word-error-rate-wer)
   - [Streaming Latency](#streaming-latency)
   - [Confirmed Streaming Latency](#confirmed-streaming-latency)
-- [Speaker-Attributed Transcription](#speaker-attributed-transcription)
+- [Speaker Attributed Transcription](#speaker-attributed-transcription)
   - [Benchmarked Systems](#benchmarked-systems-3)
-  - [Benchmarked Datasets](#benchmarked-datasets-2)
+  - [Benchmarked Datasets](#benchmarked-datasets-3)
   - [Word Error Rate (WER)](#word-error-rate-wer-2)
-  - [Word Diarization Error Rate (WDER)](#word-diarization-error-rate-wder)
+  - [Concatenated Word Error Rate (cpWER)](#concatenated-word-error-rate-cpwer)
   - [Speed Factor (SF)](#speed-factor-sf-2)
 - [Keyword Recognition](#keyword-recognition)
   - [Benchmarked Systems](#benchmarked-systems-4)
@@ -346,32 +346,68 @@
 
 
 
-# Speaker-Attributed Transcription
+# Speaker Attributed Transcription
 
 ## Benchmarked Systems
 
 <details>
 <summary>Click to expand</summary>
 
-### Deepgram
-- **Latest Run:** `2025-09-05`
+> **Note:** If a cell in the tables below is `-`, it means that the system/dataset combination was not evaluated due to timeout constaints or lack of credits.
+
+### Deepgram<br/>(nova-3)
+- **Latest Run:** `2026-02-05`
 - **Model Version:** `nova-3`
 - **Configuration:** Deepgram's Python SDK for file transcription with `diarize` and `detect_language` enabled. See [deepgram-python-sdk](https://github.com/deepgram/deepgram-python-sdk) for more details.
 - **Code Reference:** [openbench/pipeline/orchestration/orchestration_deepgram.py](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/orchestration/orchestration_deepgram.py)
 - **Hardware**: Unknown (Cloud API)
 
-### Argmax (Whisper Large V3 Turbo)
-- **Latest Run:** `2025-09-29`
+### OpenAI<br/>(GPT-4o)<sup>¹</sup>
+- **Latest Run:** `2026-01-05`
+- **Model Version:** `GPT-4o`
+- **Configuration:** [OpenAI's GPT-4o diarized API](https://platform.openai.com/docs/guides/speech-to-text#speaker-diarization) using `chunking_strategy='auto'`
+- **Code Reference:** [openbench/pipeline/orchestration/orchestration_openai.py](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/orchestration/orchestration_openai.py)
+- **Hardware**: Unknown (Cloud API)
+
+### WhisperX<br/>(Large V3 Turbo)<sup>²</sup>
+- **Latest Run:** `2025-12-05`
 - **Model Version:** `whisper-large-v3-turbo`
-- **Configuration:** Argmax WhisperKit Pro with compressed Whisper Large V3 Turbo model (i.e. `large-v3-v20240930_626MB`) for speaker-attributed transcription and SpeakerKit Pro with `pyannote-v3-pro`.
+- **Configuration:** [WhisperX](https://github.com/m-bain/whisperX) with Whisper Large V3 Turbo model for speaker-attributed transcription running with `threads=8`, `batch_size=16`, `compute_type=int8` on `cpu`.
+- **Code Reference:** [openbench/pipeline/orchestration/orchestration_whisperx.py](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/orchestration/whisperx.py)
+- **Hardware**: M2 Ultra Mac Studio
+
+### Argmax<br/>(Whisper Large V3 Turbo)
+- **Latest Run:** `2025-11-26`
+- **Model Version:** `whisper-large-v3-turbo`
+- **Configuration:** Argmax WhisperKit Pro with compressed Whisper Large V3 Turbo model (i.e. `large-v3-v20240930_626MB`) for orchestration and speaker-attributed transcription using energy based voice activity detection.
 - **Code Reference:** [openbench/pipeline/orchestration/orchestration_whisperkitpro.py](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/orchestration/orchestration_whisperkitpro.py)
 - **Hardware**: M2 Ultra Mac Studio
 
+### Argmax<br/>(Parakeet V2)
+- **Latest Run:** `2025-11-25`
+- **Model Version:** `parakeet-v2`
+- **Configuration:** Argmax WhisperKit Pro with compressed Parakeet V2 model (i.e. `parakeet-v2_476MB`) for orchestration and speaker-attributed transcription using energy based voice activity detection. **Note:** Parakeet V2 is English-only, therefore no results are available for non-English datasets.
+- **Code Reference:** [openbench/pipeline/orchestration/orchestration_whisperkitpro.py](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/orchestration/orchestration_whisperkitpro.py)
+- **Hardware**: M2 Ultra Mac Studio
 
-### Argmax (Parakeet V3)
-- **Latest Run:** `2025-09-29`
+### Argmax<br/>(Parakeet V3)
+- **Latest Run:** `2025-11-26`
 - **Model Version:** `parakeet-v3`
-- **Configuration:** Argmax WhisperKit Pro with compressed Parakeet V3 model (i.e. `parakeet-v3_494MB`) for speaker-attributed transcription and SpeakerKit Pro with `pyannote-v3-pro`.
+- **Configuration:** Argmax WhisperKit Pro with compressed Parakeet V3 model (i.e. `parakeet-v3_494MB`) for orchestration and speaker-attributed transcription using energy based voice activity detection.
+- **Code Reference:** [openbench/pipeline/orchestration/orchestration_whisperkitpro.py](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/orchestration/orchestration_whisperkitpro.py)
+- **Hardware**: M2 Ultra Mac Studio
+
+### Argmax<br/>(Parakeet V3 + Sortformer)
+- **Latest Run:** `2026-02-19`
+- **Model Version:** `parakeet-v3 + sortformer`
+- **Configuration:** Argmax WhisperKit Pro with compressed Parakeet V3 model (i.e. `parakeet-v3_494MB`) for orchestration and speaker-attributed transcription using energy based voice activity detection and Sortformer model for speaker diarization.
+- **Code Reference:** [openbench/pipeline/orchestration/orchestration_whisperkitpro.py](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/orchestration/orchestration_whisperkitpro.py)
+- **Hardware**: M2 Ultra Mac Studio
+
+### Argmax<br/>(Parakeet V2 + Sortformer)
+- **Latest Run:** `2026-02-19`
+- **Model Version:** `parakeet-v2 + sortformer`
+- **Configuration:** Argmax WhisperKit Pro with compressed Parakeet V2 model (i.e. `parakeet-v2_476MB`) for orchestration and speaker-attributed transcription using energy based voice activity detection and Sortformer model for speaker diarization.
 - **Code Reference:** [openbench/pipeline/orchestration/orchestration_whisperkitpro.py](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/orchestration/orchestration_whisperkitpro.py)
 - **Hardware**: M2 Ultra Mac Studio
 
@@ -384,15 +420,33 @@
 <details>
 <summary>Click to expand</summary>
 
-### CallHome English (callhome-english)
+### CallHome English
 - **Language:** English
 - **Domain:** Phone Call
 - **Description:** [LDC97S42](https://catalog.ldc.upenn.edu/LDC97S42) English subset of the CallHome dataset containing speaker labeled transcripts of telephone conversations with natural speech patterns and the audio quality challenges typical of phone calls.
 
-### Earnings21
+### Earnings-21
 - **Language:** English
 - **Domain:** Meeting
 - **Description:** A dataset of corporate earnings call recordings featuring financial presentations and Q&A sessions with executives, analysts, and investors.
+
+### AMI IHM OpenBench
+- **Language:** English
+- **Domain:** Meeting
+- **Description:** [AMI IHM OpenBench](https://huggingface.co/datasets/argmaxinc/ami-openbench) is an AMI-IHM dataset for transcription, orchestration and diarization evaluation. 
+The audio files and the MT-ASR annotations were taken from https://github.com/BUTSpeechFIT/mt-asr-data-prep and processed to create the dataset.
+The diarization annotations were taken from https://github.com/nttcslab-sp/diar-forced-alignment which should contain tighter annotations when compared to using the ASR segments as the ground truth.
+See `Can We Really Repurpose Multi-Speaker ASR Corpus for Speaker Diarization?` for more details.
+
+
+### AMI SDM OpenBench
+- **Language:** English
+- **Domain:** 
+- **Description:** [AMI SDM OpenBench](https://huggingface.co/datasets/argmaxinc/ami-openbench) is an AMI-SDM dataset for transcription, orchestration and diarization evaluation. 
+The audio files and the MT-ASR annotations were taken from https://github.com/BUTSpeechFIT/mt-asr-data-prep and processed to create the dataset.
+The diarization annotations were taken from https://github.com/nttcslab-sp/diar-forced-alignment which should contain tighter annotations when compared to using the ASR segments as the ground truth.
+See `Can We Really Repurpose Multi-Speaker ASR Corpus for Speaker Diarization?` for more details.
+
 
 </details>
 
@@ -403,40 +457,44 @@
 <details>
 <summary>Click to expand</summary>
 
-
 **What it measures:** WER measures speech-to-text accuracy by counting the word-level edits - substitutions, deletions, and insertions — needed to turn a transcript into the reference, then dividing by the reference length to give a percentage.
 
-**How to interpret:** Lower values indicate better performance. A WER of 0.0% means perfect accuracy (no errors), while 100% represents total error. In some cases, values may exceed 100%.
+**How to interpret:** Lower values are better. A WER of 0.0% would be perfect (no errors), while 100% means complete error and values may exceeed 100%.
 
 **Example:** In a 100-word reference transcript, a WER of 15% means there are 15 total word-level mistakes — some mix of substitutions (confusion), deletions (omission), and insertions (hallucination).
 
+
 </details>
 
-| Dataset          | Deepgram<br/>(nova-3) | Argmax<br/>(Whisper Large V3 Turbo) | Argmax<br/>(Parakeet V3) |
-|------------------|-----------------------|:-----------------------------------:|:------------------------:|
-| callhome-english | 10.22                 |               10.67                 |          9.78            |
-| earnings21       | 7.38                  |                7.99                 |          6.97            |
+| Dataset           |   Deepgram<br/>(nova-3) | OpenAI<br/>(GPT-4o)   | WhisperX<br/>(Large V3 Turbo)   | Argmax<br/>(Whisper Large V3 Turbo)   | Argmax<br/>(Parakeet V2)   | Argmax<br/>(Parakeet V3)   | Argmax<br/>(Parakeet V3 + Sortformer)   | Argmax<br/>(Parakeet V2 + Sortformer)   |
+|-------------------|-------------------------|-----------------------|---------------------------------|---------------------------------------|----------------------------|----------------------------|-----------------------------------------|-----------------------------------------|
+| CallHome English  |                   13.41 | 16.83                 | 17.74                           | 23.75                                 | 18.70                      | 17.26                      | 17.87                                   | 19.39                                   |
+| Earnings-21       |                   11.37 | -                     | -                               | 13.29                                 | 10.45                      | 9.06                       | -                                       | -                                       |
+| AMI IHM OpenBench |                   19.06 | -                     | -                               | -                                     | -                          | -                          | 26.91                                   | 23.93                                   |
+| AMI SDM OpenBench |                   29.7  | -                     | -                               | -                                     | -                          | -                          | 27.48                                   | 28.52                                   |
 
 <br/><br/>
 
-## Word Diarization Error Rate (WDER)
+## Concatenated Word Error Rate (cpWER)
 
 <details>
 <summary>Click to expand</summary>
 
+**What it measures:** cpWER evaluates speaker-attributed transcription by first finding the optimal speaker permutation mapping between hypothesis and reference, then concatenating all words from each speaker separately, and finally computing the standard WER on these concatenated sequences. Words that are correctly transcribed but attributed to the wrong speaker will count as both a deletion (missing from correct speaker) and an insertion (added to wrong speaker).
 
-**What it measures:** WDER measures the accuracy of speaker-attributed transcription by counting word-level errors in both transcription accuracy and speaker attribution. It combines word error rate with speaker diarization errors at the word level.
+**How to interpret:** Lower values are better. A cpWER of 0.0% would be perfect (no errors in both transcription and speaker attribution), while 100% means complete error and values may exceed 100%.
 
-**How to interpret:** Lower values are better. A WDER of 0.0% would be perfect (no errors in both transcription and speaker attribution), while 100% means complete error.
+**Example:** If Speaker A says "hello world" but the system attributes "hello" to Speaker A and "world" to Speaker B, the word "world" counts as both a deletion from Speaker A's concatenated sequence and an insertion in Speaker B's sequence, resulting in 2 errors out of 2 words (100% cpWER).
 
-**Example:** In a 100-word reference transcript with speaker labels, a WDER of 20% means there are 20 total word-level mistakes in either transcription accuracy or speaker attribution.
 
 </details>
 
-| Dataset          | Deepgram<br/>(nova-3) | Argmax<br/>(Whisper Large V3 Turbo) | Argmax<br/>(Parakeet V3) |
-|------------------|-----------------------|:-----------------------------------:|:------------------------:|
-| callhome-english | 5.01                  |                5.72                 |           5.99           |
-| earnings21       | 6.18                  |                4.94                 |           5.16           |
+| Dataset           |   Deepgram<br/>(nova-3) | OpenAI<br/>(GPT-4o)   | WhisperX<br/>(Large V3 Turbo)   | Argmax<br/>(Whisper Large V3 Turbo)   | Argmax<br/>(Parakeet V2)   | Argmax<br/>(Parakeet V3)   | Argmax<br/>(Parakeet V3 + Sortformer)   | Argmax<br/>(Parakeet V2 + Sortformer)   |
+|-------------------|-------------------------|-----------------------|---------------------------------|---------------------------------------|----------------------------|----------------------------|-----------------------------------------|-----------------------------------------|
+| CallHome English  |                   18.76 | 19.38                 | 23.74                           | 27.54                                 | 22.79                      | 22.13                      | 19.63                                   | 20.81                                   |
+| Earnings-21       |                   21.57 | -                     | -                               | 20.84                                 | 18.23                      | 17.26                      | -                                       | -                                       |
+| AMI IHM OpenBench |                   26.03 | -                     | -                               | -                                     | -                          | -                          | 33.19                                   | 30.17                                   |
+| AMI SDM OpenBench |                   36.84 | -                     | -                               | -                                     | -                          | -                          | 44.65                                   | 38.56                                   |
 
 <br/><br/>
 
@@ -445,23 +503,30 @@
 <details>
 <summary>Click to expand</summary>
 
-
 **What it measures:** Speed Factor compares how much faster (or slower) a system processes audio compared to real-time. It's calculated as $SF = \dfrac{Duration_{audio}}{Duration_{prediction}}$.
 
 **How to interpret:** Values above 1x mean the system is faster than real-time. Values below 1x mean slower than real-time. Higher values indicate faster processing.
 
 **Example:** An SF of 10x means the system processes 10 seconds of audio in 1 second. An SF of 0.5x means it takes 2 seconds to process 1 second of audio.
 
+
 </details>
 
-| Dataset          | Deepgram<br/>(nova-3) | Argmax<br/>(Whisper Large V3 Turbo) | Argmax<br/>(Parakeet V3) |
-|------------------|:---------------------:|:-----------------------------------:|:------------------------:|
-| callhome-english |   102                 |                 13                  |           98             |
-| earnings21       |   213                 |                 21                  |           232            |
+| Dataset           |   Deepgram<br/>(nova-3) | OpenAI<br/>(GPT-4o)   | WhisperX<br/>(Large V3 Turbo)   | Argmax<br/>(Whisper Large V3 Turbo)   | Argmax<br/>(Parakeet V2)   | Argmax<br/>(Parakeet V3)   | Argmax<br/>(Parakeet V3 + Sortformer)   | Argmax<br/>(Parakeet V2 + Sortformer)   |
+|-------------------|-------------------------|-----------------------|---------------------------------|---------------------------------------|----------------------------|----------------------------|-----------------------------------------|-----------------------------------------|
+| CallHome English  |                      82 | 3                     | 1                               | 11                                    | 31                         | 40                         | 97                                      | 99                                      |
+| Earnings-21       |                     213 | -                     | -                               | 28                                    | 176                        | 167                        | -                                       | -                                       |
+| AMI IHM OpenBench |                     199 | -                     | -                               | -                                     | -                          | -                          | 110                                     | 79                                      |
+| AMI SDM OpenBench |                     205 | -                     | -                               | -                                     | -                          | -                          | 109                                     | 130                                     |
 
 <br/><br/>
 
+
 ---
+¹ **Note:** OpenAI's gpt-4o-transcribe-diarized has a 1400s limit on the total duration of the audio, therefore it cannot run on datasets like earnings21 unless you add custom chunking logic.
+
+² **Note:** WhisperX can't use mps therefore it is running on cpu and it is extremely slow which makes it unfeasible for `earnings21` dataset.
+
 
 # Keyword Recognition
 
