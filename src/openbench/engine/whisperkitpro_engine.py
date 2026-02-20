@@ -176,10 +176,15 @@ class WhisperKitProConfig(BaseModel):
         if self.diarization:
             args.extend(["--diarization"])
             args.extend(["--orchestration-strategy", self.orchestration_strategy])
+
             # Add rttm path
             args.extend(["--rttm-path", self.rttm_path])
             args.extend(["--clusterer-version", self.clusterer_version])
-            args.extend(["--diarization-mode", self.diarization_mode])
+
+            # Only add diarization mode if using Sortformer
+            if self.clusterer_version == "sortformer":
+                args.extend(["--diarization-mode", self.diarization_mode])
+
             # If speaker models path is provided use it
             if self.speaker_models_path:
                 args.extend(["--speaker-models-path", self.speaker_models_path])
