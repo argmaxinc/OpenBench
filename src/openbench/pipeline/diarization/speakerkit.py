@@ -34,6 +34,10 @@ class SpeakerKitPipelineConfig(DiarizationPipelineConfig):
     model_path: str | None = Field(None, description="The absolute path to the SpeakerKit model directory")
     engine: Literal["pyannote", "sortformer"] = Field("pyannote", description="The engine to use")
 
+    @property
+    def is_sortformer(self) -> bool:
+        return self.engine == "sortformer"
+
     def generate_cli_args(self, inputs: SpeakerKitInput) -> list[str]:
         cmd = [
             self.cli_path,
@@ -51,10 +55,7 @@ class SpeakerKitPipelineConfig(DiarizationPipelineConfig):
             cmd.extend(["--model-path", self.model_path])
 
         if inputs["num_speakers"] is not None:
-            if self.is_sortformer:
-                logger.warning("`num_speakers` is not supported for Sortformer. Ignoring...")
-            else:
-                cmd.extend(["--num-speakers", str(inputs["num_speakers"])])
+            cmd.extend(["--num-speakers", str(inputs["num_speakers"])])
 
         if "SPEAKERKIT_API_KEY" in os.environ:
             cmd.extend(["--api-key", os.environ["SPEAKERKIT_API_KEY"]])
