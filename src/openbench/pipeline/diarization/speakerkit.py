@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Callable, Literal, TypedDict
 
 from argmaxtools.utils import get_logger
-from pydantic import Field, model_validator
+from pydantic import Field
 
 from ...dataset import DiarizationSample
 from ...pipeline_prediction import DiarizationAnnotation
@@ -32,29 +32,7 @@ class SpeakerKitInput(TypedDict):
 class SpeakerKitPipelineConfig(DiarizationPipelineConfig):
     cli_path: str = Field(..., description="The absolute path to the SpeakerKit CLI")
     model_path: str | None = Field(None, description="The absolute path to the SpeakerKit model directory")
-    clusterer_version: Literal["pyannote3", "pyannote4", "sortformer"] = Field(
-        "pyannote4", description="The version of the clusterer to use"
-    )
-    sortformer_model_name: str | None = Field(None, description="The name of the Sortformer model to use")
-    sortformer_model_variant: str | None = Field(None, description="The variant of the Sortformer model to use")
-
-    @model_validator(mode="after")
-    def validate_sortformer_model(self) -> "SpeakerKitPipelineConfig":
-        if self.sortformer_model_name is not None and self.sortformer_model_variant is None:
-            raise ValueError(
-                "If `sortformer_model_name` is provided, `sortformer_model_variant` must also be provided"
-            )
-
-        if self.sortformer_model_name is None and self.sortformer_model_variant is not None:
-            raise ValueError(
-                "If `sortformer_model_variant` is provided, `sortformer_model_name` must also be provided"
-            )
-
-        return self
-
-    @property
-    def is_sortformer(self) -> bool:
-        return self.clusterer_version == "sortformer"
+    engine: Literal["pyannote", "sortformer"] = Field("pyannote", description="The engine to use")
 
     def generate_cli_args(self, inputs: SpeakerKitInput) -> list[str]:
         cmd = [
@@ -64,21 +42,10 @@ class SpeakerKitPipelineConfig(DiarizationPipelineConfig):
             str(inputs["audio_path"]),
             "--rttm-path",
             str(inputs["output_path"]),
-            "--clusterer-version",
-            self.clusterer_version,
+            "--engine",
+            self.engine,
             "--verbose",
         ]
-
-        # Only check variant as we already checked both should be provided
-        if self.sortformer_model_variant is not None:
-            cmd.extend(
-                [
-                    "--sortformer-model-name",
-                    self.sortformer_model_name,
-                    "--sortformer-model-variant",
-                    self.sortformer_model_variant,
-                ]
-            )
 
         if self.model_path is not None:
             cmd.extend(["--model-path", self.model_path])
