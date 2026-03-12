@@ -67,7 +67,7 @@ class SpeakerKitOssPipelineConfig(DiarizationPipelineConfig):
         default=False,
         description="Disable full redundancy in segmenter",
     )
-    verbose: bool = Field(default=False, description="Enable verbose output")
+    verbose: bool = Field(default=True, description="Enable verbose output")
 
 
 class SpeakerKitOssInput(TypedDict):
