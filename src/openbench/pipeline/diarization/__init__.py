@@ -10,3 +10,4 @@ from .picovoice import *
 from .pyannote import *
 from .pyannote_api import *
 from .speakerkit import *
+from .speakerkit_oss import *

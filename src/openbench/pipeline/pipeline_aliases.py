@@ -13,6 +13,7 @@ from .diarization import (
     PicovoicePipeline,
     PyannoteApiPipeline,
     PyAnnotePipeline,
+    SpeakerKitOssPipeline,
     SpeakerKitPipeline,
 )
 from .orchestration import (
@@ -115,6 +116,16 @@ def register_pipeline_aliases() -> None:
             "clusterer_version": "pyannote4",
         },
         description="SpeakerKit speaker diarization pipeline. Requires CLI installation and API key. Set `SPEAKERKIT_CLI_PATH` and `SPEAKERKIT_API_KEY` env vars. For access to the CLI binary contact speakerkitpro@argmaxinc.com",
+    )
+
+    PipelineRegistry.register_alias(
+        "speakerkit-oss",
+        SpeakerKitOssPipeline,
+        default_config={
+            "out_dir": "./speakerkit-oss-report",
+            "cli_path": os.getenv("WHISPERKIT_CLI_PATH"),
+        },
+        description="SpeakerKit OSS diarization via whisperkit-cli diarize. No API key. Set WHISPERKIT_CLI_PATH to the whisperkit-cli binary path.",
     )
 
     PipelineRegistry.register_alias(
