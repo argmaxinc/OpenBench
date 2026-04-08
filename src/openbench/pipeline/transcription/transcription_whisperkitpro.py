@@ -24,9 +24,7 @@ TEMP_VOCAB_DIR = Path("./temp_vocab")
 class WhisperKitProTranscriptionConfig(TranscriptionConfig):
     """Configuration for WhisperKitPro transcription pipeline.
 
-    Supports two modes:
-    1. Legacy: model_version, model_prefix, model_repo_name
-    2. New: repo_id, model_variant (downloads and manages models)
+    Supports local model_dir only, Hugging Face repo_id + model_variant, or legacy model fields.
     """
 
     cli_path: str = Field(
@@ -59,7 +57,7 @@ class WhisperKitProTranscriptionConfig(TranscriptionConfig):
     )
     model_dir: str | None = Field(
         None,
-        description="Directory to cache downloaded models",
+        description="Existing local model directory for --model-path (no Hugging Face download when this is the only model source).",
     )
 
     audio_encoder_compute_units: ComputeUnit = Field(
