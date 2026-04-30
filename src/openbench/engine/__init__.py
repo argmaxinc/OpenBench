@@ -1,3 +1,12 @@
+from .argmax_oss_engine import (
+    ArgmaxOpenSourceEngine,
+    ArgmaxOpenSourceEngineConfig,
+    DiarizeCliInput,
+    DiarizeCliOutput,
+    TranscriptionCliInput,
+    TranscriptionCliOutput,
+    resolve_argmax_oss_cache_dir,
+)
 from .deepgram_engine import DeepgramApi, DeepgramApiResponse
 from .elevenlabs_engine import ElevenLabsApi, ElevenLabsApiResponse
 from .openai_engine import OpenAIApi
@@ -18,6 +27,13 @@ from .whisperkitpro_engine import (
 
 
 __all__ = [
+    "ArgmaxOpenSourceEngine",
+    "ArgmaxOpenSourceEngineConfig",
+    "DiarizeCliInput",
+    "DiarizeCliOutput",
+    "TranscriptionCliInput",
+    "TranscriptionCliOutput",
+    "resolve_argmax_oss_cache_dir",
     "DeepgramApi",
     "DeepgramApiResponse",
     "ElevenLabsApi",

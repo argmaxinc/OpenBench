@@ -3,6 +3,7 @@
 
 from .aws import *
 from .common import *
+from .diarization_argmax_oss import *
 from .diarization_deepgram import *
 from .elevenlabs import *
 from .nemo import *

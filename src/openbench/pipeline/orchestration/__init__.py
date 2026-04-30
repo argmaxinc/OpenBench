@@ -2,6 +2,10 @@
 # Copyright (C) 2025 Argmax, Inc. All Rights Reserved.
 
 from .nemo import NeMoMTParakeetPipeline, NeMoMTParakeetPipelineConfig
+from .orchestration_argmax_oss import (
+    ArgmaxOpenSourceOrchestrationConfig,
+    ArgmaxOpenSourceOrchestrationPipeline,
+)
 from .orchestration_deepgram import DeepgramOrchestrationPipeline, DeepgramOrchestrationPipelineConfig
 from .orchestration_elevenlabs import ElevenLabsOrchestrationPipeline, ElevenLabsOrchestrationPipelineConfig
 from .orchestration_openai import OpenAIOrchestrationPipeline, OpenAIOrchestrationPipelineConfig
@@ -11,6 +15,8 @@ from .whisperx import WhisperXPipeline, WhisperXPipelineConfig
 
 
 __all__ = [
+    "ArgmaxOpenSourceOrchestrationPipeline",
+    "ArgmaxOpenSourceOrchestrationConfig",
     "DeepgramOrchestrationPipeline",
     "DeepgramOrchestrationPipelineConfig",
     "ElevenLabsOrchestrationPipeline",

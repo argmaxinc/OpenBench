@@ -6,6 +6,7 @@
 import os
 
 from .diarization import (
+    ArgmaxOpenSourceDiarizationPipeline,
     AWSTranscribePipeline,
     DeepgramDiarizationPipeline,
     ElevenLabsDiarizationPipeline,
@@ -16,6 +17,7 @@ from .diarization import (
     SpeakerKitPipeline,
 )
 from .orchestration import (
+    ArgmaxOpenSourceOrchestrationPipeline,
     DeepgramOrchestrationPipeline,
     ElevenLabsOrchestrationPipeline,
     NeMoMTParakeetPipeline,
@@ -33,6 +35,7 @@ from .streaming_transcription import (
     OpenAIStreamingPipeline,
 )
 from .transcription import (
+    ArgmaxOpenSourceTranscriptionPipeline,
     AssemblyAITranscriptionPipeline,
     DeepgramTranscriptionPipeline,
     ElevenLabsTranscriptionPipeline,
@@ -42,7 +45,6 @@ from .transcription import (
     PyannoteTranscriptionPipeline,
     SpeechAnalyzerPipeline,
     WhisperKitProTranscriptionPipeline,
-    WhisperKitTranscriptionPipeline,
     WhisperOSSTranscriptionPipeline,
 )
 
@@ -115,6 +117,19 @@ def register_pipeline_aliases() -> None:
             "clusterer_version": "pyannote4",
         },
         description="SpeakerKit speaker diarization pipeline. Requires CLI installation and API key. Set `SPEAKERKIT_CLI_PATH` and `SPEAKERKIT_API_KEY` env vars. For access to the CLI binary contact speakerkitpro@argmaxinc.com",
+    )
+
+    PipelineRegistry.register_alias(
+        "argmax-oss-diarization",
+        ArgmaxOpenSourceDiarizationPipeline,
+        default_config={
+            "out_dir": "./argmax_oss_diarization_reports",
+        },
+        description=(
+            "Argmax SDK open-source diarization via `argmax-cli diarize`. "
+            "Clone/build under ARGMAX_OSS_CACHE_DIR (default ~/.cache/openbench/argmax-oss) unless `cli_path` is set."
+            "Uses pyannote's community-1 model for diarization."
+        ),
     )
 
     PipelineRegistry.register_alias(
@@ -339,39 +354,59 @@ def register_pipeline_aliases() -> None:
         description="PyannoteAI orchestration pipeline (diarization + transcription). Uses the precision-2 model with Nvidia Parakeet STT. Requires `PYANNOTE_TOKEN` env var from https://www.pyannote.ai/.",
     )
 
+    PipelineRegistry.register_alias(
+        "argmax-oss-orchestration-tiny",
+        ArgmaxOpenSourceOrchestrationPipeline,
+        default_config={
+            "out_dir": "./argmax_oss_orchestration_reports",
+            "model_version": "tiny",
+            "word_timestamps": True,
+            "chunking_strategy": "vad",
+        },
+        description="Argmax SDK (OSS): `argmax-cli` diarize then transcribe, speaker labels merged by word timing. "
+        "Cache: ARGMAX_OSS_CACHE_DIR or default; optional `cli_path`.",
+    )
+
     ################# TRANSCRIPTION PIPELINES #################
 
     PipelineRegistry.register_alias(
         "whisperkit-tiny",
-        WhisperKitTranscriptionPipeline,
+        ArgmaxOpenSourceTranscriptionPipeline,
         default_config={
             "model_version": "tiny",
             "word_timestamps": True,
             "chunking_strategy": "vad",
         },
-        description="WhisperKit transcription pipeline (open-source version) using the tiny version of the model. Requires Swift and Xcode installed.",
+        description="Argmax SDK (open source) transcription via `argmax-cli` (Swift release build, not debug). Model tiny. "
+        "Cache: ARGMAX_OSS_CACHE_DIR or ~/.cache/openbench/argmax-oss unless `cli_path` is set. "
+        "For `openbench-cli evaluate`, prefer `-d earnings22-3hours` over `librispeech-200`: longer clips amortize "
+        "first-run model load so speed factor is less misleading than on very short utterances.",
     )
 
     PipelineRegistry.register_alias(
         "whisperkit-large-v3",
-        WhisperKitTranscriptionPipeline,
+        ArgmaxOpenSourceTranscriptionPipeline,
         default_config={
             "model_version": "large-v3",
             "word_timestamps": True,
             "chunking_strategy": "vad",
         },
-        description="WhisperKit transcription pipeline (open-source version) using the large-v3 version of the model. Requires Swift and Xcode installed.",
+        description="Argmax SDK (open source) transcription via `argmax-cli` (release build). Model large-v3. "
+        "Cache: ARGMAX_OSS_CACHE_DIR or default. For transcription benchmarks use `-d earnings22-3hours`; "
+        "`librispeech-200` is better reserved for quick WER smoke tests.",
     )
 
     PipelineRegistry.register_alias(
         "whisperkit-large-v3-turbo",
-        WhisperKitTranscriptionPipeline,
+        ArgmaxOpenSourceTranscriptionPipeline,
         default_config={
             "model_version": "large-v3-v20240930",
             "word_timestamps": True,
             "chunking_strategy": "vad",
         },
-        description="WhisperKit transcription pipeline (open-source version) using the large-v3-v20240930 version of the model (which is the same as large-v3-turbo from OpenAI). Requires Swift and Xcode installed.",
+        description="Argmax SDK (open source) transcription via `argmax-cli` (release build). Model large-v3-v20240930. "
+        "Cache: ARGMAX_OSS_CACHE_DIR or default. Prefer `-d earnings22-3hours` for evaluate; short LibriSpeech "
+        "clips skew speed factor because of fixed startup cost per file.",
     )
 
     PipelineRegistry.register_alias(
