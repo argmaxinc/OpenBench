@@ -24,6 +24,7 @@ from ..command_utils import (
     get_datasets_help_text,
     get_metrics_help_text,
     get_pipelines_help_text,
+    parse_pipeline_config_overrides,
     validate_dataset_name,
     validate_pipeline_dataset_compatibility,
     validate_pipeline_metrics_compatibility,
@@ -209,15 +210,13 @@ def run_alias_mode(
             if verbose:
                 typer.echo("✅ Force language: enabled")
 
-        # Handle generic pipeline config overrides (key=value pairs)
-        if pipeline_config:
-            for item in pipeline_config:
-                if "=" not in item:
-                    raise typer.BadParameter(f"Invalid --pipeline-config format: '{item}'. Expected key=value")
-                key, value = item.split("=", 1)
-                pipeline_config_override[key] = value
-                if verbose:
-                    typer.echo(f"Config override: {key}={value}")
+        # Handle generic pipeline config overrides (key=value pairs).
+        # Values are kept as strings; the pipeline's Pydantic config
+        # coerces them to int/float/bool/etc when instantiated.
+        for key, value in parse_pipeline_config_overrides(pipeline_config).items():
+            pipeline_config_override[key] = value
+            if verbose:
+                typer.echo(f"Config override: {key}={value}")
 
         pipeline = PipelineRegistry.create_pipeline(pipeline_name, config=pipeline_config_override)
 
@@ -360,7 +359,14 @@ def evaluate(
         None,
         "--pipeline-config",
         "-pc",
-        help="Override pipeline config values as key=value pairs (e.g. --pipeline-config speaker=serena)",
+        help=(
+            "Override one or more pipeline config fields as key=value pairs. "
+            "The value is parsed as a string; Pydantic coerces it to the field's "
+            "declared type when the pipeline is instantiated, so ints/floats/bools "
+            "all just work. Repeat the flag for multiple overrides. Examples: "
+            "`-pc speaker=serena`, `-pc seed=42 -pc temperature=0.7`, "
+            "`-pc force_language=true`."
+        ),
     ),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output"),
 ) -> None:

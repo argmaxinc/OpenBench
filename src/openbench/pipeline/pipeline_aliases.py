@@ -673,13 +673,13 @@ def register_pipeline_aliases() -> None:
             "temperature": 0.9,
             "top_k": 50,
             "max_new_tokens": 245,
-            "transcription_cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
-            "transcription_repo_id": "argmaxinc/parakeetkit-pro",
-            "transcription_model_variant": "nvidia_parakeet-v2_476MB",
         },
-        description="WhisperKit speech generation pipeline. Generates audio from text prompts using whisperkit-cli TTS, "
-        "then transcribes the generated audio to compute WER against the original prompt. "
-        "Requires `WHISPERKIT_CLI_PATH` env var pointing to the whisperkit-cli binary.",
+        description=(
+            "WhisperKit speech-generation pipeline. Synthesizes audio from text prompts via whisperkit-cli TTS. "
+            "WER is computed by `SpeechGenerationWordErrorRate`, which transcribes the generated audio with "
+            "WhisperKitPro / parakeet-v2 by default and compares against the original prompt. "
+            "Requires `WHISPERKIT_CLI_PATH` for TTS; the default WER metric also requires `WHISPERKITPRO_CLI_PATH`."
+        ),
     )
 
     ################# STREAMING TRANSCRIPTION PIPELINES #################

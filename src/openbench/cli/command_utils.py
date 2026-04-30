@@ -16,6 +16,49 @@ def get_available_pipelines() -> list[str]:
     return PipelineRegistry.list_pipelines()
 
 
+def parse_pipeline_config_overrides(items: list[str] | None) -> dict[str, str]:
+    """Parse a list of `key=value` strings into a config-override dict.
+
+    Values are kept as raw strings. Pydantic performs the actual type
+    coercion when the pipeline config is built — so e.g. `seed=10`,
+    `temperature=0.9`, and `force_language=true` all work as expected
+    against a `SpeechGenerationConfig` (or any other Pydantic config),
+    because Pydantic's lax mode parses ints, floats, and the standard
+    boolean spellings ("true"/"false"/"yes"/"no"/"1"/"0", case-insensitive)
+    from strings. Quote arguments that contain spaces.
+
+    Examples:
+        --pipeline-config speaker=serena
+        --pipeline-config seed=42 -pc temperature=0.7
+        --pipeline-config force_language=true
+
+    Args:
+        items: The raw values typer collected for `--pipeline-config`,
+            or `None` if the flag wasn't passed.
+
+    Returns:
+        Dict mapping config keys to (string) values. Empty if `items`
+        is `None` or empty.
+
+    Raises:
+        typer.BadParameter: If any item is missing the `=` separator,
+            or has an empty key.
+    """
+    overrides: dict[str, str] = {}
+    if not items:
+        return overrides
+
+    for item in items:
+        if "=" not in item:
+            raise typer.BadParameter(f"Invalid --pipeline-config format: '{item}'. Expected key=value (e.g. seed=42)")
+        key, value = item.split("=", 1)
+        key = key.strip()
+        if not key:
+            raise typer.BadParameter(f"Invalid --pipeline-config format: '{item}'. Empty key before '='.")
+        overrides[key] = value
+    return overrides
+
+
 def get_available_datasets() -> list[str]:
     """Get list of available dataset aliases."""
     return DatasetRegistry.list_aliases()

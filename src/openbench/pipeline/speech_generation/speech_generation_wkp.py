@@ -1,45 +1,91 @@
 # For licensing see accompanying LICENSE.md file.
 # Copyright (C) 2025 Argmax, Inc. All Rights Reserved.
 
-"""
-Speech generation pipeline using WhisperKit CLI.
+"""Speech-generation pipeline using the WhisperKit CLI.
 
-Generates TTS audio from text prompts, then transcribes
-the generated audio back to text for WER evaluation
-against the original prompt.
+The pipeline shells out to `whisperkit-cli tts` to synthesize a WAV from
+a text prompt and returns a `GeneratedAudio` prediction containing the
+file path and the measured duration. Transcription / WER scoring is
+performed by the `SpeechGenerationWordErrorRate` metric, not here, so
+the pipeline's reported `prediction_time` reflects TTS only.
 """
 
-import json
 import subprocess
-import time
 from pathlib import Path
 from typing import Callable
 
+import librosa
 from argmaxtools.utils import get_logger
 from pydantic import BaseModel, Field
 
-from ...dataset.dataset_base import BaseSample
-from ...dataset.dataset_speech_generation import (
-    SpeechGenerationSample,
-)
-from ...engine.whisperkitpro_engine import (
-    WhisperKitPro,
-    WhisperKitProConfig,
-    WhisperKitProInput,
-)
-from ...pipeline_prediction import Transcript
+from ...dataset.dataset_speech_generation import SpeechGenerationSample
+from ...pipeline_prediction import GeneratedAudio
 from ..base import (
     Pipeline,
+    PipelineConfig,
     PipelineOutput,
     PipelineType,
     register_pipeline,
 )
-from .common import SpeechGenerationConfig, SpeechGenerationOutput
 
 
 logger = get_logger(__name__)
 
 TEMP_TTS_AUDIO_DIR = Path("./temp_tts_audio")
+
+
+class WhisperKitSpeechGenerationConfig(PipelineConfig):
+    """Config for the WhisperKit speech-generation pipeline.
+
+    All fields are specific to whisperkit-cli; we don't currently share
+    anything across TTS providers, so this config lives next to the
+    pipeline rather than under a common base.
+    """
+
+    cli_path: str = Field(
+        ...,
+        description="Path to the whisperkit-cli binary (used for TTS generation).",
+    )
+    speaker: str = Field(
+        default="aiden",
+        description="Speaker voice for TTS generation.",
+    )
+    language: str = Field(
+        default="english",
+        description="Language for TTS generation.",
+    )
+    seed: int | None = Field(
+        default=None,
+        description="Random seed for reproducible output.",
+    )
+    temperature: float = Field(
+        default=0.9,
+        description="Sampling temperature for TTS.",
+    )
+    top_k: int = Field(
+        default=50,
+        description="Top-k sampling for TTS.",
+    )
+    max_new_tokens: int = Field(
+        default=245,
+        description="Max RVQ frames to generate.",
+    )
+    models_path: str | None = Field(
+        default=None,
+        description="Local model directory for TTS.",
+    )
+    model_repo: str | None = Field(
+        default=None,
+        description="HF repo for TTS model download.",
+    )
+    version_dir: str | None = Field(
+        default=None,
+        description="TTS model version directory.",
+    )
+    tokenizer: str | None = Field(
+        default=None,
+        description="HF tokenizer repo or local path.",
+    )
 
 
 class SpeechGenerationInput(BaseModel):
@@ -51,42 +97,37 @@ class SpeechGenerationInput(BaseModel):
     )
     audio_name: str = Field(
         ...,
-        description=("Unique identifier for this sample (used for temp file naming)."),
+        description="Unique identifier for this sample (used for temp file naming).",
     )
 
 
 @register_pipeline
 class WhisperKitSpeechGenerationPipeline(Pipeline):
-    """Speech generation pipeline using WhisperKit CLI.
+    """Speech-generation pipeline using the WhisperKit CLI.
 
-    This pipeline:
-    1. Generates audio from text via whisperkit-cli tts
-    2. Transcribes audio via WhisperKitPro engine
-    3. Returns transcription as Transcript for WER eval
-    4. Cleans up temporary audio and report files
+    For each sample, the pipeline:
+
+    1. Builds a `whisperkit-cli tts` invocation from the config.
+    2. Synthesizes the WAV to a temp directory under cwd.
+    3. Measures the duration via librosa.
+    4. Returns a `GeneratedAudio` prediction (path + duration).
+
+    The generated WAV is left in place so the WER metric can transcribe
+    it and the wandb logger can copy it into the predictions artifact.
+    On TTS failure the partial WAV (if any) is removed so the temp dir
+    doesn't accumulate stale files across retries.
     """
 
-    _config_class = SpeechGenerationConfig
+    _config_class = WhisperKitSpeechGenerationConfig
     pipeline_type = PipelineType.SPEECH_GENERATION
 
-    def build_pipeline(
-        self,
-    ) -> Callable[[SpeechGenerationInput], Transcript]:
+    def build_pipeline(self) -> Callable[[SpeechGenerationInput], GeneratedAudio]:
         config = self.config
-        pipeline_ref = self
 
-        # Build the WhisperKitPro engine for transcription
-        # (downloads model once, reuses for all samples)
-        transcription_engine = self._build_transcription_engine()
-
-        def generate_and_transcribe(
-            input: SpeechGenerationInput,
-        ) -> Transcript:
+        def generate(input: SpeechGenerationInput) -> GeneratedAudio:
             TEMP_TTS_AUDIO_DIR.mkdir(parents=True, exist_ok=True)
-
             audio_path = TEMP_TTS_AUDIO_DIR / f"{input.audio_name}.wav"
 
-            # -- Step 1: Generate audio via TTS --
             tts_cmd = [
                 config.cli_path,
                 "tts",
@@ -105,7 +146,6 @@ class WhisperKitSpeechGenerationPipeline(Pipeline):
                 "--max-new-tokens",
                 str(config.max_new_tokens),
             ]
-
             if config.seed is not None:
                 tts_cmd.extend(["--seed", str(config.seed)])
             if config.models_path is not None:
@@ -119,139 +159,41 @@ class WhisperKitSpeechGenerationPipeline(Pipeline):
 
             logger.debug(f"Running TTS: {' '.join(tts_cmd)}")
 
-            tts_result = subprocess.run(tts_cmd, capture_output=True, text=True)
-
-            if tts_result.returncode != 0:
-                raise RuntimeError(
-                    "whisperkit-cli tts failed "
-                    f"(exit {tts_result.returncode}):\n"
-                    f"  stdout: "
-                    f"{tts_result.stdout[:500]}\n"
-                    f"  stderr: "
-                    f"{tts_result.stderr[:500]}"
-                )
-
-            if not audio_path.exists():
-                raise RuntimeError(f"TTS completed but audio file not found at {audio_path}")
-
-            logger.info(f"Generated TTS audio: {audio_path}")
-
-            # -- Step 2: Read audio duration before
-            #    transcription (engine may delete file) --
             try:
-                import soundfile as sf
+                tts_result = subprocess.run(tts_cmd, capture_output=True, text=True)
+                if tts_result.returncode != 0:
+                    raise RuntimeError(
+                        "whisperkit-cli tts failed "
+                        f"(exit {tts_result.returncode}):\n"
+                        f"  stdout: {tts_result.stdout[:500]}\n"
+                        f"  stderr: {tts_result.stderr[:500]}"
+                    )
+                if not audio_path.exists():
+                    raise RuntimeError(f"TTS completed but audio file not found at {audio_path}")
 
-                info = sf.info(str(audio_path))
-                pipeline_ref._last_generated_duration = info.duration
-            except Exception as e:
-                logger.warning(f"WAV duration read failed: {e}")
-                pipeline_ref._last_generated_duration = None
+                duration = float(librosa.get_duration(path=str(audio_path)))
+                logger.info(f"Generated TTS audio: {audio_path} ({duration:.2f}s)")
 
-            # -- Step 3: Transcribe via WhisperKitPro --
-            engine_input = WhisperKitProInput(
-                audio_path=audio_path,
-                keep_audio=False,
-            )
-            engine_output = transcription_engine(engine_input)
-
-            # -- Step 4: Parse transcription report --
-            json_path = engine_output.json_report_path
-            if json_path.exists():
-                with json_path.open("r") as f:
-                    data = json.load(f)
-                all_words, all_starts, all_ends = (
-                    [],
-                    [],
-                    [],
+                return GeneratedAudio(
+                    audio_path=str(audio_path),
+                    duration=duration,
                 )
-                for seg in data.get("segments", []):
-                    for w in seg.get("words", []):
-                        all_words.append(w["word"])
-                        if "start" in w:
-                            all_starts.append(w["start"])
-                        if "end" in w:
-                            all_ends.append(w["end"])
-                transcript = Transcript.from_words_info(
-                    words=all_words,
-                    start=(all_starts if all_starts else None),
-                    end=(all_ends if all_ends else None),
-                )
-                # Clean up report files
-                json_path.unlink(missing_ok=True)
-                srt_path = engine_output.srt_report_path
-                if srt_path:
-                    srt_path.unlink(missing_ok=True)
-            else:
-                raise RuntimeError(f"Transcription report not found at {json_path}")
+            except Exception:
+                # On any failure during synthesis or duration probing,
+                # clean up the partial WAV so the temp dir doesn't grow.
+                audio_path.unlink(missing_ok=True)
+                raise
 
-            logger.info("Transcription: " + transcript.get_transcript_string()[:100] + "...")
-
-            return transcript
-
-        return generate_and_transcribe
-
-    def _build_transcription_engine(self) -> WhisperKitPro:
-        """Create WhisperKitPro engine for transcription.
-
-        Uses the same engine as the dedicated
-        WhisperKitPro transcription pipelines, which
-        handles model download, caching, and CLI args.
-        """
-        config = self.config
-        cli_path = config.transcription_cli_path or config.cli_path
-
-        import coremltools as ct
-
-        engine_config = WhisperKitProConfig(
-            repo_id=config.transcription_repo_id,
-            model_variant=config.transcription_model_variant,
-            model_dir=config.transcription_model_path,
-            word_timestamps=config.transcription_word_timestamps,
-            chunking_strategy=config.transcription_chunking_strategy,
-            audio_encoder_compute_units=ct.ComputeUnit.CPU_AND_NE,
-            text_decoder_compute_units=ct.ComputeUnit.CPU_AND_NE,
-        )
-
-        return WhisperKitPro(
-            cli_path=cli_path,
-            transcription_config=engine_config,
-        )
-
-    def __call__(self, input_sample: BaseSample) -> PipelineOutput:
-        """Run pipeline and set generated audio duration.
-
-        Overrides base __call__ to propagate the real
-        TTS audio duration back onto the sample so the
-        runner reports accurate audio_duration and
-        speed_factor values.
-        """
-        self._last_generated_duration: float | None = None
-        parsed_input = self.parse_input(input_sample)
-        start_time = time.perf_counter()
-        output = self.pipeline(parsed_input)
-        end_time = time.perf_counter()
-        prediction_time = end_time - start_time
-        parsed_output = self.parse_output(output)
-        if parsed_output.prediction_time is None:
-            parsed_output.prediction_time = prediction_time
-
-        # Propagate generated audio duration to sample
-        dur = self._last_generated_duration
-        logger.debug(f"Generated audio duration: {dur}s")
-        if isinstance(input_sample, SpeechGenerationSample) and dur is not None:
-            input_sample.generated_audio_duration = dur
-            logger.debug(f"Set sample duration to {input_sample.generated_audio_duration}s")
-
-        return parsed_output
+        return generate
 
     def parse_input(self, input_sample: SpeechGenerationSample) -> SpeechGenerationInput:
-        """Extract text prompt from the sample."""
+        """Extract the text prompt and a stable identifier from the sample."""
         text = input_sample.reference.get_transcript_string()
         return SpeechGenerationInput(
             text=text,
             audio_name=input_sample.audio_name,
         )
 
-    def parse_output(self, output: Transcript) -> SpeechGenerationOutput:
-        """Wrap transcription into output."""
-        return SpeechGenerationOutput(prediction=output)
+    def parse_output(self, output: GeneratedAudio) -> PipelineOutput[GeneratedAudio]:
+        """Wrap the generated audio in a `PipelineOutput`."""
+        return PipelineOutput[GeneratedAudio](prediction=output)
