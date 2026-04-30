@@ -127,7 +127,11 @@ class BenchmarkRunner:
 
         for metric_name, metric in metrics_dict.items():
             reference = sample.reference
-            kwargs = sample.extra_info
+            kwargs = dict(sample.extra_info)
+
+            # Use metric_keywords for metric calculation if available, falling back to dictionary
+            if "metric_keywords" in kwargs:
+                kwargs["dictionary"] = kwargs.pop("metric_keywords")
 
             # The metric returns a dictionary that is also stored in the metric object as a state to compute the global result
             # We copy to avoid any side effects that may happen while interacting with dictionary for reporting
@@ -256,10 +260,15 @@ class BenchmarkRunner:
             # Update metric with all results
             for sample_result in per_sample_results:
                 sample = dataset[sample_result.sample_id]
-                # Get UEM from extra_info if available
                 kwargs = {}
-                if hasattr(sample, "extra_info") and "uem" in sample.extra_info:
-                    kwargs["uem"] = sample.extra_info["uem"]
+                if hasattr(sample, "extra_info"):
+                    if "uem" in sample.extra_info:
+                        kwargs["uem"] = sample.extra_info["uem"]
+                    # Use metric_keywords for metric calculation if available, falling back to dictionary
+                    if "metric_keywords" in sample.extra_info:
+                        kwargs["dictionary"] = sample.extra_info["metric_keywords"]
+                    elif "dictionary" in sample.extra_info:
+                        kwargs["dictionary"] = sample.extra_info["dictionary"]
 
                 metric(hypothesis=sample_result.prediction, reference=sample.reference, detailed=True, **kwargs)
 

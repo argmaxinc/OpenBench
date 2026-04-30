@@ -491,6 +491,20 @@ def register_pipeline_aliases() -> None:
     )
 
     PipelineRegistry.register_alias(
+        "whisperkitpro-local-model",
+        WhisperKitProTranscriptionPipeline,
+        default_config={
+            "model_dir": os.getenv("WHISPERKITPRO_LOCAL_MODEL_PATH"),
+            "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
+        },
+        description=(
+            "WhisperKitPro transcription using only a local model directory (no default Hugging Face repo). "
+            "Set `WHISPERKITPRO_LOCAL_MODEL_PATH` to the folder passed as `--model-path` on the CLI; it must exist. "
+            "Requires `WHISPERKITPRO_CLI_PATH` and may require `WHISPERKITPRO_API_KEY`."
+        ),
+    )
+
+    PipelineRegistry.register_alias(
         "groq-whisper-large-v3-turbo",
         GroqTranscriptionPipeline,
         default_config={
