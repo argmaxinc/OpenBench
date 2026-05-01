@@ -22,10 +22,10 @@ def parse_pipeline_config_overrides(items: list[str] | None) -> dict[str, str]:
     Values are kept as raw strings. Pydantic performs the actual type
     coercion when the pipeline config is built — so e.g. `seed=10`,
     `temperature=0.9`, and `force_language=true` all work as expected
-    against a `SpeechGenerationConfig` (or any other Pydantic config),
-    because Pydantic's lax mode parses ints, floats, and the standard
-    boolean spellings ("true"/"false"/"yes"/"no"/"1"/"0", case-insensitive)
-    from strings. Quote arguments that contain spaces.
+    against the pipeline's Pydantic config, because Pydantic's lax mode
+    parses ints, floats, and the standard boolean spellings
+    ("true"/"false"/"yes"/"no"/"1"/"0", case-insensitive) from strings.
+    Quote arguments that contain spaces.
 
     Examples:
         --pipeline-config speaker=serena
