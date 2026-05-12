@@ -360,11 +360,11 @@ def register_pipeline_aliases() -> None:
         default_config={
             "out_dir": "./argmax_oss_orchestration_reports",
             "model_version": "tiny",
-            "word_timestamps": True,
+            "word_timestamps": False,
             "chunking_strategy": "vad",
         },
-        description="Argmax SDK (OSS): `argmax-cli` diarize then transcribe, speaker labels merged by word timing. "
-        "Cache: ARGMAX_OSS_CACHE_DIR or default; optional `cli_path`.",
+        description="Argmax SDK (OSS): `argmax-cli transcribe --diarization` with verbose RTTM-like diarization log "
+        "as the transcript (word + speaker per token). Cache: ARGMAX_OSS_CACHE_DIR or default; optional `cli_path`.",
     )
 
     ################# TRANSCRIPTION PIPELINES #################

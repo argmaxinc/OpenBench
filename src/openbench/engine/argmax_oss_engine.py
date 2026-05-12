@@ -15,7 +15,7 @@ from pydantic import BaseModel, Field
 
 logger = get_logger(__name__)
 
-ARGMAX_OSS_REPO_URL = "https://github.com/argmaxinc/argmax-oss-swift.git"
+ARGMAX_OSS_REPO_URL = "https://github.com/argmaxinc/argmax-oss-swift"
 ARGMAX_OSS_PRODUCT = "argmax-cli"
 DEFAULT_CACHE_SUBDIR = Path(".cache") / "openbench" / "argmax-oss"
 
@@ -61,6 +61,10 @@ class TranscriptionCliOutput(BaseModel):
 
     json_report_path: Path = Field(..., description="JSON report path")
     srt_report_path: Path = Field(..., description="SRT report path")
+    cli_combined_output: str | None = Field(
+        default=None,
+        description="Concatenated stdout+stderr when transcribe was run with capture_combined_output=True.",
+    )
 
 
 class DiarizeCliInput(BaseModel):
@@ -140,6 +144,7 @@ class ArgmaxOpenSourceEngine:
         input: TranscriptionCliInput,
         transcription_args: list[str],
         report_dir: Path,
+        capture_combined_output: bool = False,
     ) -> TranscriptionCliOutput:
         """Run `argmax-cli transcribe` with pre-built flag list (see transcription config)."""
         cmd = [
@@ -154,17 +159,25 @@ class ArgmaxOpenSourceEngine:
 
         logger.debug("Argmax OSS transcribe: %s", cmd)
         try:
-            subprocess.run(cmd, check=True, capture_output=True, text=True)
+            result = subprocess.run(cmd, check=True, capture_output=True, text=True)
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"argmax-cli transcribe failed: {e.stderr}") from e
 
         json_report_path = report_dir / f"{input.audio_path.stem}.json"
         srt_report_path = report_dir / f"{input.audio_path.stem}.srt"
 
+        cli_combined_output: str | None = None
+        if capture_combined_output:
+            cli_combined_output = (result.stdout or "") + (result.stderr or "")
+
         if not input.keep_audio:
             input.audio_path.unlink(missing_ok=True)
 
-        return TranscriptionCliOutput(json_report_path=json_report_path, srt_report_path=srt_report_path)
+        return TranscriptionCliOutput(
+            json_report_path=json_report_path,
+            srt_report_path=srt_report_path,
+            cli_combined_output=cli_combined_output,
+        )
 
     def diarize(self, input: DiarizeCliInput, diarize_args: list[str]) -> DiarizeCliOutput:
         """Run `argmax-cli diarize` with pre-built flag list (see diarization config)."""

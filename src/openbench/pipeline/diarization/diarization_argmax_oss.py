@@ -43,8 +43,10 @@ class ArgmaxOpenSourceDiarizationConfig(DiarizationPipelineConfig):
     commit_hash: str | None = Field(default=None, description="Optional git commit pin for the clone.")
     cli_path: str | None = Field(default=None, description="Prebuilt argmax-cli path; skips clone/build.")
     model_path: str | None = Field(default=None, description="--model-path (local diarization models).")
-    model_repo: str | None = Field(default=None, description="--model-repo (HuggingFace).")
-    model_token: str | None = Field(default=None, description="--model-token (optional; scrubbed from errors).")
+    model_repo: str | None = Field(
+        default=None,
+        description="--model-repo (HuggingFace). For auth, rely on the CLI / Hugging Face env (e.g. HF_TOKEN) rather than OpenBench config.",
+    )
     download_model_path: str | None = Field(default=None, description="--download-model-path.")
     cluster_distance_threshold: float | None = Field(
         default=None,
@@ -64,8 +66,6 @@ class ArgmaxOpenSourceDiarizationConfig(DiarizationPipelineConfig):
             args.extend(["--model-path", self.model_path])
         if self.model_repo:
             args.extend(["--model-repo", self.model_repo])
-        if self.model_token:
-            args.extend(["--model-token", self.model_token])
         if self.download_model_path:
             args.extend(["--download-model-path", self.download_model_path])
         if self.cluster_distance_threshold is not None:
