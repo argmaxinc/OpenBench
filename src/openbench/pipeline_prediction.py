@@ -3,7 +3,9 @@
 
 import json
 import os
+import shutil
 from collections import defaultdict
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -235,6 +237,48 @@ class Transcript(BaseModel):
         df = pd.DataFrame(data)
         df.to_csv(path, index=False)
         return path
+
+
+# Speech Generation Prediction
+class GeneratedAudio(BaseModel):
+    """Prediction produced by speech-generation pipelines.
+
+    Wraps the generated audio file path together with measured duration so
+    that downstream metrics (which transcribe the audio) and the runner
+    (which reports speed factor) can both consume it without reading the
+    waveform twice.
+    """
+
+    audio_path: str = Field(
+        ...,
+        description="Path to the generated audio file on disk (typically a WAV).",
+    )
+    duration: float = Field(
+        ...,
+        description="Duration of the generated audio in seconds.",
+    )
+    sample_rate: int | None = Field(
+        None,
+        description="Sample rate of the generated audio in Hz, if known.",
+    )
+
+    def to_annotation_file(self, output_dir: str, filename: str) -> str:
+        """Persist the generated audio under output_dir as `{filename}.wav`.
+
+        The original `audio_path` is left intact (often a temp file managed
+        by the pipeline / metric); we copy rather than move so cleanup
+        responsibilities stay with the producer.
+        """
+        src = Path(self.audio_path)
+        suffix = src.suffix or ".wav"
+        dst = Path(output_dir) / f"{filename}{suffix}"
+        if not src.exists():
+            raise FileNotFoundError(
+                f"Cannot serialize GeneratedAudio: source {src} no longer exists "
+                "(was it deleted by an upstream cleanup step before serialization?)"
+            )
+        shutil.copyfile(src, dst)
+        return str(dst)
 
 
 # NOTE: StreamingTranscript is used only as output of pipelines. The reference for streaming transcript is of type Transcript.

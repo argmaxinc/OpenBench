@@ -28,10 +28,14 @@ class MetricRegistry:
     """Registry for metrics by pipeline type.
 
     This registry allows registering and retrieving metrics based on pipeline type.
-    Each metric can be supported by multiple pipeline types.
+    The same MetricOption (e.g. WER) can map to different metric classes for
+    different pipeline types — for example a SPEECH_GENERATION pipeline can register
+    a WER implementation that first transcribes generated audio, while
+    TRANSCRIPTION uses the standard transcript-vs-transcript implementation.
     """
 
-    _metrics: ClassVar[dict[MetricOptions, dict[str, tuple[PipelineType, ...] | Type[BaseMetric]]]] = {}
+    # Pipeline type -> Metric option -> Metric class
+    _metrics: ClassVar[dict[PipelineType, dict[MetricOptions, Type[BaseMetric]]]] = {}
 
     @classmethod
     def register(
@@ -51,10 +55,8 @@ class MetricRegistry:
         if isinstance(pipeline_types, PipelineType):
             pipeline_types = (pipeline_types,)
 
-        cls._metrics[metric_option] = {
-            "supported_pipelines": pipeline_types,
-            "metric_class": metric_class,
-        }
+        for pipeline_type in pipeline_types:
+            cls._metrics.setdefault(pipeline_type, {})[metric_option] = metric_class
 
     @classmethod
     def register_metric(
@@ -97,10 +99,11 @@ class MetricRegistry:
         return decorator
 
     @classmethod
-    def get_metric(cls, metric_option: MetricOptions, **kwargs) -> BaseMetric:
+    def get_metric(cls, pipeline_type: PipelineType, metric_option: MetricOptions, **kwargs) -> BaseMetric:
         """Get a metric instance for a specific pipeline type and metric option.
 
         Args:
+            pipeline_type: The pipeline type the metric is being requested for
             metric_option: The metric option to get
             **kwargs: Additional arguments to pass to the metric constructor
 
@@ -108,13 +111,13 @@ class MetricRegistry:
             An instance of the requested metric
 
         Raises:
-            KeyError: If the metric is not registered or not supported for the given pipeline type
+            KeyError: If the metric is not registered for the given pipeline type
         """
-        if metric_option not in cls._metrics:
-            raise KeyError(f"Metric {metric_option} not registered")
+        pipeline_metrics = cls._metrics.get(pipeline_type)
+        if pipeline_metrics is None or metric_option not in pipeline_metrics:
+            raise KeyError(f"Metric {metric_option} not registered for pipeline type {pipeline_type}")
 
-        metric_info = cls._metrics[metric_option]
-        return metric_info["metric_class"](**kwargs)
+        return pipeline_metrics[metric_option](**kwargs)
 
     @classmethod
     def get_available_metrics(cls, pipeline_type: PipelineType) -> list[MetricOptions]:
@@ -126,11 +129,7 @@ class MetricRegistry:
         Returns:
             List of available metric options
         """
-        return [
-            metric_option
-            for metric_option, metric_info in cls._metrics.items()
-            if pipeline_type in metric_info["supported_pipelines"]
-        ]
+        return list(cls._metrics.get(pipeline_type, {}).keys())
 
 
 # Register all existing and interesting metrics from pyannote.metrics

@@ -6,7 +6,7 @@ from typing import Generic, TypeVar, Union
 import numpy as np
 from pydantic import BaseModel, Field
 
-from ..pipeline_prediction import DiarizationAnnotation, StreamingTranscript, Transcript
+from ..pipeline_prediction import DiarizationAnnotation, GeneratedAudio, StreamingTranscript, Transcript
 from ..types import PredictionProtocol
 
 
@@ -68,6 +68,15 @@ class TranscriptionSampleResult(BaseSampleResult[Union[Transcript, StreamingTran
     """
 
 
+class SpeechGenerationSampleResult(BaseSampleResult[GeneratedAudio]):
+    """The speech-generation result for a given sample of a dataset.
+
+    The prediction is the generated audio (path + duration). The
+    transcription used to compute WER is internal to the metric and
+    surfaces only via TaskResult.detailed_result, not on this row.
+    """
+
+
 class TaskResult(BaseModel):
     """The evaluation result for a given task on a given sample of a dataset"""
 
@@ -101,7 +110,7 @@ class GlobalResult(BaseModel):
 
 
 class BenchmarkResult(BaseModel):
-    sample_results: list[DiarizationSampleResult | TranscriptionSampleResult] = Field(
+    sample_results: list[DiarizationSampleResult | TranscriptionSampleResult | SpeechGenerationSampleResult] = Field(
         ..., description="The results of the samples"
     )
     task_results: list[TaskResult] = Field(..., description="The results of the tasks")
