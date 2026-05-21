@@ -6,6 +6,7 @@
 import os
 
 from .diarization import (
+    ArgmaxOpenSourceDiarizationPipeline,
     AWSTranscribePipeline,
     DeepgramDiarizationPipeline,
     ElevenLabsDiarizationPipeline,
@@ -16,6 +17,7 @@ from .diarization import (
     SpeakerKitPipeline,
 )
 from .orchestration import (
+    ArgmaxOpenSourceOrchestrationPipeline,
     DeepgramOrchestrationPipeline,
     ElevenLabsOrchestrationPipeline,
     NeMoMTParakeetPipeline,
@@ -36,6 +38,7 @@ from .streaming_transcription import (
     OpenAIStreamingPipeline,
 )
 from .transcription import (
+    ArgmaxOpenSourceTranscriptionPipeline,
     AssemblyAITranscriptionPipeline,
     DeepgramTranscriptionPipeline,
     ElevenLabsTranscriptionPipeline,
@@ -45,7 +48,6 @@ from .transcription import (
     PyannoteTranscriptionPipeline,
     SpeechAnalyzerPipeline,
     WhisperKitProTranscriptionPipeline,
-    WhisperKitTranscriptionPipeline,
     WhisperOSSTranscriptionPipeline,
 )
 
@@ -115,9 +117,36 @@ def register_pipeline_aliases() -> None:
         default_config={
             "out_dir": "./speakerkit-report",
             "cli_path": os.getenv("SPEAKERKIT_CLI_PATH"),
-            "clusterer_version": "pyannote4",
+            "engine": "pyannote",
         },
-        description="SpeakerKit speaker diarization pipeline. Requires CLI installation and API key. Set `SPEAKERKIT_CLI_PATH` and `SPEAKERKIT_API_KEY` env vars. For access to the CLI binary contact speakerkitpro@argmaxinc.com",
+        description="SpeakerKit speaker diarization pipeline using community-1 model from pyannote. Requires CLI installation and API key. Set `SPEAKERKIT_CLI_PATH` and `SPEAKERKIT_API_KEY` env vars. For access to the CLI binary contact speakerkitpro@argmaxinc.com",
+    )
+
+    PipelineRegistry.register_alias(
+        "speakerkit-sortformer-compressed",
+        SpeakerKitPipeline,
+        default_config={
+            "out_dir": "./speakerkit-sortformer-report",
+            "cli_path": os.getenv("SPEAKERKIT_CLI_PATH"),
+            "engine": "sortformer",
+        },
+        description=(
+            "SpeakerKit speaker diarization pipeline using Sortformer model compressed to 94MB. Requires CLI installation and API key. "
+            "Set `SPEAKERKIT_CLI_PATH` and `SPEAKERKIT_API_KEY` env vars. For access to the CLI binary contact speakerkitpro@argmaxinc.com."
+        ),
+    )
+
+    PipelineRegistry.register_alias(
+        "argmax-oss-diarization",
+        ArgmaxOpenSourceDiarizationPipeline,
+        default_config={
+            "out_dir": "./argmax_oss_diarization_reports",
+        },
+        description=(
+            "Argmax SDK open-source diarization via `argmax-cli diarize`. "
+            "Clone/build under ARGMAX_OSS_CACHE_DIR (default ~/.cache/openbench/argmax-oss) unless `cli_path` is set."
+            "Uses pyannote's community-1 model for diarization."
+        ),
     )
 
     PipelineRegistry.register_alias(
@@ -206,8 +235,8 @@ def register_pipeline_aliases() -> None:
             "repo_id": "argmaxinc/whisperkit-pro",
             "model_variant": "openai_whisper-tiny",
             "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
-            "orchestration_strategy": "segment",
-            "clusterer_version_string": "pyannote4",
+            "orchestration_strategy": "subsegment",
+            "engine": "pyannote",
             "use_exclusive_reconciliation": True,
         },
         description="WhisperKitPro orchestration pipeline using the tiny version of the model. Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
@@ -220,8 +249,8 @@ def register_pipeline_aliases() -> None:
             "repo_id": "argmaxinc/whisperkit-pro",
             "model_variant": "openai_whisper-large-v3",
             "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
-            "orchestration_strategy": "segment",
-            "clusterer_version_string": "pyannote4",
+            "orchestration_strategy": "subsegment",
+            "engine": "pyannote",
             "use_exclusive_reconciliation": True,
         },
         description="WhisperKitPro orchestration pipeline using the large-v3 version of the model. Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
@@ -234,8 +263,8 @@ def register_pipeline_aliases() -> None:
             "repo_id": "argmaxinc/whisperkit-pro",
             "model_variant": "openai_whisper-large-v3-v20240930",
             "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
-            "orchestration_strategy": "segment",
-            "clusterer_version_string": "pyannote4",
+            "orchestration_strategy": "subsegment",
+            "engine": "pyannote",
             "use_exclusive_reconciliation": True,
         },
         description="WhisperKitPro orchestration pipeline using the large-v3-v20240930 version of the model (which is the same as large-v3-turbo from OpenAI). Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
@@ -248,8 +277,8 @@ def register_pipeline_aliases() -> None:
             "repo_id": "argmaxinc/whisperkit-pro",
             "model_variant": "openai_whisper-large-v3-v20240930_626MB",
             "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
-            "orchestration_strategy": "segment",
-            "clusterer_version_string": "pyannote4",
+            "orchestration_strategy": "subsegment",
+            "engine": "pyannote",
             "use_exclusive_reconciliation": True,
         },
         description="WhisperKitPro orchestration pipeline using the large-v3-v20240930 version of the model compressed to 626MB (which is the same as large-v3-turbo from OpenAI). Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
@@ -262,8 +291,8 @@ def register_pipeline_aliases() -> None:
             "repo_id": "argmaxinc/parakeetkit-pro",
             "model_variant": "nvidia_parakeet-v2",
             "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
-            "orchestration_strategy": "segment",
-            "clusterer_version_string": "pyannote4",
+            "orchestration_strategy": "subsegment",
+            "engine": "pyannote",
             "use_exclusive_reconciliation": True,
         },
         description="WhisperKitPro orchestration pipeline using the parakeet-v2 version of the model. Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
@@ -276,11 +305,28 @@ def register_pipeline_aliases() -> None:
             "repo_id": "argmaxinc/parakeetkit-pro",
             "model_variant": "nvidia_parakeet-v2_476MB",
             "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
-            "orchestration_strategy": "segment",
-            "clusterer_version_string": "pyannote4",
+            "orchestration_strategy": "subsegment",
+            "engine": "pyannote",
             "use_exclusive_reconciliation": True,
         },
         description="WhisperKitPro orchestration pipeline using the parakeet-v2 version of the model compressed to 476MB. Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
+    )
+
+    PipelineRegistry.register_alias(
+        "whisperkitpro-orchestration-parakeet-v2-compressed-sortformer-compressed",
+        WhisperKitProOrchestrationPipeline,
+        default_config={
+            "repo_id": "argmaxinc/parakeetkit-pro",
+            "model_variant": "nvidia_parakeet-v2_476MB",
+            "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
+            "orchestration_strategy": "subsegment",
+            "engine": "sortformer",
+            "diarization_mode": "prerecorded",
+        },
+        description=(
+            "WhisperKitPro orchestration pipeline using the parakeet-v2 version of the model compressed to 476MB and using Sortformer for diarization. "
+            "Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var."
+        ),
     )
 
     PipelineRegistry.register_alias(
@@ -290,8 +336,8 @@ def register_pipeline_aliases() -> None:
             "repo_id": "argmaxinc/parakeetkit-pro",
             "model_variant": "nvidia_parakeet-v3",
             "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
-            "orchestration_strategy": "segment",
-            "clusterer_version_string": "pyannote4",
+            "orchestration_strategy": "subsegment",
+            "engine": "pyannote",
             "use_exclusive_reconciliation": True,
         },
         description="WhisperKitPro orchestration pipeline using the parakeet-v3 version of the model. Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
@@ -304,11 +350,28 @@ def register_pipeline_aliases() -> None:
             "repo_id": "argmaxinc/parakeetkit-pro",
             "model_variant": "nvidia_parakeet-v3_494MB",
             "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
-            "orchestration_strategy": "segment",
-            "clusterer_version_string": "pyannote4",
+            "orchestration_strategy": "subsegment",
+            "engine": "pyannote",
             "use_exclusive_reconciliation": True,
         },
         description="WhisperKitPro orchestration pipeline using the parakeet-v3 version of the model compressed to 494MB. Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var.",
+    )
+
+    PipelineRegistry.register_alias(
+        "whisperkitpro-orchestration-parakeet-v3-compressed-sortformer-compressed",
+        WhisperKitProOrchestrationPipeline,
+        default_config={
+            "repo_id": "argmaxinc/parakeetkit-pro",
+            "model_variant": "nvidia_parakeet-v3_494MB",
+            "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
+            "orchestration_strategy": "subsegment",
+            "engine": "sortformer",
+            "diarization_mode": "prerecorded",
+        },
+        description=(
+            "WhisperKitPro orchestration pipeline using the parakeet-v3 version of the model compressed to 494MB and using Sortformer for diarization. "
+            "Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var."
+        ),
     )
 
     PipelineRegistry.register_alias(
@@ -342,39 +405,59 @@ def register_pipeline_aliases() -> None:
         description="PyannoteAI orchestration pipeline (diarization + transcription). Uses the precision-2 model with Nvidia Parakeet STT. Requires `PYANNOTE_TOKEN` env var from https://www.pyannote.ai/.",
     )
 
+    PipelineRegistry.register_alias(
+        "argmax-oss-orchestration-tiny",
+        ArgmaxOpenSourceOrchestrationPipeline,
+        default_config={
+            "out_dir": "./argmax_oss_orchestration_reports",
+            "model_version": "tiny",
+            "word_timestamps": False,
+            "chunking_strategy": "vad",
+        },
+        description="Argmax SDK (OSS): `argmax-cli transcribe --diarization` with verbose RTTM-like diarization log "
+        "as the transcript (word + speaker per token). Cache: ARGMAX_OSS_CACHE_DIR or default; optional `cli_path`.",
+    )
+
     ################# TRANSCRIPTION PIPELINES #################
 
     PipelineRegistry.register_alias(
         "whisperkit-tiny",
-        WhisperKitTranscriptionPipeline,
+        ArgmaxOpenSourceTranscriptionPipeline,
         default_config={
             "model_version": "tiny",
             "word_timestamps": True,
             "chunking_strategy": "vad",
         },
-        description="WhisperKit transcription pipeline (open-source version) using the tiny version of the model. Requires Swift and Xcode installed.",
+        description="Argmax SDK (open source) transcription via `argmax-cli` (Swift release build, not debug). Model tiny. "
+        "Cache: ARGMAX_OSS_CACHE_DIR or ~/.cache/openbench/argmax-oss unless `cli_path` is set. "
+        "For `openbench-cli evaluate`, prefer `-d earnings22-3hours` over `librispeech-200`: longer clips amortize "
+        "first-run model load so speed factor is less misleading than on very short utterances.",
     )
 
     PipelineRegistry.register_alias(
         "whisperkit-large-v3",
-        WhisperKitTranscriptionPipeline,
+        ArgmaxOpenSourceTranscriptionPipeline,
         default_config={
             "model_version": "large-v3",
             "word_timestamps": True,
             "chunking_strategy": "vad",
         },
-        description="WhisperKit transcription pipeline (open-source version) using the large-v3 version of the model. Requires Swift and Xcode installed.",
+        description="Argmax SDK (open source) transcription via `argmax-cli` (release build). Model large-v3. "
+        "Cache: ARGMAX_OSS_CACHE_DIR or default. For transcription benchmarks use `-d earnings22-3hours`; "
+        "`librispeech-200` is better reserved for quick WER smoke tests.",
     )
 
     PipelineRegistry.register_alias(
         "whisperkit-large-v3-turbo",
-        WhisperKitTranscriptionPipeline,
+        ArgmaxOpenSourceTranscriptionPipeline,
         default_config={
             "model_version": "large-v3-v20240930",
             "word_timestamps": True,
             "chunking_strategy": "vad",
         },
-        description="WhisperKit transcription pipeline (open-source version) using the large-v3-v20240930 version of the model (which is the same as large-v3-turbo from OpenAI). Requires Swift and Xcode installed.",
+        description="Argmax SDK (open source) transcription via `argmax-cli` (release build). Model large-v3-v20240930. "
+        "Cache: ARGMAX_OSS_CACHE_DIR or default. Prefer `-d earnings22-3hours` for evaluate; short LibriSpeech "
+        "clips skew speed factor because of fixed startup cost per file.",
     )
 
     PipelineRegistry.register_alias(

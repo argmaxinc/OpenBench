@@ -92,24 +92,28 @@ class WhisperKitProConfig(BaseModel):
         description="The compute units to use for the audio encoder. Default is CPU_AND_NE.",
     )
     text_decoder_compute_units: ct.ComputeUnit = Field(
-        ct.ComputeUnit.CPU_AND_GPU,
+        ct.ComputeUnit.CPU_AND_NE,
         description="The compute units to use for the text decoder. Default is CPU_AND_GPU.",
     )
     diarization: bool = Field(
         False,
         description="Whether to perform diarization",
     )
-    orchestration_strategy: Literal["word", "segment"] = Field(
-        "segment",
-        description="The orchestration strategy to use either `word` or `segment`",
+    diarization_mode: Literal["realtime", "prerecorded"] = Field(
+        "prerecorded",
+        description="Sortformer streaming mode: `realtime` (1.04s latency) or `prerecorded` (9.84s latency). This is only applicable when `engine` is `sortformer`.",
+    )
+    orchestration_strategy: Literal["segment", "subsegment"] = Field(
+        "subsegment",
+        description="The orchestration strategy to use either `segment` or `subsegment`",
     )
     speaker_models_path: str | None = Field(
         None,
         description="The path to the speaker models directory",
     )
-    clusterer_version: Literal["pyannote3", "pyannote4"] = Field(
-        "pyannote4",
-        description="The version of the clusterer to use",
+    engine: Literal["pyannote", "sortformer"] = Field(
+        "pyannote",
+        description="The engine to use. If `sortformer` the diarization model used is Sortformer, otherwise it is pyannote.",
     )
     use_exclusive_reconciliation: bool = Field(
         False,
@@ -167,6 +171,7 @@ class WhisperKitProConfig(BaseModel):
                 COMPUTE_UNITS_MAPPER[self.text_decoder_compute_units],
                 "--fast-load",
                 str(self.fast_load).lower(),
+                "--verbose",
             ]
         )
 
@@ -180,9 +185,15 @@ class WhisperKitProConfig(BaseModel):
         if self.diarization:
             args.extend(["--diarization"])
             args.extend(["--orchestration-strategy", self.orchestration_strategy])
+
             # Add rttm path
             args.extend(["--rttm-path", self.rttm_path])
-            args.extend(["--clusterer-version", self.clusterer_version])
+            args.extend(["--engine", self.engine])
+
+            # Only add diarization mode if using Sortformer
+            if self.engine == "sortformer":
+                args.extend(["--diarization-mode", self.diarization_mode])
+
             # If speaker models path is provided use it
             if self.speaker_models_path:
                 args.extend(["--speaker-models-path", self.speaker_models_path])

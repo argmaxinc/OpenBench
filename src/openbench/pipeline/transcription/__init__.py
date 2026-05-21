@@ -3,6 +3,10 @@
 
 from .apple_speech_analyzer import SpeechAnalyzerConfig, SpeechAnalyzerPipeline
 from .common import TranscriptionOutput
+from .transcription_argmax_oss import (
+    ArgmaxOpenSourceTranscriptionConfig,
+    ArgmaxOpenSourceTranscriptionPipeline,
+)
 from .transcription_assemblyai import AssemblyAITranscriptionPipeline, AssemblyAITranscriptionPipelineConfig
 from .transcription_deepgram import DeepgramTranscriptionPipeline, DeepgramTranscriptionPipelineConfig
 from .transcription_elevenlabs import ElevenLabsTranscriptionPipeline, ElevenLabsTranscriptionPipelineConfig
@@ -12,7 +16,6 @@ from .transcription_openai import OpenAITranscriptionPipeline, OpenAITranscripti
 from .transcription_oss_whisper import WhisperOSSTranscriptionPipeline, WhisperOSSTranscriptionPipelineConfig
 from .transcription_pyannote import PyannoteTranscriptionPipeline, PyannoteTranscriptionPipelineConfig
 from .transcription_whisperkitpro import WhisperKitProTranscriptionConfig, WhisperKitProTranscriptionPipeline
-from .whisperkit import WhisperKitTranscriptionConfig, WhisperKitTranscriptionPipeline
 
 
 __all__ = [
@@ -21,8 +24,8 @@ __all__ = [
     "SpeechAnalyzerConfig",
     "AssemblyAITranscriptionPipeline",
     "AssemblyAITranscriptionPipelineConfig",
-    "WhisperKitTranscriptionPipeline",
-    "WhisperKitTranscriptionConfig",
+    "ArgmaxOpenSourceTranscriptionPipeline",
+    "ArgmaxOpenSourceTranscriptionConfig",
     "WhisperKitProTranscriptionPipeline",
     "WhisperKitProTranscriptionConfig",
     "OpenAITranscriptionPipeline",
