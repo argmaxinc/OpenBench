@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from typing import Any, ClassVar
 
 from ..types import PipelineType
-from .base import Pipeline
+from .base import Pipeline, PipelineConfig
 
 
 @dataclass
@@ -91,6 +91,24 @@ class PipelineRegistry:
 
         # Create config instance using the pipeline's config class
         return pipeline_class.from_dict(final_config)
+
+    @classmethod
+    def create_pipeline_from_config(cls, config: PipelineConfig) -> Pipeline:
+        """Instantiate the pipeline whose `_config_class` matches `type(config)`.
+
+        Useful when a caller already has a typed config in hand (e.g. a metric
+        that needs to spin up a transcription pipeline) and doesn't want to
+        construct the Pipeline subclass directly. Looks up registered pipeline
+        classes by `_config_class` identity.
+        """
+        config_type = type(config)
+        for pipeline_class in cls._pipelines.values():
+            if pipeline_class._config_class is config_type:
+                return pipeline_class(config)
+        raise ValueError(
+            f"No registered pipeline has _config_class == {config_type.__name__}. "
+            f"Registered configs: {[c._config_class.__name__ for c in cls._pipelines.values()]}"
+        )
 
     @classmethod
     def get_pipeline_type(cls, name: str) -> PipelineType:
