@@ -119,5 +119,5 @@ class SpeechGenerationWordErrorRate(WordErrorRate):
         sample = _build_transcription_sample(hypothesis.audio_path)
         pipeline_output = self._get_pipeline()(sample)
         hypothesis_transcript: Transcript = pipeline_output.prediction
-        logger.info("TTS WER hypothesis transcript: " + hypothesis_transcript.get_transcript_string()[:120] + "...")
+        logger.debug("TTS WER hypothesis transcript: " + hypothesis_transcript.get_transcript_string()[:120] + "...")
         return super().compute_components(reference, hypothesis_transcript, **kwargs)

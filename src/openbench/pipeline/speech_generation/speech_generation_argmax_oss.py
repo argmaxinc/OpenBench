@@ -153,7 +153,7 @@ class ArgmaxOpenSourceSpeechGenerationPipeline(Pipeline):
                     tts_args,
                 )
                 duration = float(librosa.get_duration(path=str(output.audio_path)))
-                logger.info("Generated TTS audio: %s (%.2fs)", output.audio_path, duration)
+                logger.debug("Generated TTS audio: %s (%.2fs)", output.audio_path, duration)
                 return GeneratedAudio(
                     audio_path=str(output.audio_path),
                     duration=duration,
