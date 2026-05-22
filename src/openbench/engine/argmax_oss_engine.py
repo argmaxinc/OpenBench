@@ -17,6 +17,12 @@ ARGMAX_OSS_REPO_URL = "https://github.com/argmaxinc/argmax-oss-swift"
 ARGMAX_OSS_PRODUCT = "argmax-cli"
 DEFAULT_CACHE_SUBDIR = Path(".cache") / "openbench" / "argmax-oss"
 
+# Process-wide cache of resolved CLI binary paths, keyed by (cache_root, commit_hash).
+# Avoids re-cloning and re-invoking `swift build` when multiple pipelines (e.g. a
+# TTS pipeline + the WER metric's transcription pipeline) build their own engine
+# instances in the same run.
+_CLI_PATH_CACHE: dict[tuple[str, str | None], str] = {}
+
 
 def resolve_argmax_oss_cache_dir(explicit: str | Path | None = None) -> Path:
     """Absolute cache root for WhisperKit clone + `argmax-cli` build."""
@@ -97,9 +103,19 @@ class ArgmaxOpenSourceEngine:
         self.config = config
         if config.cli_path:
             self.cli_path = str(Path(config.cli_path).expanduser().resolve())
-            logger.info(f"Using Argmax OSS CLI at {self.cli_path}")
-        else:
-            self.cli_path = self._clone_and_build_cli()
+            logger.info("Using Argmax OSS CLI at %s", self.cli_path)
+            return
+
+        cache_root = resolve_argmax_oss_cache_dir(config.cache_dir)
+        cache_key = (str(cache_root), config.commit_hash)
+        cached_cli_path = _CLI_PATH_CACHE.get(cache_key)
+        if cached_cli_path is not None:
+            logger.info("Reusing cached Argmax OSS CLI at %s", cached_cli_path)
+            self.cli_path = cached_cli_path
+            return
+
+        self.cli_path = self._clone_and_build_cli(cache_root)
+        _CLI_PATH_CACHE[cache_key] = self.cli_path
 
     def _build_cli(self, repo_dir: str) -> str:
         """Run release build (swift build -c release, not debug) and return the dir containing the binary."""
@@ -130,8 +146,7 @@ class ArgmaxOpenSourceEngine:
         logger.info("Built Argmax OSS CLI at %s", cli)
         return bin_dir
 
-    def _clone_and_build_cli(self) -> str:
-        cache_root = resolve_argmax_oss_cache_dir(self.config.cache_dir)
+    def _clone_and_build_cli(self, cache_root: Path) -> str:
         cache_root.mkdir(parents=True, exist_ok=True)
         repo_url_parts = ARGMAX_OSS_REPO_URL.rstrip("/").split("/")
         repo_name = repo_url_parts[-1]
