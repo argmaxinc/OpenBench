@@ -3,6 +3,7 @@
 
 """Speech-generation pipeline via Argmax SDK open-source `argmax-cli tts`."""
 
+from enum import StrEnum
 from pathlib import Path
 from typing import Callable, Literal
 
@@ -32,6 +33,35 @@ logger = get_logger(__name__)
 TEMP_TTS_AUDIO_DIR = Path("./temp_tts_audio")
 
 
+class TtsSpeaker(StrEnum):
+    """`argmax-cli tts --speaker` allowed values."""
+
+    RYAN = "ryan"
+    AIDEN = "aiden"
+    ONO_ANNA = "ono-anna"
+    SOHEE = "sohee"
+    ERIC = "eric"
+    DYLAN = "dylan"
+    SERENA = "serena"
+    VIVIAN = "vivian"
+    UNCLE_FU = "uncle-fu"
+
+
+class TtsLanguage(StrEnum):
+    """`argmax-cli tts --language` allowed values."""
+
+    ENGLISH = "english"
+    CHINESE = "chinese"
+    JAPANESE = "japanese"
+    KOREAN = "korean"
+    GERMAN = "german"
+    FRENCH = "french"
+    RUSSIAN = "russian"
+    PORTUGUESE = "portuguese"
+    SPANISH = "spanish"
+    ITALIAN = "italian"
+
+
 class ArgmaxOpenSourceSpeechGenerationConfig(PipelineConfig):
     """Config for the Argmax OSS speech-generation pipeline.
 
@@ -53,29 +83,8 @@ class ArgmaxOpenSourceSpeechGenerationConfig(PipelineConfig):
         default=None,
         description="Prebuilt argmax-cli path; skips clone/build.",
     )
-    speaker: Literal[
-        "ryan",
-        "aiden",
-        "ono-anna",
-        "sohee",
-        "eric",
-        "dylan",
-        "serena",
-        "vivian",
-        "uncle-fu",
-    ] = Field(default="aiden", description="--speaker.")
-    language: Literal[
-        "english",
-        "chinese",
-        "japanese",
-        "korean",
-        "german",
-        "french",
-        "russian",
-        "portuguese",
-        "spanish",
-        "italian",
-    ] = Field(default="english", description="--language.")
+    speaker: TtsSpeaker = Field(default=TtsSpeaker.AIDEN, description="--speaker.")
+    language: TtsLanguage = Field(default=TtsLanguage.ENGLISH, description="--language.")
     output_format: Literal["wav", "m4a"] = Field(
         default="wav",
         description="--output-format. WAV is preferred so the WER metric can decode without extra deps.",

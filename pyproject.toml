@@ -3,7 +3,7 @@ name = "openbench"
 version = "0.1.0"
 description = "Benchmark suite for speaker diarization"
 authors = [{ name = "Argmax Inc.", email = "info@takeargmax.com" }]
-requires-python = ">=3.10,<3.13"
+requires-python = ">=3.11,<3.13"
 readme = "README.md"
 dependencies = [
     "black>=24.10.0,<25",
