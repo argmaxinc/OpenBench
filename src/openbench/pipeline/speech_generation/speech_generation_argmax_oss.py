@@ -53,8 +53,29 @@ class ArgmaxOpenSourceSpeechGenerationConfig(PipelineConfig):
         default=None,
         description="Prebuilt argmax-cli path; skips clone/build.",
     )
-    speaker: str = Field(default="aiden", description="--speaker.")
-    language: str = Field(default="english", description="--language.")
+    speaker: Literal[
+        "ryan",
+        "aiden",
+        "ono-anna",
+        "sohee",
+        "eric",
+        "dylan",
+        "serena",
+        "vivian",
+        "uncle-fu",
+    ] = Field(default="aiden", description="--speaker.")
+    language: Literal[
+        "english",
+        "chinese",
+        "japanese",
+        "korean",
+        "german",
+        "french",
+        "russian",
+        "portuguese",
+        "spanish",
+        "italian",
+    ] = Field(default="english", description="--language.")
     output_format: Literal["wav", "m4a"] = Field(
         default="wav",
         description="--output-format. WAV is preferred so the WER metric can decode without extra deps.",
