@@ -28,7 +28,7 @@ from .orchestration import (
 )
 from .pipeline_registry import PipelineRegistry
 from .speech_generation import (
-    WhisperKitSpeechGenerationPipeline,
+    ArgmaxOpenSourceSpeechGenerationPipeline,
 )
 from .streaming_transcription import (
     AssemblyAIStreamingPipeline,
@@ -745,23 +745,24 @@ def register_pipeline_aliases() -> None:
     ################# SPEECH GENERATION PIPELINES #################
 
     PipelineRegistry.register_alias(
-        "whisperkit-speech-generation",
-        WhisperKitSpeechGenerationPipeline,
+        "argmax-oss-speech-generation",
+        ArgmaxOpenSourceSpeechGenerationPipeline,
         default_config={
             "out_dir": "./speech_generation_results",
-            "cli_path": os.getenv("WHISPERKIT_CLI_PATH"),
             "speaker": "aiden",
             "language": "english",
+            "output_format": "wav",
             "seed": 10,
             "temperature": 0.9,
             "top_k": 50,
             "max_new_tokens": 245,
         },
         description=(
-            "WhisperKit speech-generation pipeline. Synthesizes audio from text prompts via whisperkit-cli TTS. "
-            "WER is computed by `SpeechGenerationWordErrorRate`, which transcribes the generated audio with "
-            "WhisperKitPro / parakeet-v2 by default and compares against the original prompt. "
-            "Requires `WHISPERKIT_CLI_PATH` for TTS; the default WER metric also requires `WHISPERKITPRO_CLI_PATH`."
+            "Argmax SDK (open source) speech-generation pipeline. Synthesizes audio from text prompts via "
+            "`argmax-cli tts`. Clone/build under ARGMAX_OSS_CACHE_DIR (default ~/.cache/openbench/argmax-oss) "
+            "unless `cli_path` is set. WER is computed by `SpeechGenerationWordErrorRate`, which transcribes "
+            "the generated audio with WhisperKitPro / parakeet-v2 by default and compares against the original "
+            "prompt; that metric requires `WHISPERKITPRO_CLI_PATH`."
         ),
     )
 

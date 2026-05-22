@@ -1,9 +1,7 @@
 # For licensing see accompanying LICENSE.md file.
 # Copyright (C) 2025 Argmax, Inc. All Rights Reserved.
 
-"""Argmax SDK open-source CLI (`argmax-cli`) — clone/build, transcribe, and diarize."""
-
-from __future__ import annotations
+"""Argmax SDK open-source CLI (`argmax-cli`) — clone/build, transcribe, diarize, and tts."""
 
 import os
 import subprocess
@@ -79,8 +77,21 @@ class DiarizeCliOutput(BaseModel):
     rttm_path: Path = Field(..., description="Written RTTM path")
 
 
+class TtsCliInput(BaseModel):
+    """Input for `argmax-cli tts`."""
+
+    text: str = Field(..., description="Text to synthesize.")
+    output_path: Path = Field(..., description="Destination audio file path (extension picks format).")
+
+
+class TtsCliOutput(BaseModel):
+    """Output from `argmax-cli tts`."""
+
+    audio_path: Path = Field(..., description="Generated audio path.")
+
+
 class ArgmaxOpenSourceEngine:
-    """Resolve `argmax-cli`, then run `transcribe` / `diarize` subcommands."""
+    """Resolve `argmax-cli`, then run `transcribe` / `diarize` / `tts` subcommands."""
 
     def __init__(self, config: ArgmaxOpenSourceEngineConfig) -> None:
         self.config = config
@@ -201,3 +212,26 @@ class ArgmaxOpenSourceEngine:
             input.audio_path.unlink(missing_ok=True)
 
         return DiarizeCliOutput(rttm_path=input.rttm_path)
+
+    def tts(self, input: TtsCliInput, tts_args: list[str]) -> TtsCliOutput:
+        """Run `argmax-cli tts` with pre-built flag list (see TTS pipeline config)."""
+        input.output_path.parent.mkdir(parents=True, exist_ok=True)
+        cmd = [
+            self.cli_path,
+            "tts",
+            "--text",
+            input.text,
+            "--output-path",
+            str(input.output_path),
+            *tts_args,
+        ]
+        logger.debug("Argmax OSS tts: %s", cmd)
+        try:
+            subprocess.run(cmd, check=True, capture_output=True, text=True)
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError(f"argmax-cli tts failed: {e.stderr}") from e
+
+        if not input.output_path.exists():
+            raise RuntimeError(f"argmax-cli tts returned 0 but no audio at {input.output_path}")
+
+        return TtsCliOutput(audio_path=input.output_path)

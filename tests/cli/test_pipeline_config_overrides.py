@@ -20,14 +20,14 @@ import typer
 from pydantic import BaseModel
 
 from openbench.cli.command_utils import parse_pipeline_config_overrides
-from openbench.pipeline.speech_generation import WhisperKitSpeechGenerationConfig
+from openbench.pipeline.speech_generation import ArgmaxOpenSourceSpeechGenerationConfig
 
 
-def _build_config(**overrides) -> WhisperKitSpeechGenerationConfig:
-    """Build a WhisperKitSpeechGenerationConfig with required fields filled in."""
-    base = {"cli_path": "/fake/whisperkit-cli"}
+def _build_config(**overrides) -> ArgmaxOpenSourceSpeechGenerationConfig:
+    """Build an ArgmaxOpenSourceSpeechGenerationConfig with sensible defaults."""
+    base = {"cli_path": "/fake/argmax-cli"}
     base.update(overrides)
-    return WhisperKitSpeechGenerationConfig(**base)
+    return ArgmaxOpenSourceSpeechGenerationConfig(**base)
 
 
 class TestParsePipelineConfigOverrides(unittest.TestCase):
@@ -103,7 +103,7 @@ class TestPydanticCoercionForOverrides(unittest.TestCase):
         self.assertEqual(config.speaker, "serena")
 
     def test_bool_string_coerces_to_bool_on_pydantic_field(self) -> None:
-        """WhisperKitSpeechGenerationConfig has no native bool field; use a minimal model."""
+        """ArgmaxOpenSourceSpeechGenerationConfig has no native bool field; use a minimal model."""
 
         class _M(BaseModel):
             flag: bool

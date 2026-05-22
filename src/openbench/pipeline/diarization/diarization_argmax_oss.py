@@ -3,8 +3,6 @@
 
 """Diarization via Argmax SDK open-source `argmax-cli diarize`."""
 
-from __future__ import annotations
-
 from pathlib import Path
 from typing import Callable
 

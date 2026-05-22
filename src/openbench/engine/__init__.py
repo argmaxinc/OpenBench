@@ -5,6 +5,8 @@ from .argmax_oss_engine import (
     DiarizeCliOutput,
     TranscriptionCliInput,
     TranscriptionCliOutput,
+    TtsCliInput,
+    TtsCliOutput,
     resolve_argmax_oss_cache_dir,
 )
 from .deepgram_engine import DeepgramApi, DeepgramApiResponse
@@ -33,6 +35,8 @@ __all__ = [
     "DiarizeCliOutput",
     "TranscriptionCliInput",
     "TranscriptionCliOutput",
+    "TtsCliInput",
+    "TtsCliOutput",
     "resolve_argmax_oss_cache_dir",
     "DeepgramApi",
     "DeepgramApiResponse",
