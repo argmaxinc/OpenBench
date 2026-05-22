@@ -1,5 +1,5 @@
 # For licensing see accompanying LICENSE.md file.
-# Copyright (C) 2025 Argmax, Inc. All Rights Reserved.
+# Copyright (C) 2026 Argmax, Inc. All Rights Reserved.
 
 """Argmax SDK open-source CLI (`argmax-cli`) — clone/build, transcribe, diarize, and tts."""
 

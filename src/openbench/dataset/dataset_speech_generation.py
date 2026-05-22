@@ -1,5 +1,5 @@
 # For licensing see accompanying LICENSE.md file.
-# Copyright (C) 2025 Argmax, Inc. All Rights Reserved.
+# Copyright (C) 2026 Argmax, Inc. All Rights Reserved.
 
 import numpy as np
 from typing_extensions import TypedDict
