@@ -93,22 +93,29 @@ class PipelineRegistry:
         return pipeline_class.from_dict(final_config)
 
     @classmethod
+    def get_pipeline_class_for_config(cls, config_type: type[PipelineConfig]) -> type[Pipeline]:
+        """Return the registered Pipeline subclass whose `_config_class` is `config_type`.
+
+        Lets a caller inspect a pipeline's type (e.g. `pipeline_type`) before
+        paying the cost of instantiation.
+        """
+        for pipeline_class in cls._pipelines.values():
+            if pipeline_class._config_class is config_type:
+                return pipeline_class
+        raise ValueError(
+            f"No registered pipeline has _config_class == {config_type.__name__}. "
+            f"Registered configs: {[c._config_class.__name__ for c in cls._pipelines.values()]}"
+        )
+
+    @classmethod
     def create_pipeline_from_config(cls, config: PipelineConfig) -> Pipeline:
         """Instantiate the pipeline whose `_config_class` matches `type(config)`.
 
         Useful when a caller already has a typed config in hand (e.g. a metric
         that needs to spin up a transcription pipeline) and doesn't want to
-        construct the Pipeline subclass directly. Looks up registered pipeline
-        classes by `_config_class` identity.
+        construct the Pipeline subclass directly.
         """
-        config_type = type(config)
-        for pipeline_class in cls._pipelines.values():
-            if pipeline_class._config_class is config_type:
-                return pipeline_class(config)
-        raise ValueError(
-            f"No registered pipeline has _config_class == {config_type.__name__}. "
-            f"Registered configs: {[c._config_class.__name__ for c in cls._pipelines.values()]}"
-        )
+        return cls.get_pipeline_class_for_config(type(config))(config)
 
     @classmethod
     def get_pipeline_type(cls, name: str) -> PipelineType:

@@ -246,7 +246,4 @@ class ArgmaxOpenSourceEngine:
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"argmax-cli tts failed: {e.stderr}") from e
 
-        if not input.output_path.exists():
-            raise RuntimeError(f"argmax-cli tts returned 0 but no audio at {input.output_path}")
-
         return TtsCliOutput(audio_path=input.output_path)

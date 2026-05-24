@@ -88,20 +88,29 @@ class SpeechGenerationWordErrorRate(WordErrorRate):
         self._pipeline: Pipeline | None = None
 
     def _get_pipeline(self) -> Pipeline:
-        if self._pipeline is None:
-            spec = self._transcription_config
-            if isinstance(spec, str):
-                logger.info("Building transcription pipeline for speech-generation WER: alias=%r", spec)
-                pipeline = PipelineRegistry.create_pipeline(spec)
-            else:
-                logger.info("Building transcription pipeline for speech-generation WER: %s", type(spec).__name__)
-                pipeline = PipelineRegistry.create_pipeline_from_config(spec)
-            if pipeline.pipeline_type != PipelineType.TRANSCRIPTION:
-                raise ValueError(
-                    f"Resolved pipeline {type(pipeline).__name__} has pipeline_type "
-                    f"{pipeline.pipeline_type}, expected TRANSCRIPTION."
-                )
-            self._pipeline = pipeline
+        if self._pipeline is not None:
+            return self._pipeline
+
+        spec = self._transcription_config
+        # Resolve pipeline class first so we can validate pipeline_type before
+        # paying the build cost (which for argmax-oss aliases means clone + swift build).
+        if isinstance(spec, str):
+            pipeline_class = PipelineRegistry.get_pipeline_class(spec)
+            label = f"alias={spec!r}"
+        else:
+            pipeline_class = PipelineRegistry.get_pipeline_class_for_config(type(spec))
+            label = type(spec).__name__
+
+        if pipeline_class.pipeline_type != PipelineType.TRANSCRIPTION:
+            raise ValueError(
+                f"{pipeline_class.__name__} has pipeline_type {pipeline_class.pipeline_type}, expected TRANSCRIPTION."
+            )
+
+        logger.info("Building transcription pipeline for speech-generation WER: %s", label)
+        if isinstance(spec, str):
+            self._pipeline = PipelineRegistry.create_pipeline(spec)
+        else:
+            self._pipeline = pipeline_class(spec)
         return self._pipeline
 
     def compute_components(self, reference: Transcript, hypothesis: GeneratedAudio, **kwargs) -> dict[str, int]:
@@ -111,11 +120,6 @@ class SpeechGenerationWordErrorRate(WordErrorRate):
             reference: Reference transcript built from the original prompt.
             hypothesis: Generated audio (path + duration) produced by a TTS pipeline.
         """
-        if not isinstance(hypothesis, GeneratedAudio):
-            raise TypeError(
-                f"SpeechGenerationWordErrorRate expected hypothesis of type GeneratedAudio, "
-                f"got {type(hypothesis).__name__}"
-            )
         sample = _build_transcription_sample(hypothesis.audio_path)
         pipeline_output = self._get_pipeline()(sample)
         hypothesis_transcript: Transcript = pipeline_output.prediction
