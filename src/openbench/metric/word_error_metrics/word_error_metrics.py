@@ -61,19 +61,6 @@ class BaseWordErrorMetric(BaseMetric):
     def _supports_paired_evaluation(self) -> bool:
         return True
 
-    @staticmethod
-    def _is_character_level(words: list[str]) -> bool:
-        """Detect character-level tokenization (CJK) by checking if most tokens are single chars."""
-        if not words:
-            return False
-        single_char_ratio = sum(1 for w in words if len(w) == 1) / len(words)
-        return single_char_ratio > 0.5
-
-    @staticmethod
-    def _split_to_chars(words: list[str]) -> list[str]:
-        """Split word tokens into individual characters, stripping whitespace."""
-        return [ch for w in words for ch in w.strip() if ch.strip()]
-
     def _get_word_error_metrics(
         self, reference: Transcript, hypothesis: Transcript
     ) -> tuple[
@@ -93,10 +80,6 @@ class BaseWordErrorMetric(BaseMetric):
                 words=hyp_words,
                 speakers=hyp_speakers,
             )
-
-        if self._is_character_level(ref_words):
-            hyp_words = self._split_to_chars(hyp_words)
-            hyp_speakers = None
 
         result = jiwer.compute_measures(
             truth=" ".join(ref_words),
@@ -310,6 +293,94 @@ class WordErrorRate(BaseWordErrorMetric):
         D = detail["num_deletions"]
         I = detail["num_insertions"]
         N = detail["num_words"]
+
+        return (S + D + I) / N if N > 0 else 0.0
+
+
+def _split_to_chars(words: list[str]) -> list[str]:
+    """Split word-level tokens into individual characters, stripping whitespace."""
+    return [ch for w in words for ch in w.strip() if ch.strip()]
+
+
+@MetricRegistry.register_metric(
+    (
+        PipelineType.TRANSCRIPTION,
+        PipelineType.ORCHESTRATION,
+        PipelineType.STREAMING_TRANSCRIPTION,
+    ),
+    MetricOptions.CER,
+)
+class CharacterErrorRate(BaseWordErrorMetric):
+    """Character Error Rate (CER) implementation.
+
+    This metric evaluates transcription accuracy at the character level.
+    Both reference and hypothesis tokens are split into individual characters
+    before alignment, making it suitable for CJK languages (Chinese, Japanese,
+    Korean) where word boundaries are not marked by spaces.
+
+    CER = (S + D + I) / N  (same formula as WER, applied to characters)
+    """
+
+    @classmethod
+    def metric_name(cls) -> str:
+        return "cer"
+
+    @classmethod
+    def metric_components(cls) -> MetricComponents:
+        return [
+            "num_substitutions",
+            "num_deletions",
+            "num_insertions",
+            "num_characters",
+        ]
+
+    def compute_components(
+        self,
+        reference: Transcript,
+        hypothesis: Transcript,
+        **kwargs,
+    ) -> dict[str, int]:
+        ref_words, _ = parse_diarzed_words(reference)
+        hyp_words, _ = parse_diarzed_words(hypothesis)
+
+        if self.use_text_normalizer:
+            ref_words, _ = self.text_normalizer(words=ref_words, speakers=None)
+            hyp_words, _ = self.text_normalizer(words=hyp_words, speakers=None)
+
+        ref_chars = _split_to_chars(ref_words)
+        hyp_chars = _split_to_chars(hyp_words)
+
+        result = jiwer.compute_measures(
+            truth=" ".join(ref_chars),
+            hypothesis=" ".join(hyp_chars),
+        )
+        result = AlignmentMetrics(**result)
+        alignments = result.ops[0]
+
+        num_substitutions = 0
+        num_deletions = 0
+        num_insertions = 0
+
+        for alignment in alignments:
+            if alignment.type == "substitute":
+                num_substitutions += alignment.ref_end_idx - alignment.ref_start_idx
+            elif alignment.type == "delete":
+                num_deletions += alignment.ref_end_idx - alignment.ref_start_idx
+            elif alignment.type == "insert":
+                num_insertions += alignment.hyp_end_idx - alignment.hyp_start_idx
+
+        return {
+            "num_substitutions": num_substitutions,
+            "num_deletions": num_deletions,
+            "num_insertions": num_insertions,
+            "num_characters": len(ref_chars),
+        }
+
+    def compute_metric(self, detail: Details) -> float:
+        S = detail["num_substitutions"]
+        D = detail["num_deletions"]
+        I = detail["num_insertions"]  # noqa: E741
+        N = detail["num_characters"]
 
         return (S + D + I) / N if N > 0 else 0.0
 
