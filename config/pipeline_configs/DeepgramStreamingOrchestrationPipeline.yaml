@@ -1,0 +1,9 @@
+DeepgramStreamingOrchestrationPipeline:
+  pipeline_config:
+    sample_rate: 16000
+    channels: 1
+    sample_width: 2
+    realtime_resolution: 0.020
+    model_version: "nova-3"
+    enable_diarization: true
+

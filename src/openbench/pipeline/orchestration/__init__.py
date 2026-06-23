@@ -7,6 +7,10 @@ from .orchestration_argmax_oss import (
     ArgmaxOpenSourceOrchestrationPipeline,
 )
 from .orchestration_deepgram import DeepgramOrchestrationPipeline, DeepgramOrchestrationPipelineConfig
+from .orchestration_deepgram_streaming import (
+    DeepgramStreamingOrchestrationPipeline,
+    DeepgramStreamingOrchestrationPipelineConfig,
+)
 from .orchestration_elevenlabs import ElevenLabsOrchestrationPipeline, ElevenLabsOrchestrationPipelineConfig
 from .orchestration_openai import OpenAIOrchestrationPipeline, OpenAIOrchestrationPipelineConfig
 from .orchestration_pyannote import PyannoteOrchestrationPipeline, PyannoteOrchestrationPipelineConfig
@@ -19,6 +23,8 @@ __all__ = [
     "ArgmaxOpenSourceOrchestrationConfig",
     "DeepgramOrchestrationPipeline",
     "DeepgramOrchestrationPipelineConfig",
+    "DeepgramStreamingOrchestrationPipeline",
+    "DeepgramStreamingOrchestrationPipelineConfig",
     "ElevenLabsOrchestrationPipeline",
     "ElevenLabsOrchestrationPipelineConfig",
     "WhisperXPipeline",
