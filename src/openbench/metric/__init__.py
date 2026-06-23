@@ -24,6 +24,7 @@ from .streaming_latency_metrics import (
 )
 from .word_error_metrics import (
     ConcatenatedMinimumPermutationWER,
+    SpeechGenerationWordErrorRate,
     WordDiarizationErrorRate,
     WordErrorRate,
 )

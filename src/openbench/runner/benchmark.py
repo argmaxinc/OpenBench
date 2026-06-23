@@ -19,11 +19,12 @@ from .data_models import (
     BenchmarkResult,
     DiarizationSampleResult,
     GlobalResult,
+    SpeechGenerationSampleResult,
     TaskResult,
     TranscriptionSampleResult,
 )
 from .utils import change_directory, get_global_results
-from .wandb_logger import DiarizationWandbLogger, TranscriptionWandbLogger
+from .wandb_logger import DiarizationWandbLogger, SpeechGenerationWandbLogger, TranscriptionWandbLogger
 
 
 logger = get_logger(__name__)
@@ -33,11 +34,12 @@ PIPELINE_TYPE_TO_SAMPLE_RESULT = {
     PipelineType.TRANSCRIPTION: TranscriptionSampleResult,
     PipelineType.ORCHESTRATION: TranscriptionSampleResult,
     PipelineType.STREAMING_TRANSCRIPTION: TranscriptionSampleResult,
+    PipelineType.SPEECH_GENERATION: SpeechGenerationSampleResult,
 }
 
 
 class ProcessingResult(NamedTuple):
-    sample_result: DiarizationSampleResult | TranscriptionSampleResult
+    sample_result: DiarizationSampleResult | TranscriptionSampleResult | SpeechGenerationSampleResult
     task_results: list[TaskResult]
     sample_id: int
     metrics_string: str
@@ -64,6 +66,7 @@ class BenchmarkRunner:
             PipelineType.TRANSCRIPTION: TranscriptionWandbLogger,
             PipelineType.ORCHESTRATION: TranscriptionWandbLogger,
             PipelineType.STREAMING_TRANSCRIPTION: TranscriptionWandbLogger,
+            PipelineType.SPEECH_GENERATION: SpeechGenerationWandbLogger,
         }
 
     def _get_metrics(self, pipeline: Pipeline) -> dict[str, BaseMetric]:
@@ -72,7 +75,7 @@ class BenchmarkRunner:
         for metric_name, kwargs in self.config.metrics.items():
             if metric_name not in available_metrics:
                 continue
-            metrics_dict[metric_name] = MetricRegistry.get_metric(metric_name, **kwargs)
+            metrics_dict[metric_name] = MetricRegistry.get_metric(pipeline.pipeline_type, metric_name, **kwargs)
         return metrics_dict
 
     def _process_single_sample_wrapper(self, args):
@@ -99,7 +102,14 @@ class BenchmarkRunner:
                 f"from dataset {dataset_name} with pipeline {pipeline.__class__.__name__}: {e}"
             )
             raise RuntimeError(f"Pipeline execution failed on sample {sample_id} ({sample.audio_name}): {e}") from e
-        audio_duration = sample.get_audio_duration()
+
+        # For speech-generation pipelines the sample has no real input audio
+        # (only a placeholder waveform), so duration is read off the prediction
+        # produced by the TTS step.
+        if pipeline.pipeline_type == PipelineType.SPEECH_GENERATION:
+            audio_duration = output.prediction.duration
+        else:
+            audio_duration = sample.get_audio_duration()
         prediction_time = output.prediction_time
 
         # Create sample result
@@ -125,7 +135,11 @@ class BenchmarkRunner:
 
         for metric_name, metric in metrics_dict.items():
             reference = sample.reference
-            kwargs = sample.extra_info
+            kwargs = dict(sample.extra_info)
+
+            # Use metric_keywords for metric calculation if available, falling back to dictionary
+            if "metric_keywords" in kwargs:
+                kwargs["dictionary"] = kwargs.pop("metric_keywords")
 
             # The metric returns a dictionary that is also stored in the metric object as a state to compute the global result
             # We copy to avoid any side effects that may happen while interacting with dictionary for reporting
@@ -254,10 +268,15 @@ class BenchmarkRunner:
             # Update metric with all results
             for sample_result in per_sample_results:
                 sample = dataset[sample_result.sample_id]
-                # Get UEM from extra_info if available
                 kwargs = {}
-                if hasattr(sample, "extra_info") and "uem" in sample.extra_info:
-                    kwargs["uem"] = sample.extra_info["uem"]
+                if hasattr(sample, "extra_info"):
+                    if "uem" in sample.extra_info:
+                        kwargs["uem"] = sample.extra_info["uem"]
+                    # Use metric_keywords for metric calculation if available, falling back to dictionary
+                    if "metric_keywords" in sample.extra_info:
+                        kwargs["dictionary"] = sample.extra_info["metric_keywords"]
+                    elif "dictionary" in sample.extra_info:
+                        kwargs["dictionary"] = sample.extra_info["dictionary"]
 
                 metric(hypothesis=sample_result.prediction, reference=sample.reference, detailed=True, **kwargs)
 

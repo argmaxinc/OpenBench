@@ -2,17 +2,21 @@
 # Copyright (C) 2025 Argmax, Inc. All Rights Reserved.
 
 import numpy as np
+from argmaxtools.utils import get_logger
 from pydantic import Field
 
 from ...dataset import OrchestrationSample
-from ...pipeline import Pipeline, PipelineConfig, register_pipeline
+from ...pipeline import Pipeline, register_pipeline
 from ...pipeline_prediction import Transcript, Word
 from ...types import PipelineType
 from ..streaming_transcription.deepgram import DeepgramApi
-from .common import OrchestrationOutput
+from .common import OrchestrationConfig, OrchestrationOutput
 
 
-class DeepgramStreamingOrchestrationPipelineConfig(PipelineConfig):
+logger = get_logger(__name__)
+
+
+class DeepgramStreamingOrchestrationPipelineConfig(OrchestrationConfig):
     sample_rate: int = Field(default=16000, description="Sample rate of the audio")
     channels: int = Field(default=1, description="Number of audio channels")
     sample_width: int = Field(default=2, description="Sample width in bytes")
@@ -47,6 +51,12 @@ class DeepgramStreamingOrchestrationPipeline(Pipeline):
 
     def parse_input(self, input_sample: OrchestrationSample):
         """Convert audio waveform to bytes for streaming."""
+        if self.config.force_language:
+            logger.warning(
+                f"{self.__class__.__name__} does not support language hinting. "
+                "The force_language flag will be ignored."
+            )
+
         y = input_sample.waveform
         y_int16 = (y * 32767).astype(np.int16)
         audio_data_byte = y_int16.T.tobytes()

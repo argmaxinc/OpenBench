@@ -201,7 +201,7 @@ def register_dataset_aliases() -> None:
         DatasetConfig(
             dataset_id=os.getenv("CALLHOME_ENGLISH_DATASET_REPO_ID", "argmaxinc/callhome-english"), split="test"
         ),
-        supported_pipeline_types={PipelineType.TRANSCRIPTION, PipelineType.ORCHESTRATION},
+        supported_pipeline_types={PipelineType.TRANSCRIPTION, PipelineType.ORCHESTRATION, PipelineType.DIARIZATION},
         description=(
             "Callhome English dataset for transcription and orchestration evaluation. "
             "To use this dataset you need to buy the license for the audio files at https://catalog.ldc.upenn.edu/LDC97S42 and the license for the transcript files at https://catalog.ldc.upenn.edu/LDC97T14"
@@ -552,6 +552,20 @@ def register_dataset_aliases() -> None:
             PipelineType.TRANSCRIPTION,
         },
         description="Common Voice dataset for transcription evaluation with up to 400 samples per language this subset contains only russian",
+    )
+
+    ########## SPEECH GENERATION ##########
+
+    DatasetRegistry.register_alias(
+        "customer-service-tts-prompts-vocalized",
+        DatasetConfig(
+            dataset_id="argmaxinc/customer-service-tts-prompts-vocalized",
+            split="validation",
+        ),
+        supported_pipeline_types={
+            PipelineType.SPEECH_GENERATION,
+        },
+        description="Customer service TTS prompts with vocalized audio for speech generation evaluation.",
     )
 
     ########## STREAMING TRANSCRIPTION ##########

@@ -13,6 +13,7 @@ class TranscriptionExtraInfo(TypedDict, total=False):
 
     language: str
     dictionary: list[str]
+    metric_keywords: list[str]
 
 
 class TranscriptionRow(TypedDict):
@@ -24,6 +25,7 @@ class TranscriptionRow(TypedDict):
     word_timestamps_end: NotRequired[list[float]]
     language: NotRequired[str]
     dictionary: NotRequired[list[str]]
+    metric_keywords: NotRequired[list[str]]
 
 
 class TranscriptionSample(BaseSample[Transcript, TranscriptionExtraInfo]):
@@ -38,6 +40,11 @@ class TranscriptionSample(BaseSample[Transcript, TranscriptionExtraInfo]):
     def dictionary(self) -> list[str] | None:
         """Convenience property to access dictionary from extra_info."""
         return self.extra_info.get("dictionary")
+
+    @property
+    def metric_keywords(self) -> list[str] | None:
+        """Convenience property to access metric keywords from extra_info."""
+        return self.extra_info.get("metric_keywords")
 
 
 class TranscriptionDataset(BaseDataset[TranscriptionSample]):
@@ -60,4 +67,7 @@ class TranscriptionDataset(BaseDataset[TranscriptionSample]):
             extra_info["language"] = row["language"]
         if "dictionary" in row:
             extra_info["dictionary"] = row["dictionary"]
+        metric_keywords = row.get("metric-keywords") or row.get("metric_keywords")
+        if metric_keywords:
+            extra_info["metric_keywords"] = metric_keywords
         return reference, extra_info

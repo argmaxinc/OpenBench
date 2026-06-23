@@ -13,6 +13,11 @@ from pydantic import BaseModel, Field
 
 logger = get_logger(__name__)
 
+
+def _config_str_provided(value: str | None) -> bool:
+    return value is not None and value.strip() != ""
+
+
 COMPUTE_UNITS_MAPPER = {
     ct.ComputeUnit.CPU_ONLY: "cpuOnly",
     ct.ComputeUnit.CPU_AND_NE: "cpuAndNeuralEngine",
@@ -26,9 +31,10 @@ COMPUTE_UNITS_MAPPER = {
 class WhisperKitProConfig(BaseModel):
     """Configuration for transcription operations.
 
-    Supports two modes:
-    1. Legacy: model_version, model_prefix, model_repo_name
-    2. New: repo_id, model_variant (downloads models locally)
+    Supports three modes:
+    1. Local: model_dir only (existing directory on disk; no Hugging Face download)
+    2. Hugging Face: repo_id + model_variant (downloads unless model_dir already exists)
+    3. Legacy: model_version, model_prefix, model_repo_name
     """
 
     # Legacy fields
@@ -54,9 +60,12 @@ class WhisperKitProConfig(BaseModel):
         None,
         description="Model variant folder name",
     )
-    models_cache_dir: str | None = Field(
+    model_dir: str | None = Field(
         None,
-        description="Directory to cache downloaded models",
+        description=(
+            "Local directory passed as --model-path. If set, must exist; repo_id/model_variant are not used for "
+            "download (no Hugging Face fetch when only model_dir is configured)."
+        ),
     )
     word_timestamps: bool = Field(
         True,
@@ -83,24 +92,28 @@ class WhisperKitProConfig(BaseModel):
         description="The compute units to use for the audio encoder. Default is CPU_AND_NE.",
     )
     text_decoder_compute_units: ct.ComputeUnit = Field(
-        ct.ComputeUnit.CPU_AND_GPU,
+        ct.ComputeUnit.CPU_AND_NE,
         description="The compute units to use for the text decoder. Default is CPU_AND_GPU.",
     )
     diarization: bool = Field(
         False,
         description="Whether to perform diarization",
     )
-    orchestration_strategy: Literal["word", "segment"] = Field(
-        "segment",
-        description="The orchestration strategy to use either `word` or `segment`",
+    diarization_mode: Literal["realtime", "prerecorded"] = Field(
+        "prerecorded",
+        description="Sortformer streaming mode: `realtime` (1.04s latency) or `prerecorded` (9.84s latency). This is only applicable when `engine` is `sortformer`.",
+    )
+    orchestration_strategy: Literal["segment", "subsegment"] = Field(
+        "subsegment",
+        description="The orchestration strategy to use either `segment` or `subsegment`",
     )
     speaker_models_path: str | None = Field(
         None,
         description="The path to the speaker models directory",
     )
-    clusterer_version: Literal["pyannote3", "pyannote4"] = Field(
-        "pyannote4",
-        description="The version of the clusterer to use",
+    engine: Literal["pyannote", "sortformer"] = Field(
+        "pyannote",
+        description="The engine to use. If `sortformer` the diarization model used is Sortformer, otherwise it is pyannote.",
     )
     use_exclusive_reconciliation: bool = Field(
         False,
@@ -128,7 +141,7 @@ class WhisperKitProConfig(BaseModel):
         # Use either --model-path (new) or legacy model args
         if self.use_model_path:
             if model_path is None:
-                raise ValueError("model_path required when using repo_id/model_variant")
+                raise ValueError("model_path required when using --model-path mode")
             args = [
                 "--model-path",
                 str(model_path),
@@ -158,6 +171,7 @@ class WhisperKitProConfig(BaseModel):
                 COMPUTE_UNITS_MAPPER[self.text_decoder_compute_units],
                 "--fast-load",
                 str(self.fast_load).lower(),
+                "--verbose",
             ]
         )
 
@@ -171,9 +185,15 @@ class WhisperKitProConfig(BaseModel):
         if self.diarization:
             args.extend(["--diarization"])
             args.extend(["--orchestration-strategy", self.orchestration_strategy])
+
             # Add rttm path
             args.extend(["--rttm-path", self.rttm_path])
-            args.extend(["--clusterer-version", self.clusterer_version])
+            args.extend(["--engine", self.engine])
+
+            # Only add diarization mode if using Sortformer
+            if self.engine == "sortformer":
+                args.extend(["--diarization-mode", self.diarization_mode])
+
             # If speaker models path is provided use it
             if self.speaker_models_path:
                 args.extend(["--speaker-models-path", self.speaker_models_path])
@@ -185,48 +205,37 @@ class WhisperKitProConfig(BaseModel):
 
     @property
     def use_model_path(self) -> bool:
-        """Check if we should use --model-path vs legacy args."""
-        return self.repo_id is not None and self.model_variant is not None
+        """Use --model-path when model_dir is set, or when HF repo_id + model_variant are set."""
+        if _config_str_provided(self.model_dir):
+            return True
+        return _config_str_provided(self.repo_id) and _config_str_provided(self.model_variant)
 
     def download_and_prepare_model(self) -> Path:
-        """Download model from HuggingFace and prepare folder.
+        """Resolve local model directory or download from Hugging Face.
 
         Returns:
             Path to model directory for --model-path
         """
         if not self.use_model_path:
-            raise ValueError("download_and_prepare_model requires repo_id and model_variant")
+            raise ValueError("download_and_prepare_model requires model_dir or repo_id/model_variant")
 
-        cache_dir = Path(self.models_cache_dir or "./models_cache")
-        cache_dir.mkdir(parents=True, exist_ok=True)
+        if _config_str_provided(self.model_dir):
+            p = Path(self.model_dir).expanduser().resolve()
+            if not p.is_dir():
+                raise FileNotFoundError(
+                    f"model_dir must be an existing directory (no Hugging Face download when model_dir is set): {self.model_dir}"
+                )
+            logger.info(f"Using local model at: {p}")
+            return p
 
-        # Model path: cache_dir / repo_id / model_variant
-        repo_dir = self.repo_id.replace("/", "_")
-        model_path = cache_dir / repo_dir / self.model_variant
-
-        # Check if model already exists
-        if model_path.exists():
-            logger.info(f"Model already exists at: {model_path}")
-            return model_path
+        if not (_config_str_provided(self.repo_id) and _config_str_provided(self.model_variant)):
+            raise ValueError("repo_id and model_variant are required when model_dir is not set")
 
         logger.info(f"Downloading model from {self.repo_id}, variant: {self.model_variant}")
 
-        # Download specific model variant folder from HuggingFace
         try:
-            downloaded_path = snapshot_download(
-                repo_id=self.repo_id,
-                allow_patterns=f"{self.model_variant}/*",
-                local_dir=cache_dir / repo_dir,
-                local_dir_use_symlinks=False,
-            )
-
-            logger.info(f"Model downloaded to: {downloaded_path}")
-            logger.info(f"Model path for CLI: {model_path}")
-
-            if not model_path.exists():
-                raise RuntimeError(f"Model download succeeded but path doesn't exist: {model_path}")
-
-            return model_path
+            downloaded_path = snapshot_download(repo_id=self.repo_id, allow_patterns=f"{self.model_variant}/*")
+            return Path(f"{downloaded_path}/{self.model_variant}")
         except Exception as e:
             raise RuntimeError(f"Failed to download model from {self.repo_id}: {e}") from e
 
@@ -271,10 +280,20 @@ class WhisperKitPro:
         # Download and prepare model if using new model management
         self.model_path = None
         if self.transcription_config.use_model_path:
-            logger.info("Using new model management with repo_id/model_variant")
+            logger.debug("Using --model-path (local model_dir and/or Hugging Face ids)")
             self.model_path = self.transcription_config.download_and_prepare_model()
         else:
-            logger.info("Using legacy model management")
+            logger.debug("Using legacy model management")
+            if not (
+                _config_str_provided(self.transcription_config.model_version)
+                and _config_str_provided(self.transcription_config.model_prefix)
+                and _config_str_provided(self.transcription_config.model_repo_name)
+            ):
+                raise ValueError(
+                    "WhisperKitPro requires one of: model_dir (existing directory), "
+                    "(repo_id and model_variant for Hugging Face), or "
+                    "(model_version, model_prefix, model_repo_name) for legacy CLI args."
+                )
 
         # Generate CLI args (with model_path if available)
         self.transcription_args = self.transcription_config.generate_cli_args(model_path=self.model_path)

@@ -23,47 +23,67 @@ logger = get_logger(__name__)
 TEMP_AUDIO_DIR = Path("audio_temp")
 
 
-class SpeakerKitPipelineConfig(DiarizationPipelineConfig):
-    cli_path: str = Field(..., description="The absolute path to the SpeakerKit CLI")
-    clusterer_version: Literal["pyannote3", "pyannote4"] = Field(
-        "pyannote4", description="The version of the clusterer to use"
-    )
-    model_path: str | None = Field(None, description="The absolute path to the SpeakerKit model")
-
-
 class SpeakerKitInput(TypedDict):
     audio_path: Path
     output_path: Path
     num_speakers: int | None
 
 
-class SpeakerKitCli:
-    def __init__(self, config: SpeakerKitPipelineConfig):
-        self.cli_path = config.cli_path
-        self.model_path = config.model_path
-        self.clusterer_version = config.clusterer_version
+class SpeakerKitPipelineConfig(DiarizationPipelineConfig):
+    cli_path: str = Field(..., description="The absolute path to the SpeakerKit CLI")
+    model_path: str | None = Field(None, description="The absolute path to the SpeakerKit model directory")
+    engine: Literal["pyannote", "sortformer"] = Field("pyannote", description="The engine to use")
 
-    def __call__(self, speakerkit_input: SpeakerKitInput) -> tuple[Path, float]:
+    @property
+    def is_sortformer(self) -> bool:
+        return self.engine == "sortformer"
+
+    def generate_cli_args(self, inputs: SpeakerKitInput) -> list[str]:
         cmd = [
             self.cli_path,
             "diarize",
             "--audio-path",
-            str(speakerkit_input["audio_path"]),
+            str(inputs["audio_path"]),
             "--rttm-path",
-            str(speakerkit_input["output_path"]),
-            "--clusterer-version",
-            self.clusterer_version,
+            str(inputs["output_path"]),
+            "--engine",
+            self.engine,
             "--verbose",
         ]
 
-        if self.model_path:
+        if self.model_path is not None:
             cmd.extend(["--model-path", self.model_path])
 
-        if speakerkit_input["num_speakers"] is not None:
-            cmd.extend(["--num-speakers", str(speakerkit_input["num_speakers"])])
+        if inputs["num_speakers"] is not None:
+            cmd.extend(["--num-speakers", str(inputs["num_speakers"])])
 
         if "SPEAKERKIT_API_KEY" in os.environ:
             cmd.extend(["--api-key", os.environ["SPEAKERKIT_API_KEY"]])
+
+        return cmd
+
+    def parse_stdout(self, stdout: str) -> float:
+        # Default pattern for pyannote models
+        pattern = r"Model Load Time:\s+\d+\.\d+\s+ms\nTotal Time:\s+(\d+\.\d+)\s+ms"
+        divisor = 1000.0
+
+        # if model is sortfomer we override the pattern and divisor
+        if self.is_sortformer:
+            pattern = r"Prediction time:\s+(\d+\.\d+)\s+seconds"
+            divisor = 1.0
+
+        matches = re.search(pattern, stdout)
+        if matches is None:
+            raise ValueError(f"Could not parse prediction time from stdout: {stdout!r}")
+        return float(matches.group(1)) / divisor
+
+
+class SpeakerKitCli:
+    def __init__(self, config: SpeakerKitPipelineConfig):
+        self.config = config
+
+    def __call__(self, speakerkit_input: SpeakerKitInput) -> tuple[Path, float]:
+        cmd = self.config.generate_cli_args(speakerkit_input)
 
         try:
             result = subprocess.run(cmd, check=True, capture_output=True, text=True)
@@ -81,11 +101,9 @@ class SpeakerKitCli:
         speakerkit_input["audio_path"].unlink()
 
         # Parse stdout and take the total time it took to diarize
-        pattern = r"Model Load Time:\s+\d+\.\d+\s+ms\nTotal Time:\s+(\d+\.\d+)\s+ms"
-        matches = re.search(pattern, result.stdout)
-        total_time = float(matches.group(1))
+        total_time = self.config.parse_stdout(result.stdout)
 
-        return speakerkit_input["output_path"], total_time / 1000
+        return speakerkit_input["output_path"], total_time
 
 
 @register_pipeline

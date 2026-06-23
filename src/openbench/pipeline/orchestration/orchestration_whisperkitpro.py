@@ -21,22 +21,46 @@ TEMP_AUDIO_DIR = Path("./temp_audio")
 
 
 class WhisperKitProOrchestrationConfig(OrchestrationConfig):
+    """Configuration for WhisperKitPro orchestration pipeline.
+
+    Supports two modes:
+    1. Legacy: model_version, model_prefix, model_repo_name
+    2. New: repo_id, model_variant (downloads and manages models)
+    """
+
     cli_path: str = Field(
         ...,
         description="The path to the WhisperKitPro CLI",
     )
-    model_version: str = Field(
-        ...,
-        description="The version of the WhisperKitPro model to use",
+
+    # Legacy fields (optional)
+    model_version: str | None = Field(
+        None,
+        description="(Legacy) The version of the WhisperKitPro model to use",
     )
-    model_prefix: str = Field(
-        "openai",
-        description="The prefix of the model to use.",
+    model_prefix: str | None = Field(
+        None,
+        description="(Legacy) The prefix of the model to use.",
     )
     model_repo_name: str | None = Field(
-        "argmaxinc/whisperkit-pro",
-        description="The name of the Hugging Face model repo to use. Default is `argmaxinc/whisperkit-pro` which has Whisper checkpoints models.",
+        None,
+        description="(Legacy) The name of the Hugging Face model repo to use.",
     )
+
+    # New fields for model download and management
+    repo_id: str | None = Field(
+        None,
+        description="HuggingFace repo ID",
+    )
+    model_variant: str | None = Field(
+        None,
+        description="Model variant folder name",
+    )
+    model_dir: str | None = Field(
+        None,
+        description="Local path to model directory. If provided, models are loaded from this path directly instead of downloading.",
+    )
+
     audio_encoder_compute_units: ComputeUnit = Field(
         ComputeUnit.CPU_AND_NE,
         description="The compute units to use for the audio encoder. Default is CPU_AND_NE.",
@@ -45,13 +69,17 @@ class WhisperKitProOrchestrationConfig(OrchestrationConfig):
         ComputeUnit.CPU_AND_NE,
         description="The compute units to use for the text decoder. Default is CPU_AND_NE.",
     )
-    orchestration_strategy: Literal["word", "segment"] = Field(
-        "segment",
-        description="The orchestration strategy to use either `word` or `segment`",
+    orchestration_strategy: Literal["segment", "subsegment"] = Field(
+        "subsegment",
+        description="The orchestration strategy to use either `segment` or `subsegment`",
     )
-    clusterer_version: Literal["pyannote3", "pyannote4"] = Field(
-        "pyannote4",
-        description="The version of the clusterer to use",
+    engine: Literal["pyannote", "sortformer"] = Field(
+        "pyannote",
+        description="The engine to use. If `sortformer` the diarization model used is Sortformer, otherwise it is pyannote.",
+    )
+    diarization_mode: Literal["realtime", "prerecorded"] = Field(
+        "prerecorded",
+        description="Sortformer streaming mode: `realtime` (1.04s latency) or `prerecorded` (9.84s latency). This is only applicable when `engine` is `sortformer`.",
     )
     use_exclusive_reconciliation: bool = Field(
         False,
@@ -73,6 +101,9 @@ class WhisperKitProOrchestrationPipeline(Pipeline):
             model_version=self.config.model_version,
             model_prefix=self.config.model_prefix,
             model_repo_name=self.config.model_repo_name,
+            repo_id=self.config.repo_id,
+            model_variant=self.config.model_variant,
+            model_dir=self.config.model_dir,
             audio_encoder_compute_units=self.config.audio_encoder_compute_units,
             text_decoder_compute_units=self.config.text_decoder_compute_units,
             report_path="whisperkitpro_orchestration_reports",
@@ -80,7 +111,8 @@ class WhisperKitProOrchestrationPipeline(Pipeline):
             chunking_strategy="vad",
             diarization=True,
             orchestration_strategy=self.config.orchestration_strategy,
-            clusterer_version_string=self.config.clusterer_version,
+            engine=self.config.engine,
+            diarization_mode=self.config.diarization_mode,
             use_exclusive_reconciliation=self.config.use_exclusive_reconciliation,
             fast_load=self.config.fast_load,
         )

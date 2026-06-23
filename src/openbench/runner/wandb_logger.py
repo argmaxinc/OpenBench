@@ -19,6 +19,7 @@ from .data_models import (
     BaseSampleResult,
     DiarizationSampleResult,
     GlobalResult,
+    SpeechGenerationSampleResult,
     TaskResult,
     TranscriptionSampleResult,
 )
@@ -356,4 +357,22 @@ class TranscriptionWandbLogger(WandbLogger[TranscriptionSampleResult]):
         sample_results: list[TranscriptionSampleResult],
     ) -> dict[str, Any]:
         """Custom logging logic for transcription pipeline."""
+        return {}
+
+
+class SpeechGenerationWandbLogger(WandbLogger[SpeechGenerationSampleResult]):
+    """Logger for speech-generation pipeline results.
+
+    The base WandbLogger already serializes each sample's prediction via
+    `prediction.to_annotation_file`, which for GeneratedAudio copies the
+    WAV under the predictions artifact directory. No additional custom
+    logging is needed at this stage.
+    """
+
+    def custom_log(
+        self,
+        global_results: list[GlobalResult],
+        task_results: list[TaskResult],
+        sample_results: list[SpeechGenerationSampleResult],
+    ) -> dict[str, Any]:
         return {}
