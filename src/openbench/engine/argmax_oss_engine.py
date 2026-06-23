@@ -1,9 +1,7 @@
 # For licensing see accompanying LICENSE.md file.
-# Copyright (C) 2025 Argmax, Inc. All Rights Reserved.
+# Copyright (C) 2026 Argmax, Inc. All Rights Reserved.
 
-"""Argmax SDK open-source CLI (`argmax-cli`) — clone/build, transcribe, and diarize."""
-
-from __future__ import annotations
+"""Argmax SDK open-source CLI (`argmax-cli`) — clone/build, transcribe, diarize, and tts."""
 
 import os
 import subprocess
@@ -18,6 +16,12 @@ logger = get_logger(__name__)
 ARGMAX_OSS_REPO_URL = "https://github.com/argmaxinc/argmax-oss-swift"
 ARGMAX_OSS_PRODUCT = "argmax-cli"
 DEFAULT_CACHE_SUBDIR = Path(".cache") / "openbench" / "argmax-oss"
+
+# Process-wide cache of resolved CLI binary paths, keyed by (cache_root, commit_hash).
+# Avoids re-cloning and re-invoking `swift build` when multiple pipelines (e.g. a
+# TTS pipeline + the WER metric's transcription pipeline) build their own engine
+# instances in the same run.
+_CLI_PATH_CACHE: dict[tuple[str, str | None], str] = {}
 
 
 def resolve_argmax_oss_cache_dir(explicit: str | Path | None = None) -> Path:
@@ -79,16 +83,39 @@ class DiarizeCliOutput(BaseModel):
     rttm_path: Path = Field(..., description="Written RTTM path")
 
 
+class TtsCliInput(BaseModel):
+    """Input for `argmax-cli tts`."""
+
+    text: str = Field(..., description="Text to synthesize.")
+    output_path: Path = Field(..., description="Destination audio file path (extension picks format).")
+
+
+class TtsCliOutput(BaseModel):
+    """Output from `argmax-cli tts`."""
+
+    audio_path: Path = Field(..., description="Generated audio path.")
+
+
 class ArgmaxOpenSourceEngine:
-    """Resolve `argmax-cli`, then run `transcribe` / `diarize` subcommands."""
+    """Resolve `argmax-cli`, then run `transcribe` / `diarize` / `tts` subcommands."""
 
     def __init__(self, config: ArgmaxOpenSourceEngineConfig) -> None:
         self.config = config
         if config.cli_path:
             self.cli_path = str(Path(config.cli_path).expanduser().resolve())
-            logger.info(f"Using Argmax OSS CLI at {self.cli_path}")
-        else:
-            self.cli_path = self._clone_and_build_cli()
+            logger.info("Using Argmax OSS CLI at %s", self.cli_path)
+            return
+
+        cache_root = resolve_argmax_oss_cache_dir(config.cache_dir)
+        cache_key = (str(cache_root), config.commit_hash)
+        cached_cli_path = _CLI_PATH_CACHE.get(cache_key)
+        if cached_cli_path is not None:
+            logger.info("Reusing cached Argmax OSS CLI at %s", cached_cli_path)
+            self.cli_path = cached_cli_path
+            return
+
+        self.cli_path = self._clone_and_build_cli(cache_root)
+        _CLI_PATH_CACHE[cache_key] = self.cli_path
 
     def _build_cli(self, repo_dir: str) -> str:
         """Run release build (swift build -c release, not debug) and return the dir containing the binary."""
@@ -119,8 +146,7 @@ class ArgmaxOpenSourceEngine:
         logger.info("Built Argmax OSS CLI at %s", cli)
         return bin_dir
 
-    def _clone_and_build_cli(self) -> str:
-        cache_root = resolve_argmax_oss_cache_dir(self.config.cache_dir)
+    def _clone_and_build_cli(self, cache_root: Path) -> str:
         cache_root.mkdir(parents=True, exist_ok=True)
         repo_url_parts = ARGMAX_OSS_REPO_URL.rstrip("/").split("/")
         repo_name = repo_url_parts[-1]
@@ -201,3 +227,23 @@ class ArgmaxOpenSourceEngine:
             input.audio_path.unlink(missing_ok=True)
 
         return DiarizeCliOutput(rttm_path=input.rttm_path)
+
+    def tts(self, input: TtsCliInput, tts_args: list[str]) -> TtsCliOutput:
+        """Run `argmax-cli tts` with pre-built flag list (see TTS pipeline config)."""
+        input.output_path.parent.mkdir(parents=True, exist_ok=True)
+        cmd = [
+            self.cli_path,
+            "tts",
+            "--text",
+            input.text,
+            "--output-path",
+            str(input.output_path),
+            *tts_args,
+        ]
+        logger.debug("Argmax OSS tts: %s", cmd)
+        try:
+            subprocess.run(cmd, check=True, capture_output=True, text=True)
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError(f"argmax-cli tts failed: {e.stderr}") from e
+
+        return TtsCliOutput(audio_path=input.output_path)

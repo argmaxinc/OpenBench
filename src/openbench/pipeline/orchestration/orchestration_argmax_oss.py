@@ -3,8 +3,6 @@
 
 """Orchestration: `argmax-cli transcribe --diarization`; prediction from RTTM-like verbose log (word + speaker, no timestamps)."""
 
-from __future__ import annotations
-
 from pathlib import Path
 from typing import Callable
 

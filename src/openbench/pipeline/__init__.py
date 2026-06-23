@@ -6,6 +6,7 @@ from .base import PIPELINE_REGISTRY, Pipeline, register_pipeline
 from .diarization import *
 from .orchestration import *
 from .pipeline_registry import PipelineRegistry
+from .speech_generation import *
 from .streaming_transcription import *
 from .transcription import *
 
