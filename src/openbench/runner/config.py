@@ -37,6 +37,14 @@ class BenchmarkConfig(BaseModel):
     hf_results_flush_every: int = Field(
         100, description="Flush buffered per-sample results to the HF repo every N samples."
     )
+    hf_results_chunk_tag: str | None = Field(
+        None,
+        description=(
+            "Suffix appended to the uploaded parquet shard names. Required when several runs "
+            "(e.g. dataset shards) push to one repo at the same time, since each picks its "
+            "starting chunk index independently and identical names would overwrite."
+        ),
+    )
     continue_on_sample_error: bool = Field(
         True,
         description=(

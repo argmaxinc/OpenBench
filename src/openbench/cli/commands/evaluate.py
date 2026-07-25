@@ -35,6 +35,20 @@ from ..command_utils import (
 PipelineConfigOptions = dict[str, dict[str, Any] | dict[str, dict[str, Any]]]
 
 
+def parse_dataset_shard(spec: str) -> tuple[int, int]:
+    """Parse a ``INDEX/TOTAL`` shard spec into 0-based (index, total)."""
+    index_str, sep, total_str = spec.partition("/")
+    if not sep:
+        raise typer.BadParameter(f"Expected INDEX/TOTAL, got {spec!r}", param_hint="--dataset-shard")
+    try:
+        index, total = int(index_str), int(total_str)
+    except ValueError:
+        raise typer.BadParameter(f"INDEX and TOTAL must be integers, got {spec!r}", param_hint="--dataset-shard")
+    if total < 1 or not 0 <= index < total:
+        raise typer.BadParameter(f"Need 0 <= INDEX < TOTAL and TOTAL >= 1, got {spec!r}", param_hint="--dataset-shard")
+    return index, total
+
+
 class EvaluationConfig(BaseModel):
     benchmark_config: BenchmarkConfig = Field(..., description="The benchmark config to use for evaluation")
     pipeline_config: dict[str, dict[str, Any]] = Field(
@@ -181,6 +195,9 @@ def run_alias_mode(
     verbose: bool,
     hf_results_repo: str | None = None,
     hf_results_flush_every: int = 100,
+    hf_results_chunk_tag: str | None = None,
+    dataset_shard: str | None = None,
+    skip_completed_in: str | None = None,
     metric_config: list[str] | None = None,
 ) -> BenchmarkResult:
     """Run evaluation using pipeline and dataset aliases."""
@@ -227,6 +244,24 @@ def run_alias_mode(
         typer.echo(f"📊 Loading dataset: {dataset_name}")
         dataset_config = DatasetRegistry.get_alias_config(dataset_name)
 
+        # Row selection for split-up sweeps: keep one shard, and/or drop samples
+        # that already have results elsewhere.
+        dataset_overrides: dict[str, Any] = {}
+        if dataset_shard:
+            shard_index, num_shards = parse_dataset_shard(dataset_shard)
+            dataset_overrides.update(num_shards=num_shards, shard_index=shard_index)
+            typer.echo(f"🔀 Dataset shard {shard_index} of {num_shards} (interleaved)")
+        if skip_completed_in:
+            from openbench.runner.speech_generation_sink import completed_sample_ids
+
+            repos = [repo for repo in (r.strip() for r in skip_completed_in.split(",")) if repo]
+            completed = completed_sample_ids(repos)
+            typer.echo(f"⏭️  Skipping {len(completed)} samples already scored in {', '.join(repos)}")
+            if completed:
+                dataset_overrides["exclude_sample_ids"] = frozenset(completed)
+        if dataset_overrides:
+            dataset_config = dataset_config.model_copy(update=dataset_overrides)
+
         wandb_config = WandbConfig(
             project_name=wandb_project,
             run_name=wandb_run_name,
@@ -262,6 +297,7 @@ def run_alias_mode(
             metrics=metric_kwargs,
             hf_results_repo=hf_results_repo,
             hf_results_flush_every=hf_results_flush_every,
+            hf_results_chunk_tag=hf_results_chunk_tag,
         )
 
         # Create runner
@@ -420,6 +456,35 @@ def evaluate(
         "--hf-results-flush-every",
         help="Flush buffered per-sample results to the HF repo every N samples (used with --hf-results-repo).",
     ),
+    hf_results_chunk_tag: str | None = typer.Option(
+        None,
+        "--hf-results-chunk-tag",
+        help=(
+            "Suffix for the uploaded parquet shard filenames, e.g. `--hf-results-chunk-tag s3`. "
+            "Required when several runs push to the same --hf-results-repo concurrently: each "
+            "picks its starting chunk index independently, so without distinct tags they would "
+            "overwrite each other's shards."
+        ),
+    ),
+    dataset_shard: str | None = typer.Option(
+        None,
+        "--dataset-shard",
+        help=(
+            "Evaluate only one interleaved shard of the dataset, given as INDEX/TOTAL with a "
+            "0-based index, e.g. `--dataset-shard 3/10`. Lets one sweep run as several independent "
+            "jobs, each short enough to finish inside a CI job's time limit. Shard membership "
+            "depends only on INDEX/TOTAL, so a single shard can be retried on its own. Alias mode only."
+        ),
+    ),
+    skip_completed_in: str | None = typer.Option(
+        None,
+        "--skip-completed-in",
+        help=(
+            "Comma-separated HF results repos to resume past: every sample already scored there is "
+            "dropped before evaluation. Pass the current --hf-results-repo plus any older repo "
+            "holding partial results. Alias mode only."
+        ),
+    ),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output"),
 ) -> None:
     """Run evaluation benchmarks.
@@ -467,6 +532,17 @@ def evaluate(
 
         # Validate mutually exclusive modes
         if evaluation_config_path is not None:
+            alias_only = {
+                "--dataset-shard": dataset_shard,
+                "--skip-completed-in": skip_completed_in,
+                "--hf-results-chunk-tag": hf_results_chunk_tag,
+            }
+            unsupported = [flag for flag, value in alias_only.items() if value]
+            if unsupported:
+                raise typer.BadParameter(
+                    f"{', '.join(unsupported)} only apply in alias mode; set the equivalent fields in "
+                    "the evaluation config instead."
+                )
             typer.echo("🔧 Running with config file mode")
             result = run_config_file_mode(evaluation_config_path, evaluation_config_overrides, verbose)
         else:
@@ -484,6 +560,9 @@ def evaluate(
                 pipeline_config=pipeline_config,
                 hf_results_repo=hf_results_repo,
                 hf_results_flush_every=hf_results_flush_every,
+                hf_results_chunk_tag=hf_results_chunk_tag,
+                dataset_shard=dataset_shard,
+                skip_completed_in=skip_completed_in,
                 metric_config=metric_config,
                 verbose=verbose,
             )

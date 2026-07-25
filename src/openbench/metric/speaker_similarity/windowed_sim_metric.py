@@ -109,6 +109,14 @@ class SpeechGenerationWindowedSpeakerSimilarity(SpeechGenerationSpeakerSimilarit
 
     def window_scores(self, generated_audio: str, reference_audio: str) -> list[float]:
         """Cosine similarity of each generated-audio window vs the whole reference."""
+        return [score for _, score in self.window_scores_with_starts(generated_audio, reference_audio)]
+
+    def window_scores_with_starts(self, generated_audio: str, reference_audio: str) -> list[tuple[float, float]]:
+        """``(window start in seconds, similarity vs the whole reference)`` per window.
+
+        The start times make a low-scoring window locatable in the generated clip,
+        which is what turns a bad score into something you can listen to.
+        """
         emb_reference = self._embed_waveform(self._load_16k(reference_audio))
         wav = self._load_16k(generated_audio)
         total = wav.shape[-1]
@@ -117,19 +125,19 @@ class SpeechGenerationWindowedSpeakerSimilarity(SpeechGenerationSpeakerSimilarit
         min_win = int(self.min_window_seconds * self.SAMPLE_RATE)
 
         starts = list(range(0, max(total - win, 0) + 1, hop))
-        windows = [wav[:, s : s + win] for s in starts]
+        windows = [(s, wav[:, s : s + win]) for s in starts]
         # Cover the tail beyond the last full window when it is long enough to
         # embed meaningfully; a clip shorter than one window is itself the only
         # window (degenerates to plain SIM).
         tail_start = starts[-1] + hop if windows else 0
         if total - tail_start >= min_win or not windows:
-            windows.append(wav[:, tail_start:])
+            windows.append((tail_start, wav[:, tail_start:]))
 
-        scores = []
-        for w in windows:
+        scored = []
+        for start, w in windows:
             emb = self._embed_waveform(w)
-            scores.append(F.cosine_similarity(emb, emb_reference).item())
-        return scores
+            scored.append((start / self.SAMPLE_RATE, F.cosine_similarity(emb, emb_reference).item()))
+        return scored
 
     # -- BaseMetric interface --------------------------------------------------
 
@@ -147,11 +155,13 @@ class SpeechGenerationWindowedSpeakerSimilarity(SpeechGenerationSpeakerSimilarit
                 "(or pass reference_audio=... to the metric call)."
             )
 
-        scores = self.window_scores(generated_audio, str(reference_audio))
+        scored = self.window_scores_with_starts(generated_audio, str(reference_audio))
+        scores = [score for _, score in scored]
         n = len(scores)
         mean = sum(scores) / n
         var = sum((s - mean) ** 2 for s in scores) / n
-        lo, hi = min(scores), max(scores)
+        min_start, lo = min(scored, key=lambda window: window[1])
+        hi = max(scores)
 
         self._run_window_min = lo if self._run_window_min is None else min(self._run_window_min, lo)
         self._run_window_max = hi if self._run_window_max is None else max(self._run_window_max, hi)
@@ -167,6 +177,12 @@ class SpeechGenerationWindowedSpeakerSimilarity(SpeechGenerationSpeakerSimilarit
             "wsim_var_sum": var,
             "window_count": float(n),
             "count": 1.0,
+            # Not declared in metric_components(), so these are never accumulated
+            # into run totals — they ride along in the per-sample detailed output
+            # (W&B task table) to make single-sample drift analyzable.
+            "wsim_min": lo,
+            "wsim_max": hi,
+            "wsim_min_start": min_start,
         }
 
     def compute_metric(self, detail: Details) -> float:
