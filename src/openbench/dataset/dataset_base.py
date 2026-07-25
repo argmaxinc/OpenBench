@@ -10,7 +10,7 @@ import soundfile as sf
 from argmaxtools.utils import get_logger
 from datasets import Dataset as HfDataset
 from datasets import load_dataset
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_serializer
 
 from ..types import PredictionProtocol
 from .dataset_utils import validate_hf_dataset_schema
@@ -65,6 +65,11 @@ class DatasetConfig(BaseModel):
             "The function signature should be `def transform(row: dict[str, Any]) -> dict[str, Any]` where the key is the post column mapping name and the value is the transformed column."
         ),
     )
+
+    @field_serializer("exclude_sample_ids")
+    def _serialize_exclude_sample_ids(self, sample_ids: frozenset[str] | None) -> list[str] | None:
+        """Dump the id set as a sorted list, since a set is not JSON serializable."""
+        return sorted(sample_ids) if sample_ids else None
 
     def load(self) -> HfDataset:
         """Load dataset from config.

@@ -61,4 +61,9 @@ class BenchmarkConfig(BaseModel):
         wandb_config: dict[str, Any] = self.model_dump()
         # Convert `metrics` that use enums to their respective values
         wandb_config["metrics"] = {metric.value: kwargs for metric, kwargs in wandb_config["metrics"].items()}
+        # A resumed sweep excludes every already-scored id; log how many were
+        # skipped instead of listing them, which would swamp the run config.
+        for dataset in wandb_config.get("datasets", {}).values():
+            if dataset.get("exclude_sample_ids") is not None:
+                dataset["exclude_sample_ids"] = f"{len(dataset['exclude_sample_ids'])} already-scored ids"
         return wandb_config
