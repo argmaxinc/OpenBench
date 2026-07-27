@@ -11,13 +11,15 @@ results accumulate safely and the HF dataset viewer auto-concatenates them.
 Each row carries three playable Audio columns (embedded in the parquet) for
 listening-based debugging — ``prompt_audio`` (the clone prompt),
 ``sim_reference_audio`` (the clip SIM compared the generation against), and
-``generated_audio`` — plus ``prompt_text``, the ASR ``transcription``, and
-per-sample ``SIM`` / ``WER``.
+``generated_audio`` — plus ``prompt_text``, the ASR ``transcription``,
+per-sample ``SIM`` / ``WER``, and (when ``-m sim-windowed`` is enabled)
+``wsim_mean`` / ``wsim_var`` / ``wsim_min`` / ``wsim_max`` / ``wsim_min_start``.
 """
 
 import re
 import tempfile
 from collections.abc import Iterable
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from argmaxtools.utils import get_logger
@@ -31,6 +33,7 @@ logger = get_logger(__name__)
 _DATA_DIR = "data"
 _CHUNK_RE = re.compile(r"chunk-(\d+)(?:-[A-Za-z0-9._-]+)?\.parquet$")
 _TAG_SANITIZE_RE = re.compile(r"[^A-Za-z0-9._-]+")
+_RESUME_READ_WORKERS = 12
 
 
 class SpeechGenerationResultSink:
@@ -102,11 +105,16 @@ class SpeechGenerationResultSink:
                 "sim_reference_audio": Audio(),
                 "generated_audio": Audio(),
                 # Kept adjacent for easy analysis: synthesized text, its ASR
-                # transcription, and the two scores.
+                # transcription, whole-clip SIM/WER, and windowed SIM breakdown.
                 "prompt_text": Value("string"),
                 "transcription": Value("string"),
                 "WER": Value("float32"),
                 "SIM": Value("float32"),
+                "wsim_mean": Value("float32"),
+                "wsim_var": Value("float32"),
+                "wsim_min": Value("float32"),
+                "wsim_max": Value("float32"),
+                "wsim_min_start": Value("float32"),
             }
         )
         rows, self._buffer = self._buffer, []
@@ -144,30 +152,39 @@ def completed_sample_ids(repo_ids: Iterable[str], column: str = "sample_idx") ->
     embedded audio columns are never downloaded — reading the ids of a few
     hundred results costs megabytes, not gigabytes. Repos that do not exist yet
     contribute nothing, which makes a first run behave like a full sweep.
+
+    Shards are read concurrently because the cost is per-file network latency,
+    not bandwidth; a resumed sweep would otherwise spend a large part of its job
+    reading shard footers one at a time before scoring its first sample.
     """
     import pyarrow.parquet as pq
     from huggingface_hub import HfFileSystem
     from huggingface_hub.utils import HfHubHTTPError
 
-    fs = HfFileSystem()
     completed: set[str] = set()
+
+    def shard_ids(shard: str) -> set[str]:
+        # A filesystem per worker: HfFileSystem holds a session that is not
+        # guaranteed to be thread-safe.
+        with HfFileSystem().open(shard, "rb") as handle:
+            table = pq.read_table(handle, columns=[column])
+        return {str(v) for v in table.column(column).to_pylist() if v is not None}
+
     for repo_id in repo_ids:
         repo_id = repo_id.strip()
         if not repo_id:
             continue
         try:
-            shards = fs.glob(f"datasets/{repo_id}/**/*.parquet")
+            shards = HfFileSystem().glob(f"datasets/{repo_id}/**/*.parquet")
         except (FileNotFoundError, HfHubHTTPError) as e:
             logger.info(f"No results to resume from in {repo_id}: {e}")
             continue
 
         found = 0
-        for shard in shards:
-            with fs.open(shard, "rb") as handle:
-                table = pq.read_table(handle, columns=[column])
-            ids = {str(v) for v in table.column(column).to_pylist() if v is not None}
-            found += len(ids)
-            completed |= ids
+        with ThreadPoolExecutor(max_workers=_RESUME_READ_WORKERS) as pool:
+            for ids in pool.map(shard_ids, shards):
+                found += len(ids)
+                completed |= ids
         logger.info(f"Found {found} scored samples across {len(shards)} shards in {repo_id}")
 
     logger.info(f"Resuming past {len(completed)} unique already-scored samples")

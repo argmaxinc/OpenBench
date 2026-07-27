@@ -235,6 +235,9 @@ class BenchmarkRunner:
 
         sim = wer = None
         transcription = ""
+        # Windowed SIM columns stay None when `-m sim-windowed` was not requested,
+        # so the parquet schema stays stable across runs that omit it.
+        wsim_mean = wsim_var = wsim_min = wsim_max = wsim_min_start = None
         for t in task_results:
             name = self._normalize_metric_name(t.metric_name)
             if name == "sim":
@@ -244,6 +247,16 @@ class BenchmarkRunner:
                 # The ASR transcription used to compute WER rides along in the
                 # metric's per-sample detailed output (see speech_generation_wer).
                 transcription = (t.detailed_result or {}).get("transcription") or ""
+            elif name == "sim-windowed":
+                detail = t.detailed_result or {}
+                # Metric value is the per-sample windowed mean; within-sample
+                # variance rides as wsim_var_sum (same column names as the
+                # standalone wSIM backfill).
+                wsim_mean = t.result
+                wsim_var = detail.get("wsim_var_sum")
+                wsim_min = detail.get("wsim_min")
+                wsim_max = detail.get("wsim_max")
+                wsim_min_start = detail.get("wsim_min_start")
 
         try:
             gen_array, gen_sr = sf.read(output.prediction.audio_path, dtype="float32")
@@ -272,11 +285,16 @@ class BenchmarkRunner:
             "prompt_audio": prompt,
             "sim_reference_audio": sim_reference,
             "generated_audio": {"array": gen_array, "sampling_rate": int(gen_sr)},
-            # prompt_text / transcription / WER / SIM kept adjacent for analysis.
+            # prompt_text / transcription / WER / SIM / wSIM kept adjacent for analysis.
             "prompt_text": sample.text,
             "transcription": transcription,
             "WER": wer,
             "SIM": sim,
+            "wsim_mean": wsim_mean,
+            "wsim_var": wsim_var,
+            "wsim_min": wsim_min,
+            "wsim_max": wsim_max,
+            "wsim_min_start": wsim_min_start,
         }
 
     def _run_pipeline_on_dataset_parallel(
