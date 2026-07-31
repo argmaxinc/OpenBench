@@ -697,6 +697,30 @@ def register_dataset_aliases() -> None:
         description="Reference-length smoke-test subset (first 3 samples) for quick pipeline validation.",
     )
 
+    # Worst Exp1 Python 1.7B WER failures for RD-691 guardrails A/B.
+    DatasetRegistry.register_alias(
+        "rd691-worst3-reflen",
+        DatasetConfig(
+            dataset_id="argmaxinc/reflen-sim-eval",
+            subset="default",
+            split="train",
+            include_sample_ids=frozenset(
+                {
+                    "en_US_Southern_Banking_1589014_channel1-ref26",
+                    "en_US_Southern_Banking_1589014_channel1-ref27",
+                    "en_US_Southern_Aviation_1589010_channel1-ref30",
+                }
+            ),
+        ),
+        supported_pipeline_types={
+            PipelineType.SPEECH_GENERATION,
+        },
+        description=(
+            "Three worst Exp1 prototype-1.7b reflen WER samples for RD-691 "
+            "guardrails comparison (long Southern banking/aviation refs)."
+        ),
+    )
+
     # The exact 100 reflen samples scored by the local Swift throughput run
     # (voice-clone-benchmark rows as of 2026-07-22): cross-implementation
     # comparisons re-run precisely this subset.

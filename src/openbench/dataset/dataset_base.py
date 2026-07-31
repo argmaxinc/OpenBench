@@ -50,9 +50,19 @@ class DatasetConfig(BaseModel):
             "sharding, so shard membership does not shift as results accumulate."
         ),
     )
+    include_sample_ids: frozenset[str] | None = Field(
+        None,
+        description=(
+            "Keep only rows whose `sample_id_column` value appears in this set. Applied after "
+            "sharding/exclusions so a tiny targeted compare can reuse a large hosted dataset."
+        ),
+    )
     sample_id_column: str = Field(
         "sample_idx",
-        description="Column holding the dataset-stable sample id matched against `exclude_sample_ids`.",
+        description=(
+            "Column holding the dataset-stable sample id matched against "
+            "`exclude_sample_ids` / `include_sample_ids`."
+        ),
     )
     column_mapping: Mapping[str, str] | None = Field(
         None, description="Mapping of the column names in the dataset to the expected column names in the sample class"
@@ -68,6 +78,11 @@ class DatasetConfig(BaseModel):
 
     @field_serializer("exclude_sample_ids")
     def _serialize_exclude_sample_ids(self, sample_ids: frozenset[str] | None) -> list[str] | None:
+        """Dump the id set as a sorted list, since a set is not JSON serializable."""
+        return sorted(sample_ids) if sample_ids else None
+
+    @field_serializer("include_sample_ids")
+    def _serialize_include_sample_ids(self, sample_ids: frozenset[str] | None) -> list[str] | None:
         """Dump the id set as a sorted list, since a set is not JSON serializable."""
         return sorted(sample_ids) if sample_ids else None
 
@@ -143,6 +158,17 @@ class DatasetConfig(BaseModel):
             # input_columns keeps the filter from decoding the audio columns.
             ds = ds.filter(lambda sample_id: str(sample_id) not in excluded, input_columns=self.sample_id_column)
             logger.info(f"Excluded {before - len(ds)} already-completed rows, {len(ds)} left to evaluate")
+
+        if self.include_sample_ids:
+            if self.sample_id_column not in ds.column_names:
+                raise ValueError(
+                    f"include_sample_ids needs column {self.sample_id_column!r}, "
+                    f"but the dataset only has {ds.column_names}"
+                )
+            included = self.include_sample_ids
+            before = len(ds)
+            ds = ds.filter(lambda sample_id: str(sample_id) in included, input_columns=self.sample_id_column)
+            logger.info(f"Included filter kept {len(ds)} of {before} rows")
 
         if self.column_mapping is not None:
             ds = ds.rename_columns(self.column_mapping)

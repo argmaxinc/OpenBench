@@ -66,4 +66,6 @@ class BenchmarkConfig(BaseModel):
         for dataset in wandb_config.get("datasets", {}).values():
             if dataset.get("exclude_sample_ids") is not None:
                 dataset["exclude_sample_ids"] = f"{len(dataset['exclude_sample_ids'])} already-scored ids"
+            if dataset.get("include_sample_ids") is not None:
+                dataset["include_sample_ids"] = sorted(dataset["include_sample_ids"])
         return wandb_config
