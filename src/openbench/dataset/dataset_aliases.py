@@ -753,6 +753,41 @@ def register_dataset_aliases() -> None:
         description="Prompt-length smoke-test subset (first 3 samples) for quick pipeline validation.",
     )
 
+    # TED long-prompt WER / hallucination study: short promptlen-style refs ×
+    # TED talk synthesis text at 10/15/20/25 min (sentence-snapped word budgets).
+    # No target_audio — WER only (ground truth = prompt_text); SIM is out of scope.
+    DatasetRegistry.register_alias(
+        "ted-longprompt-wer-eval",
+        DatasetConfig(
+            dataset_id="argmaxinc/ted-longprompt-wer-eval",
+            split="train",
+            column_mapping={"reference_audio": "audio"},
+        ),
+        supported_pipeline_types={
+            PipelineType.SPEECH_GENERATION,
+        },
+        description=(
+            "TED long-prompt WER study (100 rows: 25 short refs × 10/15/20/25 min TED "
+            "prompts). WER vs prompt_text; no SIM yardstick audio."
+        ),
+    )
+
+    DatasetRegistry.register_alias(
+        "ted-longprompt-wer-eval-mini",
+        DatasetConfig(
+            dataset_id="argmaxinc/ted-longprompt-wer-eval-mini",
+            split="train",
+            column_mapping={"reference_audio": "audio"},
+        ),
+        supported_pipeline_types={
+            PipelineType.SPEECH_GENERATION,
+        },
+        description=(
+            "TED long-prompt smoke subset (2 × ~10 min prompts) for pipeline validation "
+            "before the full 100-row sweep."
+        ),
+    )
+
     # Refclone / reference-length study: built locally from
     # argmaxinc/force_aligner_speech_regions via scripts/refclone/build_dataset.py.
     # Each row: target text + real target audio (SIM) + variable-length ref_audio/ref_text (ICL).
