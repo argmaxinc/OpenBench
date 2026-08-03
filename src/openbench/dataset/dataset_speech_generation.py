@@ -22,6 +22,10 @@ class SpeechGenerationExtraInfo(TypedDict, total=False):
     SIM compares the generated clip against `sim_audio` when set (refclone /
     reference-length study: fixed REAL target wav). Otherwise it falls back to
     `ref_audio` / the sample waveform (seedTTS-style reconstruction).
+
+    TED long-prompt WER rows optionally carry ``prompt_length`` (word count) and
+    ``prompt_duration_minutes`` (nominal estimated talking time). Presence of
+    ``prompt_duration_minutes`` selects the WER-only HF results schema.
     """
 
     language: str
@@ -29,6 +33,8 @@ class SpeechGenerationExtraInfo(TypedDict, total=False):
     ref_text: str
     sim_audio: str
     sample_idx: str
+    prompt_length: int
+    prompt_duration_minutes: int
 
 
 class SpeechGenerationRow(TypedDict, total=False):
@@ -45,6 +51,8 @@ class SpeechGenerationRow(TypedDict, total=False):
     target_text: str
     language: str
     sample_idx: str
+    prompt_length: int
+    prompt_duration_minutes: int
 
 
 class SpeechGenerationSample(BaseSample[Transcript, SpeechGenerationExtraInfo]):
@@ -134,6 +142,11 @@ class SpeechGenerationDataset(BaseDataset[SpeechGenerationSample]):
         # Stable per-sample id (e.g. source file name) for downstream result rows.
         if row.get("sample_idx") is not None:
             extra_info["sample_idx"] = str(row["sample_idx"])
+        # TED long-prompt metadata → WER-only results schema (no SIM yardstick).
+        if row.get("prompt_length") is not None:
+            extra_info["prompt_length"] = int(row["prompt_length"])
+        if row.get("prompt_duration_minutes") is not None:
+            extra_info["prompt_duration_minutes"] = int(row["prompt_duration_minutes"])
         # Explicit ICL ref transcript (refclone: local datasets ship a ref_text column).
         ref_text = row.get("ref_text")
         if isinstance(ref_text, str) and ref_text.strip():
@@ -148,8 +161,14 @@ class SpeechGenerationDataset(BaseDataset[SpeechGenerationSample]):
         # not computed against the clip the model conditioned on (same-channel /
         # ICL-continuation bias inflates that score). An explicit `sim_audio` path
         # column (refclone local datasets) takes precedence below.
+        # Skip when the row is TED long-prompt (prompt_duration_minutes): there is
+        # no held-out target audio for the synthesis text.
         target_audio = row.get("target_audio")
-        if isinstance(target_audio, dict) and target_audio.get("array") is not None:
+        if (
+            row.get("prompt_duration_minutes") is None
+            and isinstance(target_audio, dict)
+            and target_audio.get("array") is not None
+        ):
             sim_dir = Path("./temp_dataset_sim_audio")
             sim_dir.mkdir(parents=True, exist_ok=True)
             sim_name = str(row.get("sample_idx") or f"sample_{row.get('idx', 'unknown')}")
@@ -162,7 +181,7 @@ class SpeechGenerationDataset(BaseDataset[SpeechGenerationSample]):
             extra_info["ref_audio"] = ref_audio.strip()
 
         sim_audio = row.get("sim_audio")  # type: ignore[attr-defined]
-        if isinstance(sim_audio, str) and sim_audio.strip():
+        if isinstance(sim_audio, str) and sim_audio.strip() and row.get("prompt_duration_minutes") is None:
             extra_info["sim_audio"] = sim_audio.strip()
 
         return reference, extra_info

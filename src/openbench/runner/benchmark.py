@@ -223,12 +223,12 @@ class BenchmarkRunner:
     def _build_speech_generation_row(self, sample, output, task_results, sample_id) -> dict | None:
         """Assemble one row for the speech-generation HF results sink.
 
-        Carries three audio columns so per-sample scores can be debugged by
-        listening: ``prompt_audio`` (the clone prompt, i.e. the sample
-        waveform), ``sim_reference_audio`` (the clip SIM actually compared
-        against — the held-out real target when the dataset ships one, else
-        the prompt), and ``generated_audio``. Audio is carried as in-memory
-        arrays so it embeds into the parquet shard.
+        Default (SIM-capable) schema: ``prompt_audio``, ``sim_reference_audio``,
+        ``generated_audio``, texts, ``WER`` / ``SIM`` / windowed SIM columns.
+
+        TED long-prompt WER schema (selected when the sample carries
+        ``prompt_duration_minutes``): no SIM yardstick or SIM metric columns;
+        adds ``prompt_word_count`` and ``prompt_duration`` (minutes).
         """
         import numpy as np
         import soundfile as sf
@@ -265,6 +265,27 @@ class BenchmarkRunner:
             return None
 
         prompt = {"array": np.asarray(sample.waveform, dtype=np.float32), "sampling_rate": int(sample.sample_rate)}
+        sample_idx = str(sample.extra_info.get("sample_idx", sample_id))
+        language = sample.extra_info.get("language") or ""
+        generated = {"array": gen_array, "sampling_rate": int(gen_sr)}
+
+        # TED long-prompt: estimated talking-time metadata selects the slim schema.
+        prompt_duration = sample.extra_info.get("prompt_duration_minutes")
+        if prompt_duration is not None:
+            word_count = sample.extra_info.get("prompt_length")
+            if word_count is None:
+                word_count = len((sample.text or "").split())
+            return {
+                "sample_idx": sample_idx,
+                "prompt_word_count": int(word_count),
+                "prompt_duration": int(prompt_duration),
+                "prompt_audio": prompt,
+                "generated_audio": generated,
+                "prompt_text": sample.text,
+                "transcription": transcription,
+                "WER": wer,
+                "language": language,
+            }
 
         # The clip the SIM metric compared the generation against (sim_audio /
         # ref_audio, whichever the pipeline recorded on the prediction). None if
@@ -280,11 +301,11 @@ class BenchmarkRunner:
 
         return {
             # Prefer the dataset's stable id (e.g. source file name) over the loop index.
-            "sample_idx": str(sample.extra_info.get("sample_idx", sample_id)),
-            "language": sample.extra_info.get("language") or "",
+            "sample_idx": sample_idx,
+            "language": language,
             "prompt_audio": prompt,
             "sim_reference_audio": sim_reference,
-            "generated_audio": {"array": gen_array, "sampling_rate": int(gen_sr)},
+            "generated_audio": generated,
             # prompt_text / transcription / WER / SIM / wSIM kept adjacent for analysis.
             "prompt_text": sample.text,
             "transcription": transcription,

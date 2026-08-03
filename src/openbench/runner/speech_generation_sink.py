@@ -8,12 +8,15 @@ parquet shard to a Hugging Face dataset repo (``data/chunk-NNNNN.parquet``).
 Each flush only uploads a new file — existing shards are never rewritten — so
 results accumulate safely and the HF dataset viewer auto-concatenates them.
 
-Each row carries three playable Audio columns (embedded in the parquet) for
-listening-based debugging — ``prompt_audio`` (the clone prompt),
-``sim_reference_audio`` (the clip SIM compared the generation against), and
-``generated_audio`` — plus ``prompt_text``, the ASR ``transcription``,
-per-sample ``SIM`` / ``WER``, and (when ``-m sim-windowed`` is enabled)
-``wsim_mean`` / ``wsim_var`` / ``wsim_min`` / ``wsim_max`` / ``wsim_min_start``.
+Default schema (SIM-capable datasets): three playable Audio columns —
+``prompt_audio`` (the clone prompt), ``sim_reference_audio`` (the clip SIM
+compared against), and ``generated_audio`` — plus ``prompt_text``, the ASR
+``transcription``, per-sample ``SIM`` / ``WER``, and (when ``-m sim-windowed``
+is enabled) ``wsim_mean`` / ``wsim_var`` / ``wsim_min`` / ``wsim_max`` /
+``wsim_min_start``.
+
+TED long-prompt WER schema (rows carrying ``prompt_duration``): no SIM audio
+or SIM metric columns; adds ``prompt_word_count`` and ``prompt_duration``.
 """
 
 import re
@@ -93,31 +96,48 @@ class SpeechGenerationResultSink:
         # datasets Audio stack unless a sink is actually used.
         from datasets import Audio, Dataset, Features, Value
 
-        features = Features(
-            {
-                "sample_idx": Value("string"),
-                "language": Value("string"),
-                # Three audio columns for listening-based debugging: the clone
-                # prompt, the clip SIM compared against (held-out real target
-                # when the dataset ships one; None when the pipeline recorded
-                # none), and the generated clip.
-                "prompt_audio": Audio(),
-                "sim_reference_audio": Audio(),
-                "generated_audio": Audio(),
-                # Kept adjacent for easy analysis: synthesized text, its ASR
-                # transcription, whole-clip SIM/WER, and windowed SIM breakdown.
-                "prompt_text": Value("string"),
-                "transcription": Value("string"),
-                "WER": Value("float32"),
-                "SIM": Value("float32"),
-                "wsim_mean": Value("float32"),
-                "wsim_var": Value("float32"),
-                "wsim_min": Value("float32"),
-                "wsim_max": Value("float32"),
-                "wsim_min_start": Value("float32"),
-            }
-        )
         rows, self._buffer = self._buffer, []
+        # TED long-prompt WER rows omit SIM columns and carry prompt length /
+        # duration; other speech-gen datasets keep the SIM-capable schema.
+        if rows and "prompt_duration" in rows[0]:
+            features = Features(
+                {
+                    "sample_idx": Value("string"),
+                    "prompt_word_count": Value("int32"),
+                    "prompt_duration": Value("int32"),
+                    "prompt_audio": Audio(),
+                    "generated_audio": Audio(),
+                    "prompt_text": Value("string"),
+                    "transcription": Value("string"),
+                    "WER": Value("float32"),
+                    "language": Value("string"),
+                }
+            )
+        else:
+            features = Features(
+                {
+                    "sample_idx": Value("string"),
+                    "language": Value("string"),
+                    # Three audio columns for listening-based debugging: the clone
+                    # prompt, the clip SIM compared against (held-out real target
+                    # when the dataset ships one; None when the pipeline recorded
+                    # none), and the generated clip.
+                    "prompt_audio": Audio(),
+                    "sim_reference_audio": Audio(),
+                    "generated_audio": Audio(),
+                    # Kept adjacent for easy analysis: synthesized text, its ASR
+                    # transcription, whole-clip SIM/WER, and windowed SIM breakdown.
+                    "prompt_text": Value("string"),
+                    "transcription": Value("string"),
+                    "WER": Value("float32"),
+                    "SIM": Value("float32"),
+                    "wsim_mean": Value("float32"),
+                    "wsim_var": Value("float32"),
+                    "wsim_min": Value("float32"),
+                    "wsim_max": Value("float32"),
+                    "wsim_min_start": Value("float32"),
+                }
+            )
         dataset = Dataset.from_list(rows, features=features)
 
         tag_suffix = f"-{self.chunk_tag}" if self.chunk_tag else ""
