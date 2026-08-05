@@ -505,6 +505,13 @@
 - **Code Reference:** [openbench/pipeline/transcription/transcription_whisperkitpro.py](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/transcription/transcription_whisperkitpro.py)
 - **Hardware**: M2 Ultra Mac Studio
 
+### Argmax
+- **Latest Run:** `2026-08-04`
+- **Model Version:** `qwen3-asr-1.7b`
+- **Configuration:** Argmax SDK WhisperKit Pro framework with the Qwen3-ASR 1.7B model and Custom Vocabulary feature enabled. Keywords are applied through Qwen3-ASR's native system-prompt context biasing.
+- **Code Reference:** [openbench/pipeline/transcription/transcription_whisperkitpro.py](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/transcription/transcription_whisperkitpro.py)
+- **Hardware**: M3 Pro MacBook Pro
+
 ### Apple 
 - **Latest Run:** `2025-12-30`
 - **Model Version:** `SFSpeechRecognizer`
@@ -557,6 +564,7 @@
 | Whisper OSS<br/>(large-v3-turbo)           | 15.4        | 21.24          | 14.69         |
 | Argmax<br/>(parakeet-v2)                   | 14.69       | 12.46          | 12.57         |
 | Argmax<br/>(parakeet-v3)                   | 16.89       | 14.57          | 14.73         |
+| Argmax<br/>(qwen3-asr-1.7b)                | 11.86       | 9.19           | 10.18         |
 | ElevenLabs                                 | 10.53       | 9.13           | 9.08          |
 | Apple<br/>(SFSpeechRecognizer)             | 28.42       | 26.98          | 27.26         |
 | Apple<br/>(SpeechAnalyzer)                 | 17          | -              | -             |
@@ -590,6 +598,7 @@ If the model predicts 20 keywords and 15 of them match the ground truth, precisi
 | Whisper OSS<br/>(large-v3-turbo)           | 0.97        | 0.96           | 0.94          |
 | Argmax<br/>(parakeet-v2)                   | 0.97        | 0.98           | 0.96          |
 | Argmax<br/>(parakeet-v3)                   | 0.98        | 0.98           | 0.95          |
+| Argmax<br/>(qwen3-asr-1.7b)                | 0.97        | 0.98           | 0.93          |
 | ElevenLabs                                 | 0.97        | 0.99           | 0.96          |
 | Apple<br/>(SFSpeechRecognizer)             | 1           | 0.99           | 0.99          |
 | Apple<br/>(SpeechAnalyzer)                 | 0.99        | -              | -             |
@@ -623,6 +632,7 @@ If the ground-truth transcript has 25 keywords and the model correctly finds 15,
 | Whisper OSS<br/>(large-v3-turbo)           | 0.53        | 0.77           | 0.82          |
 | Argmax<br/>(parakeet-v2)                   | 0.47        | 0.85           | 0.82          |
 | Argmax<br/>(parakeet-v3)                   | 0.45        | 0.82           | 0.8           |
+| Argmax<br/>(qwen3-asr-1.7b)                | 0.53        | 0.87           | 0.81          |
 | ElevenLabs                                 | 0.75        | 0.96           | 0.94          |
 | Apple<br/>(SFSpeechRecognizer)             | 0.26        | 0.45           | 0.4           |
 | Apple<br/>(SpeechAnalyzer)                 | 0.39        | -              | -             |
@@ -658,6 +668,7 @@ F1 = 2 × (0.75 × 0.6) / (0.75 + 0.6) = **66.7%**, reflecting the model's overa
 | Whisper OSS<br/>(large-v3-turbo)           | 0.69        | 0.86           | 0.87          |
 | Argmax<br/>(parakeet-v2)                   | 0.63        | 0.91           | 0.88          |
 | Argmax<br/>(parakeet-v3)                   | 0.62        | 0.89           | 0.87          |
+| Argmax<br/>(qwen3-asr-1.7b)                | 0.69        | 0.92           | 0.87          |
 | ElevenLabs                                 | 0.84        | 0.97           | 0.95          |
 | Apple<br/>(SFSpeechRecognizer)             | 0.41        | 0.62           | 0.58          |
 | Apple<br/>(SpeechAnalyzer)                 | 0.56        | -              | -             |
