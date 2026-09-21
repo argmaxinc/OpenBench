@@ -81,13 +81,25 @@ class WhisperKitProOrchestrationConfig(OrchestrationConfig):
         "prerecorded",
         description="Sortformer streaming mode: `realtime` (1.04s latency) or `prerecorded` (9.84s latency). This is only applicable when `engine` is `sortformer`.",
     )
+    sortformer_model_version: str | None = Field(
+        None,
+        description="Sortformer model version (e.g. `v2-1` or `v3-preview`). Only applicable when `engine` is `sortformer`.",
+    )
+    sortformer_model_variant: str | None = Field(
+        None,
+        description="Sortformer model variant (e.g. `384_94MB` or `684_98MB`). Only applicable when `engine` is `sortformer`.",
+    )
+    speaker_models_path: str | None = Field(
+        None,
+        description="Local directory used as the speaker-models download base (passed as --speaker-models-path).",
+    )
     use_exclusive_reconciliation: bool = Field(
         False,
         description="Whether to use exclusive reconciliation",
     )
     fast_load: bool = Field(
         False,
-        description="Whether to use fast load",
+        description="Deprecated: whisperkitpro-cli 3.x has no --fast-load flag. Accepted for config compatibility but never emitted.",
     )
 
 
@@ -113,6 +125,9 @@ class WhisperKitProOrchestrationPipeline(Pipeline):
             orchestration_strategy=self.config.orchestration_strategy,
             engine=self.config.engine,
             diarization_mode=self.config.diarization_mode,
+            sortformer_model_version=self.config.sortformer_model_version,
+            sortformer_model_variant=self.config.sortformer_model_variant,
+            speaker_models_path=self.config.speaker_models_path,
             use_exclusive_reconciliation=self.config.use_exclusive_reconciliation,
             fast_load=self.config.fast_load,
         )

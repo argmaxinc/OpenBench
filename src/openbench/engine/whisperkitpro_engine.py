@@ -115,13 +115,21 @@ class WhisperKitProConfig(BaseModel):
         "pyannote",
         description="The engine to use. If `sortformer` the diarization model used is Sortformer, otherwise it is pyannote.",
     )
+    sortformer_model_version: str | None = Field(
+        None,
+        description="Sortformer model version (e.g. `v2-1` or `v3-preview`). Only applicable when `engine` is `sortformer`.",
+    )
+    sortformer_model_variant: str | None = Field(
+        None,
+        description="Sortformer model variant (e.g. `384_94MB` or `684_98MB`). Only applicable when `engine` is `sortformer`.",
+    )
     use_exclusive_reconciliation: bool = Field(
         False,
         description="Whether to use exclusive reconciliation",
     )
     fast_load: bool = Field(
         False,
-        description="Whether to use fast load",
+        description="Deprecated: whisperkitpro-cli 3.x has no --fast-load flag. Accepted for config compatibility but never emitted.",
     )
 
     @property
@@ -158,6 +166,8 @@ class WhisperKitProConfig(BaseModel):
             ]
 
         # Common args
+        # NOTE: whisperkitpro-cli 3.x has no --fast-load flag, so `fast_load` is
+        # intentionally not emitted.
         args.extend(
             [
                 "--report",  # Always generate the report files
@@ -169,8 +179,6 @@ class WhisperKitProConfig(BaseModel):
                 COMPUTE_UNITS_MAPPER[self.audio_encoder_compute_units],
                 "--text-decoder-compute-units",
                 COMPUTE_UNITS_MAPPER[self.text_decoder_compute_units],
-                "--fast-load",
-                str(self.fast_load).lower(),
                 "--verbose",
             ]
         )
@@ -188,11 +196,17 @@ class WhisperKitProConfig(BaseModel):
 
             # Add rttm path
             args.extend(["--rttm-path", self.rttm_path])
-            args.extend(["--engine", self.engine])
+            # whisperkitpro-cli 3.x selects the diarization backend with --diarizer
+            # (there is no --engine flag).
+            args.extend(["--diarizer", self.engine])
 
-            # Only add diarization mode if using Sortformer
+            # Only add Sortformer-specific options if using Sortformer
             if self.engine == "sortformer":
                 args.extend(["--diarization-mode", self.diarization_mode])
+                if self.sortformer_model_version:
+                    args.extend(["--sortformer-model-version", self.sortformer_model_version])
+                if self.sortformer_model_variant:
+                    args.extend(["--sortformer-model-variant", self.sortformer_model_variant])
 
             # If speaker models path is provided use it
             if self.speaker_models_path:
