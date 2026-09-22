@@ -7,6 +7,7 @@ import os
 import time
 from datetime import datetime
 from pathlib import Path
+from typing import Literal
 
 import requests
 from argmaxtools.utils import get_logger
@@ -18,6 +19,7 @@ from ..pipeline_prediction import DiarizationAnnotation
 
 __all__ = [
     "PyannoteAIApi",
+    "PyannoteAIModel",
     "PyannoteApiDiarizationOutput",
     "PyannoteApiOrchestrationOutput",
     "PyannoteApiSegment",
@@ -26,6 +28,9 @@ __all__ = [
 ]
 
 logger = get_logger(__name__)
+
+# Diarization models exposed by https://docs.pyannote.ai/api-reference/diarize
+PyannoteAIModel = Literal["precision-3", "precision-2", "community-1"]
 
 
 def to_camel(string: str) -> str:
@@ -168,6 +173,8 @@ class PyannoteAIApi:
         timeout: Timeout for job polling in seconds
         request_buffer: Buffer for request rate limiting
         transcription: Whether to enable transcription (STT) in addition to diarization
+        model: Diarization model to request. Sent explicitly on every job so results do not
+            change when pyannoteAI rotates the API default.
     """
 
     diarization_url = "https://api.pyannote.ai/v1/diarize"
@@ -179,10 +186,12 @@ class PyannoteAIApi:
         timeout: int = 1800,
         request_buffer: int = 30,
         transcription: bool = False,
+        model: PyannoteAIModel = "precision-3",
     ) -> None:
         self.timeout = timeout
         self.request_buffer = request_buffer
         self.transcription = transcription
+        self.model = model
 
         # Check that the API key is set
         if not os.getenv("PYANNOTE_TOKEN"):
@@ -244,7 +253,7 @@ class PyannoteAIApi:
         Returns:
             The response from the diarization endpoint
         """
-        data = {"url": audio_url}
+        data = {"url": audio_url, "model": self.model}
 
         if num_speakers is not None:
             data["numSpeakers"] = num_speakers
