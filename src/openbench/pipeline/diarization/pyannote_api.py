@@ -8,7 +8,7 @@ from argmaxtools.utils import get_logger
 from pydantic import Field
 
 from ...dataset import DiarizationSample
-from ...engine import PyannoteAIApi, PyannoteApiDiarizationOutput
+from ...engine import PyannoteAIApi, PyannoteAIModel, PyannoteApiDiarizationOutput
 from ..base import Pipeline, PipelineType, register_pipeline
 from .common import DiarizationOutput, DiarizationPipelineConfig
 
@@ -27,6 +27,13 @@ class PyannoteApiConfig(DiarizationPipelineConfig):
         default=30,
         description="Buffer for the request rate limit",
     )
+    model: PyannoteAIModel = Field(
+        default="precision-3",
+        description=(
+            "PyannoteAI diarization model. Pinned explicitly so results do not change "
+            "when pyannoteAI rotates the API default."
+        ),
+    )
 
 
 TEMP_AUDIO_DIR = Path("audio_temp")
@@ -43,6 +50,7 @@ class PyannoteApiPipeline(Pipeline):
         api = PyannoteAIApi(
             timeout=self.config.timeout,
             request_buffer=self.config.request_buffer,
+            model=self.config.model,
             transcription=False,
         )
         return lambda input_sample: api(

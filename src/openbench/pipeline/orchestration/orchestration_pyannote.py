@@ -10,7 +10,7 @@ from argmaxtools.utils import get_logger
 from pydantic import Field
 
 from ...dataset import OrchestrationSample
-from ...engine import PyannoteAIApi, PyannoteApiOrchestrationOutput
+from ...engine import PyannoteAIApi, PyannoteAIModel, PyannoteApiOrchestrationOutput
 from ...pipeline_prediction import Transcript
 from ..base import Pipeline, PipelineType, register_pipeline
 from .common import OrchestrationConfig, OrchestrationOutput
@@ -34,6 +34,13 @@ class PyannoteOrchestrationPipelineConfig(OrchestrationConfig):
         default=30,
         description="Buffer for the request rate limit",
     )
+    model: PyannoteAIModel = Field(
+        default="precision-3",
+        description=(
+            "PyannoteAI diarization model. Pinned explicitly so results do not change "
+            "when pyannoteAI rotates the API default."
+        ),
+    )
 
 
 @register_pipeline
@@ -54,6 +61,7 @@ class PyannoteOrchestrationPipeline(Pipeline):
         api = PyannoteAIApi(
             timeout=self.config.timeout,
             request_buffer=self.config.request_buffer,
+            model=self.config.model,
             transcription=True,
         )
 

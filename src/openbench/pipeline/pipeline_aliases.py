@@ -107,8 +107,9 @@ def register_pipeline_aliases() -> None:
             "out_dir": "./pyannoteapi",
             "timeout": 3600,
             "request_buffer": 30,
+            "model": "precision-3",
         },
-        description="Pyannote API speaker diarization pipeline. Requires API key from https://www.pyannote.ai/. Set `PYANNOTE_API_KEY` env var.",
+        description="PyannoteAI API speaker diarization pipeline using the precision-3 model. Requires `PYANNOTE_TOKEN` env var from https://www.pyannote.ai/.",
     )
 
     PipelineRegistry.register_alias(
@@ -401,8 +402,9 @@ def register_pipeline_aliases() -> None:
             "out_dir": "./pyannote_orchestration_results",
             "timeout": 3600,
             "request_buffer": 30,
+            "model": "precision-3",
         },
-        description="PyannoteAI orchestration pipeline (diarization + transcription). Uses the precision-2 model with Nvidia Parakeet STT. Requires `PYANNOTE_TOKEN` env var from https://www.pyannote.ai/.",
+        description="PyannoteAI orchestration pipeline (diarization + transcription). Uses the precision-3 model with Nvidia Parakeet STT. Requires `PYANNOTE_TOKEN` env var from https://www.pyannote.ai/.",
     )
 
     PipelineRegistry.register_alias(
@@ -738,8 +740,9 @@ def register_pipeline_aliases() -> None:
             "out_dir": "./pyannote_transcription_results",
             "timeout": 3600,
             "request_buffer": 30,
+            "model": "precision-3",
         },
-        description="PyannoteAI transcription pipeline (ignores speaker attribution). Uses the precision-2 model with Nvidia Parakeet STT. Requires `PYANNOTE_TOKEN` env var from https://www.pyannote.ai/.",
+        description="PyannoteAI transcription pipeline (ignores speaker attribution). Uses the precision-3 model with Nvidia Parakeet STT. Requires `PYANNOTE_TOKEN` env var from https://www.pyannote.ai/.",
     )
 
     ################# SPEECH GENERATION PIPELINES #################

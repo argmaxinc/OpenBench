@@ -3,3 +3,4 @@ PyannoteOrchestrationPipeline:
     out_dir: ./pyannote-orchestration
     timeout: 3600 # 1 hour
     request_buffer: 30
+    model: precision-3

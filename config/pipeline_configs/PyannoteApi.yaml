@@ -3,3 +3,4 @@ PyannoteApiPipeline:
     out_dir: ./pyannoteapi
     timeout: 3600 # 1 hour
     request_buffer: 30
+    model: precision-3

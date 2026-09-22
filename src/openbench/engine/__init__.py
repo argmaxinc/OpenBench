@@ -14,6 +14,7 @@ from .elevenlabs_engine import ElevenLabsApi, ElevenLabsApiResponse
 from .openai_engine import OpenAIApi
 from .pyannote_engine import (
     PyannoteAIApi,
+    PyannoteAIModel,
     PyannoteApiDiarizationOutput,
     PyannoteApiOrchestrationOutput,
     PyannoteApiSegment,
@@ -44,6 +45,7 @@ __all__ = [
     "ElevenLabsApiResponse",
     "OpenAIApi",
     "PyannoteAIApi",
+    "PyannoteAIModel",
     "PyannoteApiDiarizationOutput",
     "PyannoteApiOrchestrationOutput",
     "PyannoteApiSegment",
