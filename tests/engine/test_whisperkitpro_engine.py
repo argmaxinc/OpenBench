@@ -61,13 +61,13 @@ class TestDiarizationArgs(unittest.TestCase):
             diarization=True,
             engine="sortformer",
             diarization_mode="realtime",
-            sortformer_model_version="v3-preview",
-            sortformer_model_variant="684_98MB",
+            sortformer_model_version="nemotron-3-diarization",
+            sortformer_model_variant="684_74MB",
             speaker_models_path="/speaker-models",
         )
         self.assertEqual(_value(args, "--diarization-mode"), "realtime")
-        self.assertEqual(_value(args, "--sortformer-model-version"), "v3-preview")
-        self.assertEqual(_value(args, "--sortformer-model-variant"), "684_98MB")
+        self.assertEqual(_value(args, "--sortformer-model-version"), "nemotron-3-diarization")
+        self.assertEqual(_value(args, "--sortformer-model-variant"), "684_74MB")
         self.assertEqual(_value(args, "--speaker-models-path"), "/speaker-models")
 
     def test_exclusive_reconciliation_flag(self) -> None:

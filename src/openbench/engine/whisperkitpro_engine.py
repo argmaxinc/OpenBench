@@ -117,11 +117,11 @@ class WhisperKitProConfig(BaseModel):
     )
     sortformer_model_version: str | None = Field(
         None,
-        description="Sortformer model version (e.g. `v2-1` or `v3-preview`). Only applicable when `engine` is `sortformer`.",
+        description="Sortformer model version (e.g. `v2-1` or `nemotron-3-diarization`). Only applicable when `engine` is `sortformer`.",
     )
     sortformer_model_variant: str | None = Field(
         None,
-        description="Sortformer model variant (e.g. `384_94MB` or `684_98MB`). Only applicable when `engine` is `sortformer`.",
+        description="Sortformer model variant (e.g. `384_94MB` or `684_74MB`). Only applicable when `engine` is `sortformer`.",
     )
     use_exclusive_reconciliation: bool = Field(
         False,
