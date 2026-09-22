@@ -46,7 +46,9 @@ class SpeakerKitPipelineConfig(DiarizationPipelineConfig):
             str(inputs["audio_path"]),
             "--rttm-path",
             str(inputs["output_path"]),
-            "--engine",
+            # speakerkitpro-cli selects the diarization backend with `--diarizer` (pyannote | sortformer);
+            # the former `--engine` flag is rejected with "Unknown option '--engine'".
+            "--diarizer",
             self.engine,
             "--verbose",
         ]
