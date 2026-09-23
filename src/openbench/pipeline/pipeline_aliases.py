@@ -130,10 +130,32 @@ def register_pipeline_aliases() -> None:
             "out_dir": "./speakerkit-sortformer-report",
             "cli_path": os.getenv("SPEAKERKIT_CLI_PATH"),
             "engine": "sortformer",
+            # Pinned explicitly: speakerkitpro-cli >= 3.1.6 defaults to Nemotron 3 Diarization.
+            "sortformer_model_version": "v2-1",
+            "sortformer_model_variant": "384_94MB",
         },
         description=(
-            "SpeakerKit speaker diarization pipeline using Sortformer model compressed to 94MB. Requires CLI installation and API key. "
+            "SpeakerKit speaker diarization pipeline using the Sortformer v2 model compressed to 94MB "
+            "(`--sortformer-model-version v2-1 --sortformer-model-variant 384_94MB`). Requires CLI installation and API key. "
             "Set `SPEAKERKIT_CLI_PATH` and `SPEAKERKIT_API_KEY` env vars. For access to the CLI binary contact speakerkitpro@argmaxinc.com."
+        ),
+    )
+
+    PipelineRegistry.register_alias(
+        "speakerkit-nemotron-3-diarization",
+        SpeakerKitPipeline,
+        default_config={
+            "out_dir": "./speakerkit-nemotron-3-diarization-report",
+            "cli_path": os.getenv("SPEAKERKIT_CLI_PATH"),
+            "engine": "sortformer",
+            "sortformer_model_version": "nemotron-3-diarization",
+            "sortformer_model_variant": "684_74MB",
+        },
+        description=(
+            "SpeakerKit speaker diarization pipeline using NVIDIA Nemotron 3 Diarization (Sortformer v3, 74MB variant; "
+            "`--sortformer-model-version nemotron-3-diarization --sortformer-model-variant 684_74MB`). Requires CLI installation "
+            "and API key. Set `SPEAKERKIT_CLI_PATH` and `SPEAKERKIT_API_KEY` env vars. "
+            "For access to the CLI binary contact speakerkitpro@argmaxinc.com."
         ),
     )
 

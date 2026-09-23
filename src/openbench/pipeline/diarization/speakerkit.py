@@ -33,6 +33,20 @@ class SpeakerKitPipelineConfig(DiarizationPipelineConfig):
     cli_path: str = Field(..., description="The absolute path to the SpeakerKit CLI")
     model_path: str | None = Field(None, description="The absolute path to the SpeakerKit model directory")
     engine: Literal["pyannote", "sortformer"] = Field("pyannote", description="The engine to use")
+    sortformer_model_version: str | None = Field(
+        None,
+        description=(
+            "Sortformer model version passed as `--sortformer-model-version` (e.g. `v2-1` or `nemotron-3-diarization`). "
+            "Only applicable when `engine` is `sortformer`; when unset the CLI default is used."
+        ),
+    )
+    sortformer_model_variant: str | None = Field(
+        None,
+        description=(
+            "Sortformer model variant passed as `--sortformer-model-variant` (e.g. `384_94MB` or `684_74MB`). "
+            "Only applicable when `engine` is `sortformer`; when unset the CLI default is used."
+        ),
+    )
 
     @property
     def is_sortformer(self) -> bool:
@@ -52,6 +66,14 @@ class SpeakerKitPipelineConfig(DiarizationPipelineConfig):
             self.engine,
             "--verbose",
         ]
+
+        if self.is_sortformer:
+            # speakerkitpro-cli >= 3.1.6 defaults to Nemotron 3 Diarization; aliases pin the model explicitly so
+            # they keep evaluating the same model regardless of the CLI default.
+            if self.sortformer_model_version is not None:
+                cmd.extend(["--sortformer-model-version", self.sortformer_model_version])
+            if self.sortformer_model_variant is not None:
+                cmd.extend(["--sortformer-model-variant", self.sortformer_model_variant])
 
         if self.model_path is not None:
             cmd.extend(["--model-path", self.model_path])
