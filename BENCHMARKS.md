@@ -55,14 +55,14 @@
 ### pyannoteAI (precision-3)
 - **Latest Run:** `2026-09-22`
 - **Model Version:** `precision-3`
-- **Configuration:** Job polling based on `X-RateLimit-Remaining` and `X-RateLimit-Reset` headers which leads to sub-second polling checks. See [pyannoteAI Documentation](https://docs.pyannote.ai/api-reference/diarize) for more details.
+- **Configuration:** pyannoteAI cloud API with the `precision-3` model requested explicitly on every job. Job polling based on `X-RateLimit-Remaining` and `X-RateLimit-Reset` headers which leads to sub-second polling checks. See [pyannoteAI Documentation](https://docs.pyannote.ai/api-reference/diarize) for more details.
 - **Code Reference:** [openbench/pipeline/diarization/pyannote-api](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/diarization/pyannote_api.py)
 - **Hardware**: Unknown (Cloud API)
 
 ### Argmax (Pyannote community-1)
-- **Latest Run:** `2025-09-29`
+- **Latest Run:** `2026-09-22`
 - **Model Version:** `pyannote/community-1` (`pyannote-v4`)
-- **Configuration:** Argmax SDK 1.8.2 `SpeakerKit` CLI with default settings. See [Interspeech 2025 Paper](https://www.isca-archive.org/interspeech_2025/durmus25_interspeech.html) for more details.
+- **Configuration:** Argmax SDK 3.1.6 `SpeakerKit` CLI with the `pyannote` diarizer (default settings). See [Interspeech 2025 Paper](https://www.isca-archive.org/interspeech_2025/durmus25_interspeech.html) for more details.
 - **Code Reference:** [openbench/pipeline/diarization/speakerkit](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/diarization/speakerkit.py)
 - **Hardware**: M2 Ultra Mac Studio
 
@@ -201,18 +201,18 @@
 
 | Dataset                 | AWS Transcribe | Deepgram | pyannoteAI (precision-3) | Argmax (Pyannote community-1) | Argmax (Sortformer v2.1) | Argmax (Nemotron 3 Diarization) |
 |-------------------------|----------------|----------|--------------------------|-------------------------------|--------------------------|---------------------------------|
-| AISHELL-4               | 10             | -        | -                        | 476                           | -                        | -                               |
-| AMI-IHM                 | -              | -        | -                        | 682                           | -                        | -                               |
-| AMI-SDM                 | -              | -        | -                        | 674                           | -                        | -                               |
-| AVA-AVD                 | 3              | -        | -                        | 426                           | -                        | -                               |
-| AliMeeting              | 9              | -        | -                        | 442                           | -                        | -                               |
-| CallHome                | 2              | -        | -                        | 263                           | -                        | -                               |
-| DIHARD-III              | 8              | -        | -                        | 433                           | -                        | -                               |
-| EGO4D                   | 6              | -        | -                        | 436                           | -                        | -                               |
-| Earnings-21             | 9              | -        | -                        | 496                           | -                        | -                               |
-| MSDWILD                 | 1              | -        | -                        | 216                           | -                        | -                               |
-| VoxConverse             | 6              | -        | -                        | 462                           | -                        | -                               |
-| **Average**<sup>3</sup> | **6**          | -        | -                        | **455**                       | -                        | -                               |
+| AISHELL-4               | 10             | 908      | 66                       | 697                           | 176                      | 250                             |
+| AMI-IHM                 | -              | 240      | 70                       | 682                           | 155                      | 257                             |
+| AMI-SDM                 | -              | 195      | 71                       | 674                           | 155                      | 253                             |
+| AVA-AVD                 | 3              | 242      | 25                       | 521                           | 146                      | 236                             |
+| AliMeeting              | 9              | 864      | 77                       | 647                           | 170                      | 254                             |
+| CallHome                | 2              | 120      | 15                       | 268                           | 166                      | 223                             |
+| DIHARD-III              | 8              | 191      | 38                       | 566                           | 165                      | 245                             |
+| EGO4D                   | 6              | 178      | 39                       | 532                           | 136                      | 234                             |
+| Earnings-21             | 9              | 297      | 85                       | 710                           | 174                      | 251                             |
+| MSDWILD                 | 1              | 93       | 12                       | 224                           | 161                      | 209                             |
+| VoxConverse             | 6              | 213      | 52                       | 618                           | 173                      | 246                             |
+| **Average**<sup>3</sup> | **6**          | **322**  | **50**                   | **558**                       | **162**                  | **242**                         |
 
 <br/><br/>
 
@@ -232,18 +232,18 @@
 
 | Dataset                 | AWS Transcribe | Deepgram | pyannoteAI (precision-3) | Argmax (Pyannote community-1) | Argmax (Sortformer v2.1) | Argmax (Nemotron 3 Diarization) |
 |-------------------------|----------------|----------|--------------------------|-------------------------------|--------------------------|---------------------------------|
-| AISHELL-4               | 75             | 5        | 70                       | 60                            | -                        | -                               |
-| AMI-IHM                 | -              | 63       | 100                      | 75                            | -                        | -                               |
-| AMI-SDM                 | -              | 75       | 75                       | 69                            | -                        | -                               |
-| AVA-AVD                 | 13             | 9        | 15                       | 13                            | -                        | -                               |
-| AliMeeting              | 90             | 10       | 95                       | 65                            | -                        | -                               |
-| CallHome                | 60             | 24       | 82                       | 42                            | -                        | -                               |
-| DIHARD-III              | 72             | 63       | 78                       | 45                            | -                        | -                               |
-| EGO4D                   | 34             | 14       | 32                       | 48                            | -                        | -                               |
-| Earnings-21             | 50             | 36       | 64                       | 55                            | -                        | -                               |
-| MSDWILD                 | 39             | 14       | 50                       | 28                            | -                        | -                               |
-| VoxConverse             | 46             | 40       | 44                       | 45                            | -                        | -                               |
-| **Average**<sup>3</sup> | **53**         | **32**   | **64**                   | **50**                        | -                        | -                               |
+| AISHELL-4               | 75             | 5        | 70                       | 60                            | 0                        | 90                              |
+| AMI-IHM                 | -              | 63       | 100                      | 75                            | 94                       | 88                              |
+| AMI-SDM                 | -              | 75       | 75                       | 69                            | 94                       | 88                              |
+| AVA-AVD                 | 13             | 9        | 15                       | 13                            | 4                        | 13                              |
+| AliMeeting              | 90             | 10       | 95                       | 65                            | 70                       | 100                             |
+| CallHome                | 60             | 24       | 82                       | 42                            | 82                       | 92                              |
+| DIHARD-III              | 72             | 63       | 78                       | 44                            | 70                       | 83                              |
+| EGO4D                   | 34             | 14       | 32                       | 50                            | 16                       | 92                              |
+| Earnings-21             | 50             | 36       | 64                       | 57                            | 2                        | 25                              |
+| MSDWILD                 | 39             | 14       | 50                       | 28                            | 45                       | 59                              |
+| VoxConverse             | 46             | 40       | 44                       | 44                            | 28                       | 53                              |
+| **Average**<sup>3</sup> | **53**         | **32**   | **64**                   | **50**                        | **46**                   | **71**                          |
 
 </br><br/>
 # Real-time Transcription 
