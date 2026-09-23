@@ -46,30 +46,37 @@
 - **Hardware**: Unknown (Cloud API)
 
 ### Deepgram
-- **Latest Run:** `2025-06-27`
+- **Latest Run:** `2026-09-22`
 - **Model Version:** `nova-3`
 - **Configuration:** Using `Deepgram`'s Python SDK for transcription with `diarize` and `detect_language` enabled. See [deepgram-python-sdk](https://github.com/deepgram/deepgram-python-sdk) for more details.
 - **Code Reference:** [openbench/pipeline/diarization/diarization_deepgram](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/diarization/diarization_deepgram.py)
 - **Hardware**: Unknown (Cloud API)
 
-### pyannote
-- **Latest Run:** `2025-02-17`
-- **Model Version:** `speaker-diarization-3.1`
-- **Configuration:** `Pyannote` OSS using [pyannote-audio](https://github.com/pyannote/pyannote-audio) version v3.3.2 and default settings for [pyannote/speaker-diarization-3.1](https://huggingface.co/pyannote/speaker-diarization-3.1) running inference with `float16` precision.
-- **Code Reference:** [openbench/pipeline/diarization/pyannote/pipeline](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/diarization/pyannote/pipeline.py)
-- **Hardware**: M2 Ultra Mac Studio
-
-### pyannoteAI
-- **Latest Run:** `2025-02-17`
-- **Model Version:** `pyannote/precision-1`
+### pyannoteAI (precision-3)
+- **Latest Run:** `2026-09-22`
+- **Model Version:** `precision-3`
 - **Configuration:** Job polling based on `X-RateLimit-Remaining` and `X-RateLimit-Reset` headers which leads to sub-second polling checks. See [pyannoteAI Documentation](https://docs.pyannote.ai/api-reference/diarize) for more details.
 - **Code Reference:** [openbench/pipeline/diarization/pyannote-api](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/diarization/pyannote_api.py)
 - **Hardware**: Unknown (Cloud API)
 
-### Argmax
+### Argmax (Pyannote community-1)
 - **Latest Run:** `2025-09-29`
 - **Model Version:** `pyannote/community-1` (`pyannote-v4`)
 - **Configuration:** Argmax SDK 1.8.2 `SpeakerKit` CLI with default settings. See [Interspeech 2025 Paper](https://www.isca-archive.org/interspeech_2025/durmus25_interspeech.html) for more details.
+- **Code Reference:** [openbench/pipeline/diarization/speakerkit](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/diarization/speakerkit.py)
+- **Hardware**: M2 Ultra Mac Studio
+
+### Argmax (Sortformer v2.1)
+- **Latest Run:** `2026-09-22`
+- **Model Version:** `Sortformer v2.1` (`384_94MB` variant)
+- **Configuration:** Argmax SDK 3.1.6 `SpeakerKit` CLI with the `sortformer` diarizer.
+- **Code Reference:** [openbench/pipeline/diarization/speakerkit](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/diarization/speakerkit.py)
+- **Hardware**: M2 Ultra Mac Studio
+
+### Argmax (Nemotron 3 Diarization)
+- **Latest Run:** `2026-09-22`
+- **Model Version:** `nemotron-3-diarization` (`684_74MB` variant)
+- **Configuration:** Argmax SDK 3.1.6 `SpeakerKit` CLI with the `nemotron-3-diarization` model.
 - **Code Reference:** [openbench/pipeline/diarization/speakerkit](https://github.com/argmaxinc/OpenBench/blob/main/src/openbench/pipeline/diarization/speakerkit.py)
 - **Hardware**: M2 Ultra Mac Studio
 
@@ -127,11 +134,6 @@
 - **Domain:** Meeting
 - **Description:** A dataset of corporate earnings call recordings featuring financial presentations and Q&A sessions with executives, analysts, and investors.
 
-### ICSI
-- **Language:** English
-- **Domain:** In-Person Meeting
-- **Description:** The ICSI Meeting Corpus contains academic research meetings with multiple participants, featuring technical discussions and natural conversation flow.
-
 ### MSDWILD
 - **Language:** Multilingual
 - **Domain:** YouTube/In-the-Wild
@@ -160,20 +162,26 @@
 
 </details>
 
-| Dataset                | AWS Transcribe            | Deepgram             | pyannote | pyannoteAI              | Argmax     |
-|------------------------|---------------------------|----------------------|----------|-------------------------|------------|
-| AISHELL-4              | 0.22                      | 0.72                 | 0.12     | 0.11                    | 0.12       |
-| AMI-IHM                | 0.29                      | 0.35                 | 0.19     | 0.16                    | 0.18       |
-| AMI-SDM                | 0.37                      | 0.42                 | 0.23     | 0.18                    | 0.21       |
-| AVA-AVD                | 0.61                      | 0.68                 | 0.48     | 0.47                    | 0.48       |
-| AliMeeting             | 0.42                      | 0.81                 | 0.25     | 0.19                    | 0.23       |
-| CallHome               | 0.37                      | 0.64                 | 0.29     | 0.20                    | 0.30       |
-| DIHARD-III             | 0.36                      | 0.37                 | 0.24     | 0.17                    | 0.22       |
-| EGO4D                  | 0.61                      | 0.71                 | 0.52     | 0.46                    | 0.48       |
-| Earnings-21            | 0.18                      | -                    | 0.10     | 0.09                    | 0.10       |
-| ICSI                   | 0.46                      | -                    | 0.34     | 0.31                    | 0.35       |
-| MSDWILD                | 0.40                      | 0.64                 | 0.32     | 0.26                    | 0.33       |
-| VoxConverse            | 0.13                      | 0.36                 | 0.11     | 0.10                    | 0.11       |
+| Dataset                 | AWS Transcribe | Deepgram<sup>1</sup> | pyannoteAI (precision-3) | Argmax (Pyannote community-1) | Argmax (Sortformer v2) | Argmax (Nemotron 3) |
+|-------------------------|----------------|----------------------|--------------------------|-------------------------------|------------------------|---------------------|
+| AISHELL-4               | 0.22           | 0.96                 | 0.10                     | 0.12                          | 0.32                   | 0.11                |
+| AMI-IHM<sup>2</sup>     | -              | 0.36                 | 0.30                     | 0.36                          | 0.18                   | 0.09                |
+| AMI-SDM<sup>2</sup>     | -              | 0.44                 | 0.32                     | 0.38                          | 0.23                   | 0.11                |
+| AVA-AVD                 | 0.61           | 0.67                 | 0.34                     | 0.48                          | 0.60                   | 0.45                |
+| AliMeeting              | 0.42           | 0.95                 | 0.11                     | 0.23                          | 0.21                   | 0.18                |
+| CallHome                | 0.37           | 0.66                 | 0.15                     | 0.30                          | 0.19                   | 0.15                |
+| DIHARD-III              | 0.36           | 0.37                 | 0.14                     | 0.22                          | 0.21                   | 0.13                |
+| EGO4D                   | 0.61           | 0.70                 | 0.37                     | 0.48                          | 0.50                   | 0.41                |
+| Earnings-21             | 0.18           | 0.20                 | 0.10                     | 0.10                          | 0.45                   | 0.20                |
+| MSDWILD                 | 0.40           | 0.65                 | 0.22                     | 0.33                          | 0.33                   | 0.23                |
+| VoxConverse             | 0.13           | 0.17                 | 0.09                     | 0.11                          | 0.22                   | 0.08                |
+| **Average**<sup>3</sup> | **0.37**       | **0.56**             | **0.20**                 | **0.28**                      | **0.31**               | **0.19**            |
+
+<sup>1</sup> **Note:** Deepgram runs with language autodetect enabled (`detect_language`). Language autodetection is responsible for the outlier DER values, most visibly on the Chinese datasets (AISHELL-4 and AliMeeting), where nearly all speech is missed.
+
+<sup>2</sup> **Note:** AMI-IHM and AMI-SDM are evaluated on the `argmaxinc/ami-openbench` dataset, which uses the tighter forced-alignment diarization annotations from [nttcslab-sp/diar-forced-alignment](https://github.com/nttcslab-sp/diar-forced-alignment) instead of the original AMI segments. See [Can We Really Repurpose Multi-Speaker ASR Corpus for Speaker Diarization?](https://arxiv.org/abs/2507.09226) for details. Results computed on the original AMI annotations are not comparable, so systems that have not been re-evaluated on the new annotations are shown as `-`.
+
+<sup>3</sup> **Note:** The average row is a macro average over the datasets each system was evaluated on. Datasets shown as `-` are excluded, so averages for systems with missing datasets are not directly comparable to averages over all datasets. The same applies to the Speed Factor and Speaker Count Accuracy tables below.
 
 <br/><br/>
 
@@ -191,21 +199,20 @@
 
 </details>
 
-| Dataset                 | AWS Transcribe | Deepgram | Picovoice | pyannote | pyannoteAI | Argmax |
-|-------------------------|---------------------------|----------------------|-----------|----------|-------------------------|------------|
-| AISHELL-4               | 10                       | 130                  | -         | 55       | 62                     | 476        |
-| AMI-IHM                 | 11                       | 216                  | 59        | 53       | 45                     | 463        |
-| AMI-SDM                 | 10                       | 241                  | -         | 54       | 62                     | 458        |
-| AVA-AVD                 | 3                        | 187                  | -         | 28       | 35                     | 426        |
-| AliMeeting              | 9                        | 157                  | -         | 29       | 45                     | 442        |
-| American-Life-Podcast   | 10                       | 231                  | -         | 54       | 58                     | 481        |
-| CallHome                | 2                        | 63                   | 61        | 53       | 20                     | 263        |
-| DIHARD-III              | 8                        | 154                  | -         | 28       | 39                     | 433        |
-| EGO4D                   | 6                        | 127                  | -         | 54       | 34                     | 436        |
-| Earnings-21             | 9                        | -                    | -         | 54       | 47                     | 496        |
-| ICSI                    | 11                       | -                    | -         | 52       | 62                     | 447        |
-| MSDWILD                 | 1                        | 43                   | -         | 53       | 15                     | 216        |
-| VoxConverse             | 6                        | 210                  | -         | 53       | 50                     | 462        |
+| Dataset                 | AWS Transcribe | Deepgram | pyannoteAI (precision-3) | Argmax (Pyannote community-1) | Argmax (Sortformer v2.1) | Argmax (Nemotron 3 Diarization) |
+|-------------------------|----------------|----------|--------------------------|-------------------------------|--------------------------|---------------------------------|
+| AISHELL-4               | 10             | -        | -                        | 476                           | -                        | -                               |
+| AMI-IHM                 | -              | -        | -                        | 682                           | -                        | -                               |
+| AMI-SDM                 | -              | -        | -                        | 674                           | -                        | -                               |
+| AVA-AVD                 | 3              | -        | -                        | 426                           | -                        | -                               |
+| AliMeeting              | 9              | -        | -                        | 442                           | -                        | -                               |
+| CallHome                | 2              | -        | -                        | 263                           | -                        | -                               |
+| DIHARD-III              | 8              | -        | -                        | 433                           | -                        | -                               |
+| EGO4D                   | 6              | -        | -                        | 436                           | -                        | -                               |
+| Earnings-21             | 9              | -        | -                        | 496                           | -                        | -                               |
+| MSDWILD                 | 1              | -        | -                        | 216                           | -                        | -                               |
+| VoxConverse             | 6              | -        | -                        | 462                           | -                        | -                               |
+| **Average**<sup>3</sup> | **6**          | -        | -                        | **455**                       | -                        | -                               |
 
 <br/><br/>
 
@@ -223,21 +230,20 @@
 
 </details>
 
-| Dataset                 | AWS Transcribe | Deepgram |  pyannote | pyannoteAI | Argmax |
-|-------------------------|----------------|----------|-----------|------------|--------|
-| AISHELL-4               | 75             | 30       | 5         | 15         | 60     |
-| AMI-IHM                 | 94             | 56       | 0         | 12         | 75     |
-| AMI-SDM                 | 56             | 88       | 6         | 12         | 69     |
-| AVA-AVD                 | 13             | 6        | 13        | 9          | 13     |
-| AliMeeting              | 90             | 5        | 40        | 55         | 65     |
-| American-Life-Podcast   | 11             | 14       | 8         | 8          | 8      |
-| CallHome                | 60             | 33       | 74        | 48         | 42     |
-| DIHARD-III              | 72             | 60       | 60        | 58         | 45     |
-| EGO4D                   | 34             | 16       | 24        | 24         | 48     |
-| Earnings-21             | 50             | -        | 50        | 64         | 55     |
-| ICSI                    | 43             | -        | 7         | 13         | 7      |
-| MSDWILD                 | 39             | 15       | 34        | 35         | 28     |
-| VoxConverse             | 46             | 39       | 42        | 38         | 45     |
+| Dataset                 | AWS Transcribe | Deepgram | pyannoteAI (precision-3) | Argmax (Pyannote community-1) | Argmax (Sortformer v2.1) | Argmax (Nemotron 3 Diarization) |
+|-------------------------|----------------|----------|--------------------------|-------------------------------|--------------------------|---------------------------------|
+| AISHELL-4               | 75             | 5        | 70                       | 60                            | -                        | -                               |
+| AMI-IHM                 | -              | 63       | 100                      | 75                            | -                        | -                               |
+| AMI-SDM                 | -              | 75       | 75                       | 69                            | -                        | -                               |
+| AVA-AVD                 | 13             | 9        | 15                       | 13                            | -                        | -                               |
+| AliMeeting              | 90             | 10       | 95                       | 65                            | -                        | -                               |
+| CallHome                | 60             | 24       | 82                       | 42                            | -                        | -                               |
+| DIHARD-III              | 72             | 63       | 78                       | 45                            | -                        | -                               |
+| EGO4D                   | 34             | 14       | 32                       | 48                            | -                        | -                               |
+| Earnings-21             | 50             | 36       | 64                       | 55                            | -                        | -                               |
+| MSDWILD                 | 39             | 14       | 50                       | 28                            | -                        | -                               |
+| VoxConverse             | 46             | 40       | 44                       | 45                            | -                        | -                               |
+| **Average**<sup>3</sup> | **53**         | **32**   | **64**                   | **50**                        | -                        | -                               |
 
 </br><br/>
 # Real-time Transcription 
