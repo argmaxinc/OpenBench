@@ -63,6 +63,11 @@ class MetricOptions(Enum):
     # Ref: https://en.wikipedia.org/wiki/Word_error_rate
     WER = "wer"
 
+    # Character Error Rate
+    # Evaluates transcription accuracy at character level, suitable for CJK languages
+    # Ref: https://en.wikipedia.org/wiki/Word_error_rate (applied at character granularity)
+    CER = "cer"
+
     # Concatenated minimum-Permutation Word Error Rate
     # Evaluates multi-speaker transcription by finding the optimal speaker permutation
     # Ref: https://arxiv.org/abs/2004.09249
