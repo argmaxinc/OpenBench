@@ -598,7 +598,7 @@ def register_pipeline_aliases() -> None:
     )
 
     PipelineRegistry.register_alias(
-        "whisperkitpro-qwen3-asr",
+        "whisperkitpro-qwen3-asr-1.7b",
         WhisperKitProTranscriptionPipeline,
         default_config={
             "model_version": "qwen3-asr-1.7b",
