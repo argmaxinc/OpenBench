@@ -75,5 +75,38 @@ class TestDiarizationArgs(unittest.TestCase):
         self.assertNotIn("--use-exclusive-reconciliation", _args(diarization=True))
 
 
+class TestQwen3ASRArgs(unittest.TestCase):
+    """Qwen3-ASR is selected by `--model <name>` alone: the CLI matches the
+    name by prefix and resolves the repo itself, so no `--model-prefix`,
+    `--model-repo-name` or `--model-path` may be emitted."""
+
+    def test_model_name_only(self) -> None:
+        config = WhisperKitProConfig(model_version="qwen3-asr-1.7b")
+        self.assertTrue(config.is_qwen3_asr)
+        args = config.generate_cli_args()
+        self.assertEqual(_value(args, "--model"), "qwen3-asr-1.7b")
+        for flag in ("--model-prefix", "--model-repo-name", "--model-path"):
+            self.assertNotIn(flag, args)
+
+    def test_other_model_versions_are_not_qwen(self) -> None:
+        for version in (None, "large-v3-v20240930_626MB", "parakeet-v3_494MB"):
+            self.assertFalse(WhisperKitProConfig(model_version=version).is_qwen3_asr)
+
+    def test_model_path_keeps_the_qwen_model_name(self) -> None:
+        # A downloaded package (repo_id + model_variant, or model_dir) is passed
+        # as --model-path; the name still selects the CLI's Qwen3-ASR arm.
+        config = WhisperKitProConfig(
+            repo_id="argmaxinc/qwenasrkit-pro", model_variant="qwen3-asr", model_version="qwen3-asr-1.7b"
+        )
+        self.assertTrue(config.use_model_path)
+        args = config.generate_cli_args(model_path=Path("/hub/qwen3-asr"))
+        self.assertEqual(_value(args, "--model"), "qwen3-asr-1.7b")
+        self.assertEqual(_value(args, "--model-path"), "/hub/qwen3-asr")
+        self.assertNotIn("--model-prefix", args)
+
+    def test_model_dir_without_qwen_name_has_no_model_flag(self) -> None:
+        self.assertNotIn("--model", _args())
+
+
 if __name__ == "__main__":
     unittest.main()

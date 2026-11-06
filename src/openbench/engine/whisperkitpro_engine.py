@@ -154,6 +154,19 @@ class WhisperKitProConfig(BaseModel):
                 "--model-path",
                 str(model_path),
             ]
+            if self.is_qwen3_asr:
+                # The CLI picks its Qwen3-ASR arm by the --model name; the
+                # folder alone would load as Whisper.
+                args = ["--model", self.model_version, *args]
+        elif self.is_qwen3_asr:
+            # Qwen3-ASR by --model name alone: the CLI detects it by prefix
+            # and downloads the package itself, once per CLI call (one call
+            # per sample). Prefer repo_id + model_variant, which download once.
+            # A --model-prefix glob would stop the detection from matching.
+            args = [
+                "--model",
+                self.model_version,
+            ]
         else:
             # Legacy mode
             args = [
@@ -223,6 +236,11 @@ class WhisperKitProConfig(BaseModel):
         if _config_str_provided(self.model_dir):
             return True
         return _config_str_provided(self.repo_id) and _config_str_provided(self.model_variant)
+
+    @property
+    def is_qwen3_asr(self) -> bool:
+        """Qwen3-ASR models need only model_version (e.g. `qwen3-asr-1.7b`); the CLI resolves the repo itself."""
+        return _config_str_provided(self.model_version) and self.model_version.lower().startswith("qwen3-asr")
 
     def download_and_prepare_model(self) -> Path:
         """Resolve local model directory or download from Hugging Face.
@@ -296,6 +314,8 @@ class WhisperKitPro:
         if self.transcription_config.use_model_path:
             logger.debug("Using --model-path (local model_dir and/or Hugging Face ids)")
             self.model_path = self.transcription_config.download_and_prepare_model()
+        elif self.transcription_config.is_qwen3_asr:
+            logger.debug("Using Qwen3-ASR model selection (--model name only; the CLI resolves the repo)")
         else:
             logger.debug("Using legacy model management")
             if not (
@@ -305,7 +325,8 @@ class WhisperKitPro:
             ):
                 raise ValueError(
                     "WhisperKitPro requires one of: model_dir (existing directory), "
-                    "(repo_id and model_variant for Hugging Face), or "
+                    "(repo_id and model_variant for Hugging Face), "
+                    "model_version starting with `qwen3-asr`, or "
                     "(model_version, model_prefix, model_repo_name) for legacy CLI args."
                 )
 

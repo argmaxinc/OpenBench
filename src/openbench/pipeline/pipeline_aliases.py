@@ -598,6 +598,25 @@ def register_pipeline_aliases() -> None:
     )
 
     PipelineRegistry.register_alias(
+        "whisperkitpro-qwen3-asr-1.7b",
+        WhisperKitProTranscriptionPipeline,
+        default_config={
+            # Downloaded once here and passed as --model-path: letting the CLI
+            # resolve the package itself costs a Hub call per sample, which the
+            # Hub rate-limits (HTTP 429) across parallel runs.
+            "repo_id": "argmaxinc/qwenasrkit-pro",
+            "model_variant": "qwen3-asr",
+            "model_version": "qwen3-asr-1.7b",
+            "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
+        },
+        description=(
+            "WhisperKitPro transcription pipeline using the Qwen3-ASR 1.7B model. "
+            "Keyword boosting (`--use-keywords`) is applied through Qwen3-ASR's native system-prompt biasing. "
+            "Requires `WHISPERKITPRO_CLI_PATH` env var and depending on your permissions also `WHISPERKITPRO_API_KEY` env var."
+        ),
+    )
+
+    PipelineRegistry.register_alias(
         "whisperkitpro-local-model",
         WhisperKitProTranscriptionPipeline,
         default_config={
