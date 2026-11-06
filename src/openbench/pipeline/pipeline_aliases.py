@@ -601,6 +601,11 @@ def register_pipeline_aliases() -> None:
         "whisperkitpro-qwen3-asr-1.7b",
         WhisperKitProTranscriptionPipeline,
         default_config={
+            # Downloaded once here and passed as --model-path: letting the CLI
+            # resolve the package itself costs a Hub call per sample, which the
+            # Hub rate-limits (HTTP 429) across parallel runs.
+            "repo_id": "argmaxinc/qwenasrkit-pro",
+            "model_variant": "qwen3-asr",
             "model_version": "qwen3-asr-1.7b",
             "cli_path": os.getenv("WHISPERKITPRO_CLI_PATH"),
         },

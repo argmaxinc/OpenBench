@@ -154,10 +154,15 @@ class WhisperKitProConfig(BaseModel):
                 "--model-path",
                 str(model_path),
             ]
+            if self.is_qwen3_asr:
+                # The CLI picks its Qwen3-ASR arm by the --model name; the
+                # folder alone would load as Whisper.
+                args = ["--model", self.model_version, *args]
         elif self.is_qwen3_asr:
-            # Qwen3-ASR is selected by --model name alone: the CLI detects it
-            # by prefix and resolves the model repo itself, and a
-            # --model-prefix glob would stop that detection from matching.
+            # Qwen3-ASR by --model name alone: the CLI detects it by prefix
+            # and downloads the package itself, once per CLI call (one call
+            # per sample). Prefer repo_id + model_variant, which download once.
+            # A --model-prefix glob would stop the detection from matching.
             args = [
                 "--model",
                 self.model_version,
