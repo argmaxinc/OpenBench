@@ -13,6 +13,12 @@ from .transcription_elevenlabs import ElevenLabsTranscriptionPipeline, ElevenLab
 from .transcription_groq import GroqTranscriptionConfig, GroqTranscriptionPipeline
 from .transcription_nemo import NeMoTranscriptionPipeline, NeMoTranscriptionPipelineConfig
 from .transcription_openai import OpenAITranscriptionPipeline, OpenAITranscriptionPipelineConfig
+from .transcription_oruk import (
+    OrukApiTranscriptionConfig,
+    OrukApiTranscriptionPipeline,
+    OrukFourierTranscriptionConfig,
+    OrukFourierTranscriptionPipeline,
+)
 from .transcription_oss_whisper import WhisperOSSTranscriptionPipeline, WhisperOSSTranscriptionPipelineConfig
 from .transcription_pyannote import PyannoteTranscriptionPipeline, PyannoteTranscriptionPipelineConfig
 from .transcription_whisperkitpro import WhisperKitProTranscriptionConfig, WhisperKitProTranscriptionPipeline
@@ -30,6 +36,10 @@ __all__ = [
     "WhisperKitProTranscriptionConfig",
     "OpenAITranscriptionPipeline",
     "OpenAITranscriptionPipelineConfig",
+    "OrukApiTranscriptionPipeline",
+    "OrukApiTranscriptionConfig",
+    "OrukFourierTranscriptionPipeline",
+    "OrukFourierTranscriptionConfig",
     "WhisperOSSTranscriptionPipeline",
     "WhisperOSSTranscriptionPipelineConfig",
     "DeepgramTranscriptionPipeline",

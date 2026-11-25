@@ -12,6 +12,7 @@ from .argmax_oss_engine import (
 from .deepgram_engine import DeepgramApi, DeepgramApiResponse
 from .elevenlabs_engine import ElevenLabsApi, ElevenLabsApiResponse
 from .openai_engine import OpenAIApi
+from .oruk_engine import OrukApi, OrukFourierEngine
 from .pyannote_engine import (
     PyannoteAIApi,
     PyannoteAIModel,
@@ -44,6 +45,8 @@ __all__ = [
     "ElevenLabsApi",
     "ElevenLabsApiResponse",
     "OpenAIApi",
+    "OrukApi",
+    "OrukFourierEngine",
     "PyannoteAIApi",
     "PyannoteAIModel",
     "PyannoteApiDiarizationOutput",

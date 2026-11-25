@@ -45,6 +45,8 @@ from .transcription import (
     GroqTranscriptionPipeline,
     NeMoTranscriptionPipeline,
     OpenAITranscriptionPipeline,
+    OrukApiTranscriptionPipeline,
+    OrukFourierTranscriptionPipeline,
     PyannoteTranscriptionPipeline,
     SpeechAnalyzerPipeline,
     WhisperKitProTranscriptionPipeline,
@@ -765,6 +767,40 @@ def register_pipeline_aliases() -> None:
             "model": "precision-3",
         },
         description="PyannoteAI transcription pipeline (ignores speaker attribution). Uses the precision-3 model with Nvidia Parakeet STT. Requires `PYANNOTE_TOKEN` env var from https://www.pyannote.ai/.",
+    )
+
+    PipelineRegistry.register_alias(
+        "oruk-fourier-2b",
+        OrukFourierTranscriptionPipeline,
+        default_config={
+            "out_dir": "./oruk_fourier_2b_results",
+            "model_id": "oruk/oruk-fourier-2b",
+            "revision": "8c2a8871f1304aa2f634da4fb95e24438c4945b9",
+            "decode_mode": "published",
+            "chunk_length_s": 30.0,
+            "use_keywords": False,
+        },
+        description=(
+            "Local Hugging Face Transformers pipeline for Oruk Fourier 2B "
+            "(`oruk/oruk-fourier-2b@8c2a8871`, English-only, CC BY-NC 4.0) with Qwen3-ASR "
+            "system-prompt keyword boosting (`--use-keywords`). Requires `transformers>=5.21.0`."
+        ),
+    )
+
+    PipelineRegistry.register_alias(
+        "oruk-fourier-2b-api",
+        OrukApiTranscriptionPipeline,
+        default_config={
+            "out_dir": "./oruk_fourier_2b_api_results",
+            "model_version": "oruk-fourier-2b",
+            "base_url": None,
+            "timeout": 300.0,
+        },
+        description=(
+            "Hosted Oruk Speech API transcription pipeline for `oruk-fourier-2b` "
+            "(`https://speech-api.oruk.ai/v1/audio/transcriptions`, English-only). "
+            "Requires `ORUK_API_KEY` env var (optional `ORUK_BASE_URL` override)."
+        ),
     )
 
     ################# SPEECH GENERATION PIPELINES #################
